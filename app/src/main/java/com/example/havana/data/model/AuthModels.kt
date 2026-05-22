@@ -41,3 +41,18 @@ sealed class AuthState {
     data class Success(val user: HavanaUser, val token: String) : AuthState()
     data class Error(val message: String) : AuthState()
 }
+
+// SIGN UP
+
+data class SignupRequest(
+    val name: String,
+    val email: String,
+    val password: String,
+    val confirmPassword: String,
+    val phone: String
+)
+
+data class SignupResponse(
+    val token: String,
+    val user: UserDto
+)

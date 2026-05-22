@@ -33,6 +33,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.havana.data.model.AuthState
 import com.example.havana.ui.theme.*
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.text.style.TextDecoration
+import com.example.havana.ui.theme.Maroon
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -269,16 +272,25 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             TextButton(onClick = onNavigateToSignup) {
-                Text(
-                    buildAnnotatedString {
-                        append("Don't have an account? ")
-                        withStyle(SpanStyle(color = Maroon, fontWeight = FontWeight.SemiBold)) {
-                            append("Sign Up")
-                        }
+                Row(
+                    modifier = Modifier.clickable {
+                        onNavigateToSignup()
                     },
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = TextSecondary,
-                )
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Don't have an account? ",
+                        color = Color(0xFF8B7E74),
+                        fontSize = 14.sp
+                    )
+                    Text(
+                        text = "Sign Up",
+                        color = Maroon,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        textDecoration = TextDecoration.Underline
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(40.dp))

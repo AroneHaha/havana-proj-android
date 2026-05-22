@@ -4,10 +4,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Surface
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.*
 import com.example.havana.ui.screens.login.LoginScreen
+import com.example.havana.ui.screens.signup.SignupScreen
 import com.example.havana.ui.theme.HavanaTheme
 
 class MainActivity : ComponentActivity() {
@@ -16,13 +15,33 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             HavanaTheme {
-                Surface(modifier = Modifier.fillMaxSize()) {
-                    LoginScreen(
-                        onLoginSuccess = { /* TODO: Navigate to Home */ },
-                        onNavigateToSignup = { /* TODO: Navigate to Signup */ },
-                    )
-                }
+                HavanaApp()
             }
         }
+    }
+}
+
+@Composable
+fun HavanaApp() {
+    // Simple navigation state — we'll upgrade to Navigation Compose later
+    var currentScreen by remember { mutableStateOf("login") }
+
+    when (currentScreen) {
+        "login" -> LoginScreen(
+            onLoginSuccess = {
+                // TODO: Navigate to Home
+            },
+            onNavigateToSignup = {
+                currentScreen = "signup"
+            }
+        )
+        "signup" -> SignupScreen(
+            onSignupSuccess = {
+                // TODO: Navigate to Home
+            },
+            onNavigateToLogin = {
+                currentScreen = "login"
+            }
+        )
     }
 }
