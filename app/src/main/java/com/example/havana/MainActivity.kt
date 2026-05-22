@@ -5,7 +5,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.*
+import com.example.havana.ui.screens.home.HomeScreen
 import com.example.havana.ui.screens.login.LoginScreen
+import com.example.havana.ui.screens.productdetails.ProductDetailsScreen
 import com.example.havana.ui.screens.signup.SignupScreen
 import com.example.havana.ui.theme.HavanaTheme
 
@@ -23,13 +25,13 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun HavanaApp() {
-    // Simple navigation state — we'll upgrade to Navigation Compose later
     var currentScreen by remember { mutableStateOf("login") }
+    var selectedProductId by remember { mutableStateOf<String?>(null) }
 
     when (currentScreen) {
         "login" -> LoginScreen(
             onLoginSuccess = {
-                // TODO: Navigate to Home
+                currentScreen = "home"
             },
             onNavigateToSignup = {
                 currentScreen = "signup"
@@ -40,5 +42,33 @@ fun HavanaApp() {
                 currentScreen = "login"
             }
         )
+        "home" -> HomeScreen(
+            onProductClick = { productId ->
+                selectedProductId = productId
+                currentScreen = "productDetails"
+            },
+            onCartClick = {
+                currentScreen = "cart"
+            }
+        )
+        "productDetails" -> ProductDetailsScreen(
+            productId = selectedProductId ?: "",
+            onBackClick = {
+                currentScreen = "home"
+            },
+            onCartClick = {
+                currentScreen = "cart"
+            }
+        )
+        "cart" -> {
+            // TODO: CartScreen — for now go back to home
+            HomeScreen(
+                onProductClick = { productId ->
+                    selectedProductId = productId
+                    currentScreen = "productDetails"
+                },
+                onCartClick = { }
+            )
+        }
     }
 }

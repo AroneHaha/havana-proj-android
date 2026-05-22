@@ -56,6 +56,13 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
             return
         }
 
+        // Kuwait phone: 8 digits starting with 5, 6, 8, or 9
+        val cleanPhone = phone.replace("+965", "").replace(" ", "").trim()
+        if (cleanPhone.length != 8 || !cleanPhone.first().toString().matches(Regex("[5689]"))) {
+            _signupState.value = AuthState.Error("Enter a valid Kuwait phone number (e.g. +965 5XXX XXXX)")
+            return
+        }
+
         _signupState.value = AuthState.Loading
 
         viewModelScope.launch {
