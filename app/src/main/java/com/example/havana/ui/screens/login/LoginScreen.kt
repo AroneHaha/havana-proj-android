@@ -20,20 +20,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.havana.data.model.AuthState
 import com.example.havana.ui.theme.*
-import androidx.compose.foundation.clickable
 import androidx.compose.ui.text.style.TextDecoration
 import com.example.havana.ui.theme.Maroon
 
@@ -272,25 +268,18 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             TextButton(onClick = onNavigateToSignup) {
-                Row(
-                    modifier = Modifier.clickable {
-                        onNavigateToSignup()
-                    },
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Don't have an account? ",
-                        color = Color(0xFF8B7E74),
-                        fontSize = 14.sp
-                    )
-                    Text(
-                        text = "Sign Up",
-                        color = Maroon,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        textDecoration = TextDecoration.Underline
-                    )
-                }
+                Text(
+                    text = "Don't have an account? ",
+                    color = TextSecondary,
+                    fontSize = 14.sp
+                )
+                Text(
+                    text = "Sign Up",
+                    color = Maroon,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    textDecoration = TextDecoration.Underline
+                )
             }
 
             Spacer(modifier = Modifier.height(40.dp))

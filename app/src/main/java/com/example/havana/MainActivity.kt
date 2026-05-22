@@ -36,9 +36,6 @@ fun HavanaApp() {
             }
         )
         "signup" -> SignupScreen(
-            onSignupSuccess = {
-                // TODO: Navigate to Home
-            },
             onNavigateToLogin = {
                 currentScreen = "login"
             }

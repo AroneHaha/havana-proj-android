@@ -82,33 +82,34 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
         // Simulate network delay
         Thread.sleep(800)
 
-        // Check if email is already "taken" by our mock account
-        if (email == "admin@gmail.com") {
-            _signupState.value = AuthState.Error("This email is already registered")
+        // Mock: only user@gmail.com can register successfully
+        if (email.lowercase() != "user@gmail.com") {
+            _signupState.value = AuthState.Error("Registration failed. Please use user@gmail.com to test.")
             return
         }
 
         // Mock success
+        val nameParts = name.trim().split(" ", limit = 2)
         val mockUser = HavanaUser(
-            id = (2..9999).random(),
-            name = name,
+            id = "user-${System.currentTimeMillis()}",
             email = email,
-            phone = phone,
-            avatar = null
+            firstName = nameParts.first(),
+            lastName = nameParts.getOrElse(1) { "" },
+            role = "customer",
+            emailVerified = false,
         )
         _signupState.value = AuthState.Success(mockUser, "mock-signup-token-${System.currentTimeMillis()}")
     }
-
     private fun mapToHavanaUser(dto: UserDto): HavanaUser {
         return HavanaUser(
             id = dto.id,
-            name = dto.name,
             email = dto.email,
-            phone = dto.phone,
-            avatar = dto.avatar
+            firstName = dto.firstName,
+            lastName = dto.lastName,
+            role = dto.role,
+            emailVerified = dto.emailVerifiedAt != null,
         )
     }
-
     fun resetState() {
         _signupState.value = AuthState.Idle
     }

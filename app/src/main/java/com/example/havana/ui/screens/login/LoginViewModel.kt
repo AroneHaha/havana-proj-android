@@ -36,21 +36,18 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
             try {
                 val response = apiService.login(LoginRequest(email, password))
-                if (response.isSuccessful) {
-                    val body = response.body()!!
-                    _authState.value = AuthState.Success(
-                        user = HavanaUser(
-                            id = body.user.id,
-                            email = body.user.email,
-                            firstName = body.user.firstName,
-                            lastName = body.user.lastName,
-                            role = body.user.role,
-                            emailVerified = body.user.emailVerifiedAt != null,
-                        ),
-                        token = body.token,
-                    )
-                    return@launch
-                }
+                _authState.value = AuthState.Success(
+                    user = HavanaUser(
+                        id = response.user.id,
+                        email = response.user.email,
+                        firstName = response.user.firstName,
+                        lastName = response.user.lastName,
+                        role = response.user.role,
+                        emailVerified = response.user.emailVerifiedAt != null,
+                    ),
+                    token = response.token,
+                )
+                return@launch
             } catch (_: Exception) {
                 // API unreachable — fall through to mock
             }

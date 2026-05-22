@@ -32,10 +32,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.havana.data.model.AuthState
-import com.example.havana.ui.theme.HavanaMaroon
-import com.example.havana.ui.theme.HavanaGold
-import com.example.havana.ui.theme.HavanaCreamBg
-import com.example.havana.ui.theme.HavanaDarkBg
+import com.example.havana.ui.theme.Maroon
+import com.example.havana.ui.theme.Gold
+import com.example.havana.ui.theme.CreamBg
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,10 +59,19 @@ fun SignupScreen(
     val passwordFocus = remember { FocusRequester() }
     val confirmPasswordFocus = remember { FocusRequester() }
 
-    // Handle success
+    // Handle success → show success briefly then redirect to login
     LaunchedEffect(signupState) {
         if (signupState is AuthState.Success) {
-            onSignupSuccess()
+            kotlinx.coroutines.delay(1500)
+            viewModel.resetState()
+            onNavigateToLogin()
+        }
+    }
+
+    // Clear email field on error
+    LaunchedEffect(signupState) {
+        if (signupState is AuthState.Error) {
+            email = ""
         }
     }
 
@@ -78,7 +86,7 @@ fun SignupScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(HavanaCreamBg)
+            .background(CreamBg)
     ) {
         Column(
             modifier = Modifier
@@ -93,13 +101,13 @@ fun SignupScreen(
                 text = "HAVANA",
                 fontSize = 36.sp,
                 fontWeight = FontWeight.Bold,
-                color = HavanaMaroon,
+                color = Maroon,
                 letterSpacing = 6.sp
             )
             Text(
                 text = "Luxury Flowers & Gifts",
                 fontSize = 13.sp,
-                color = HavanaGold,
+                color = Gold,
                 letterSpacing = 3.sp,
                 fontWeight = FontWeight.Medium
             )
@@ -111,7 +119,7 @@ fun SignupScreen(
                 text = "Create Account",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = HavanaMaroon
+                color = Maroon
             )
             Text(
                 text = "Join us and start ordering beautiful flowers",
@@ -121,6 +129,40 @@ fun SignupScreen(
             )
 
             Spacer(modifier = Modifier.height(28.dp))
+
+            // ===== SUCCESS BANNER =====
+            if (signupState is AuthState.Success) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFFE8F5E9)
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "✓",
+                            color = Color(0xFF2E7D32),
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = "Account created! Redirecting to login...",
+                            color = Color(0xFF2E7D32),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
 
             // ===== ERROR BANNER =====
             if (errorMessage != null) {
@@ -164,9 +206,9 @@ fun SignupScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = HavanaMaroon,
-                    focusedLabelColor = HavanaMaroon,
-                    cursorColor = HavanaMaroon,
+                    focusedBorderColor = Maroon,
+                    focusedLabelColor = Maroon,
+                    cursorColor = Maroon,
                     unfocusedBorderColor = Color(0xFFD4C5B9),
                     unfocusedLabelColor = Color(0xFF8B7E74)
                 ),
@@ -189,9 +231,9 @@ fun SignupScreen(
                     .focusRequester(emailFocus),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = HavanaMaroon,
-                    focusedLabelColor = HavanaMaroon,
-                    cursorColor = HavanaMaroon,
+                    focusedBorderColor = Maroon,
+                    focusedLabelColor = Maroon,
+                    cursorColor = Maroon,
                     unfocusedBorderColor = Color(0xFFD4C5B9),
                     unfocusedLabelColor = Color(0xFF8B7E74)
                 ),
@@ -215,9 +257,9 @@ fun SignupScreen(
                     .focusRequester(phoneFocus),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = HavanaMaroon,
-                    focusedLabelColor = HavanaMaroon,
-                    cursorColor = HavanaMaroon,
+                    focusedBorderColor = Maroon,
+                    focusedLabelColor = Maroon,
+                    cursorColor = Maroon,
                     unfocusedBorderColor = Color(0xFFD4C5B9),
                     unfocusedLabelColor = Color(0xFF8B7E74)
                 ),
@@ -241,9 +283,9 @@ fun SignupScreen(
                     .focusRequester(passwordFocus),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = HavanaMaroon,
-                    focusedLabelColor = HavanaMaroon,
-                    cursorColor = HavanaMaroon,
+                    focusedBorderColor = Maroon,
+                    focusedLabelColor = Maroon,
+                    cursorColor = Maroon,
                     unfocusedBorderColor = Color(0xFFD4C5B9),
                     unfocusedLabelColor = Color(0xFF8B7E74)
                 ),
@@ -277,9 +319,9 @@ fun SignupScreen(
                     .focusRequester(confirmPasswordFocus),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = HavanaMaroon,
-                    focusedLabelColor = HavanaMaroon,
-                    cursorColor = HavanaMaroon,
+                    focusedBorderColor = Maroon,
+                    focusedLabelColor = Maroon,
+                    cursorColor = Maroon,
                     unfocusedBorderColor = Color(0xFFD4C5B9),
                     unfocusedLabelColor = Color(0xFF8B7E74)
                 ),
@@ -312,8 +354,8 @@ fun SignupScreen(
                     .height(52.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = HavanaMaroon,
-                    disabledContainerColor = HavanaMaroon.copy(alpha = 0.5f)
+                    containerColor = Maroon,
+                    disabledContainerColor = Maroon.copy(alpha = 0.5f)
                 ),
                 enabled = !isLoading
             ) {
@@ -350,7 +392,7 @@ fun SignupScreen(
                 )
                 Text(
                     text = "Sign In",
-                    color = HavanaMaroon,
+                    color = Maroon,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
                     textDecoration = TextDecoration.Underline
