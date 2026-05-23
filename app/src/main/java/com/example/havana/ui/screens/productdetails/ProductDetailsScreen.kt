@@ -28,10 +28,12 @@ import com.example.havana.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+
 fun ProductDetailsScreen(
     productId: String,
     onBackClick: () -> Unit = {},
     onCartClick: () -> Unit = {},
+    onCheckoutClick: () -> Unit = {},
     viewModel: ProductDetailsViewModel = viewModel()
 ) {
     LaunchedEffect(productId) {
@@ -164,7 +166,8 @@ fun ProductDetailsScreen(
                             // Checkout
                             Button(
                                 onClick = {
-                                    // TODO: Navigate to Checkout
+                                    viewModel.addToCart()
+                                    onCheckoutClick()
                                 },
                                 shape = RoundedCornerShape(12.dp),
                                 colors = ButtonDefaults.buttonColors(

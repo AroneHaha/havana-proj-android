@@ -69,6 +69,22 @@ class ProductDetailsViewModel(application: Application) : AndroidViewModel(appli
     }
 
     fun addToCart() {
+        val product = _productState.value ?: return
+
+        // Stock validation
+        if (!product.inStock) {
+            return
+        }
+
+        com.example.havana.data.cart.CartManager.addToCart(
+            com.example.havana.data.model.CartItem(
+                productId = product.id,
+                name = product.name,
+                price = product.price,
+                quantity = _quantity.value,
+                category = product.category
+            )
+        )
         _addedToCart.value = true
     }
 
