@@ -9,6 +9,7 @@ import com.example.havana.data.model.SignupRequest
 import com.example.havana.data.model.SignupResponse
 import com.example.havana.data.model.UserDto
 import com.example.havana.data.remote.ApiClient
+import com.example.havana.data.session.SessionManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,7 +31,6 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
         confirmPassword: String,
         phone: String
     ) {
-        // Client-side validation
         if (name.isBlank()) {
             _signupState.value = AuthState.Error("Please enter your full name")
             return
@@ -56,7 +56,6 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
             return
         }
 
-        // Kuwait phone: 8 digits starting with 5, 6, 8, or 9
         val cleanPhone = phone.replace("+965", "").replace(" ", "").trim()
         if (cleanPhone.length != 8 || !cleanPhone.first().toString().matches(Regex("[5689]"))) {
             _signupState.value = AuthState.Error("Enter a valid Kuwait phone number (e.g. +965 5XXX XXXX)")
@@ -67,13 +66,12 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
 
         viewModelScope.launch {
             try {
-                // Try real API first
                 val request = SignupRequest(name, email, password, confirmPassword, phone)
                 val response: SignupResponse = authApi.register(request)
                 val user = mapToHavanaUser(response.user)
+                SessionManager.saveSession(user, response.token)
                 _signupState.value = AuthState.Success(user, response.token)
             } catch (e: Exception) {
-                // Mock fallback for development
                 tryMockSignup(name, email, password, confirmPassword, phone)
             }
         }
@@ -86,16 +84,13 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
         confirmPassword: String,
         phone: String
     ) {
-        // Simulate network delay
         Thread.sleep(800)
 
-        // Mock: only user@gmail.com can register successfully
         if (email.lowercase() != "user@gmail.com") {
             _signupState.value = AuthState.Error("Registration failed. Please use user@gmail.com to test.")
             return
         }
 
-        // Mock success
         val nameParts = name.trim().split(" ", limit = 2)
         val mockUser = HavanaUser(
             id = "user-${System.currentTimeMillis()}",
@@ -104,8 +99,11 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
             lastName = nameParts.getOrElse(1) { "" },
             role = "customer",
             emailVerified = false,
+            phone = phone,
         )
-        _signupState.value = AuthState.Success(mockUser, "mock-signup-token-${System.currentTimeMillis()}")
+        val mockToken = "mock-signup-token-${System.currentTimeMillis()}"
+        SessionManager.saveSession(mockUser, mockToken)
+        _signupState.value = AuthState.Success(mockUser, mockToken)
     }
     private fun mapToHavanaUser(dto: UserDto): HavanaUser {
         return HavanaUser(

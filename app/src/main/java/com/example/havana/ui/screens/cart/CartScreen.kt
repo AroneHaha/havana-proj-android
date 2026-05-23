@@ -32,6 +32,7 @@ fun CartScreen(
     onBackClick: () -> Unit = {},
     onCheckoutClick: () -> Unit = {},
     onHomeClick: () -> Unit = {},
+    onProfileClick: () -> Unit = {},
 ) {
     val viewModel: CartViewModel = viewModel()
     val cartItems by viewModel.cartItems.collectAsState()
@@ -74,7 +75,6 @@ fun CartScreen(
                             .fillMaxWidth()
                             .padding(16.dp)
                     ) {
-                        // Total row
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -95,7 +95,6 @@ fun CartScreen(
 
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        // Checkout button
                         Button(
                             onClick = onCheckoutClick,
                             shape = RoundedCornerShape(12.dp),
@@ -116,7 +115,6 @@ fun CartScreen(
                     }
                 }
             } else {
-                // Nav bar when cart is empty
                 NavigationBar(
                     containerColor = Color.White,
                     tonalElevation = 8.dp
@@ -154,7 +152,7 @@ fun CartScreen(
                     )
                     NavigationBarItem(
                         selected = false,
-                        onClick = { },
+                        onClick = onProfileClick,
                         icon = { Icon(Icons.Outlined.Person, contentDescription = "Profile") },
                         label = { Text("Profile", fontSize = 11.sp) },
                         colors = NavigationBarItemDefaults.colors(
@@ -168,7 +166,6 @@ fun CartScreen(
         containerColor = CreamBg
     ) { paddingValues ->
         if (cartItems.isEmpty()) {
-            // Empty cart state
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -223,13 +220,11 @@ fun CartScreen(
                     )
                 }
 
-                // Summary section
                 item {
                     Spacer(modifier = Modifier.height(8.dp))
                     HorizontalDivider(color = Color(0xFFE5E5E5))
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Subtotal
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
@@ -245,7 +240,6 @@ fun CartScreen(
 
                     Spacer(modifier = Modifier.height(6.dp))
 
-                    // Delivery fee
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
@@ -265,7 +259,6 @@ fun CartScreen(
 
                     Spacer(modifier = Modifier.height(6.dp))
 
-                    // Grand total
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -285,14 +278,13 @@ fun CartScreen(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(80.dp)) // Space for bottom bar
+                    Spacer(modifier = Modifier.height(80.dp))
                 }
             }
         }
     }
 }
 
-// ===== CART ITEM CARD =====
 @Composable
 fun CartItemCard(
     item: CartItem,
@@ -312,7 +304,6 @@ fun CartItemCard(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Product image placeholder
             Box(
                 modifier = Modifier
                     .size(80.dp)
@@ -327,7 +318,6 @@ fun CartItemCard(
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            // Product info
             Column(
                 modifier = Modifier.weight(1f)
             ) {
@@ -347,7 +337,6 @@ fun CartItemCard(
                 )
                 Spacer(modifier = Modifier.height(6.dp))
 
-                // Quantity controls
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -385,7 +374,6 @@ fun CartItemCard(
                 }
             }
 
-            // Right side: subtotal + delete
             Column(
                 horizontalAlignment = Alignment.End
             ) {
@@ -412,7 +400,6 @@ fun CartItemCard(
     }
 }
 
-// Helper extension for cart items
 private fun CartItem.categoryEmoji(): String {
     return when (category.lowercase()) {
         "roses" -> "🌹"

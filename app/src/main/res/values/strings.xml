@@ -1,3 +1,37 @@
 <resources>
     <string name="app_name">Havana</string>
-</resources>
+
+    <!-- Profile Module -->
+    <string name="profile_title">My Profile</string>
+    <string name="profile_back">Back</string>
+    <string name="profile_retry">Retry</string>
+    <string name="profile_edit">Edit</string>
+    <string name="profile_save">Save</string>
+    <string name="profile_cancel">Cancel</string>
+    <string name="profile_verified">Verified</string>
+
+    <!-- Profile Sections -->
+    <string name="profile_section_personal">PERSONAL INFORMATION</string>
+    <string name="profile_section_address">DELIVERY ADDRESS</string>
+    <string name="profile_section_preferences">PREFERENCES</string>
+
+    <!-- Profile Fields -->
+    <string name="profile_full_name">Full Name</string>
+    <string name="profile_first_name">First Name</string>
+    <string name="profile_last_name">Last Name</string>
+    <string name="profile_email">Email Address</string>
+    <string name="profile_contact">Contact Number</string>
+    <string name="profile_phone_hint">e.g. +965 5XXX XXXX</string>
+    <string name="profile_address">Delivery Address</string>
+    <string name="profile_address_hint">Enter your full delivery address</string>
+    <string name="profile_address_not_set">No address set</string>
+
+    <!-- Preferences -->
+    <string name="profile_dark_mode">Dark Mode</string>
+    <string name="profile_dark_mode_desc">Switch to dark theme</string>
+    <string name="profile_language">Language</string>
+    <string name="profile_language_desc">Switch to Arabic</string>
+    <string name="profile_language_arabic">Switch to English</string>
+
+    <!-- Account Actions -->
+    <string name="profile_logout">Logout</string></resources>

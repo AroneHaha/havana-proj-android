@@ -16,13 +16,16 @@ import com.example.havana.ui.screens.login.LoginScreen
 import com.example.havana.ui.screens.orders.OrderDetailsScreen
 import com.example.havana.ui.screens.orders.OrdersScreen
 import com.example.havana.ui.screens.productdetails.ProductDetailsScreen
+import com.example.havana.ui.screens.profile.ProfileScreen
 import com.example.havana.ui.screens.signup.SignupScreen
 import com.example.havana.ui.theme.HavanaTheme
+import com.example.havana.data.session.SessionManager
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        SessionManager.initialize(applicationContext)
         setContent {
             HavanaTheme {
                 HavanaApp()
@@ -31,7 +34,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-// Shared mock orders for lookup
 val mockOrdersList = listOf(
     Order(
         id = "ord-1", orderNumber = "HAV-4821", customerName = "Fatima Al-Sabah",
@@ -139,7 +141,7 @@ val mockOrdersList = listOf(
 
 @Composable
 fun HavanaApp() {
-    var currentScreen by remember { mutableStateOf("login") }
+    var currentScreen by remember { mutableStateOf(if (SessionManager.isLoggedIn) "home" else "login") }
     var selectedProductId by remember { mutableStateOf<String?>(null) }
     var selectedAddress by remember { mutableStateOf<DeliveryAddress?>(null) }
     var selectedOrderId by remember { mutableStateOf<String?>(null) }
@@ -157,7 +159,9 @@ fun HavanaApp() {
                 selectedProductId = productId
                 currentScreen = "productDetails"
             },
-            onCartClick = { currentScreen = "cart" }
+            onCartClick = { currentScreen = "cart" },
+            onOrdersClick = { currentScreen = "orders" },
+            onProfileClick = { currentScreen = "profile" }
         )
         "productDetails" -> ProductDetailsScreen(
             productId = selectedProductId ?: "",
@@ -168,7 +172,8 @@ fun HavanaApp() {
         "cart" -> CartScreen(
             onBackClick = { currentScreen = "home" },
             onCheckoutClick = { currentScreen = "checkout" },
-            onHomeClick = { currentScreen = "home" }
+            onHomeClick = { currentScreen = "home" },
+            onProfileClick = { currentScreen = "profile" }
         )
         "checkout" -> CheckoutScreen(
             onBackClick = { currentScreen = "cart" },
@@ -191,11 +196,19 @@ fun HavanaApp() {
                 currentScreen = "orderDetails"
             },
             onHomeClick = { currentScreen = "home" },
-            onCartClick = { currentScreen = "cart" }
+            onCartClick = { currentScreen = "cart" },
+            onProfileClick = { currentScreen = "profile" }
         )
         "orderDetails" -> OrderDetailsScreen(
             order = mockOrdersList.find { it.id == selectedOrderId },
             onBackClick = { currentScreen = "orders" }
+        )
+        "profile" -> ProfileScreen(
+            onBackClick = { currentScreen = "home" },
+            onHomeClick = { currentScreen = "home" },
+            onCartClick = { currentScreen = "cart" },
+            onOrdersClick = { currentScreen = "orders" },
+            onLogoutClick = { currentScreen = "login" }
         )
     }
 }

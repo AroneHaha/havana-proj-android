@@ -33,6 +33,8 @@ data class HavanaUser(
     val lastName: String,
     val role: String,
     val emailVerified: Boolean,
+    val phone: String = "",
+    val deliveryAddress: DeliveryAddress? = null,
 )
 
 sealed class AuthState {

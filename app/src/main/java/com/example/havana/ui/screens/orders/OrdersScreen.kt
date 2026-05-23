@@ -35,6 +35,7 @@ fun OrdersScreen(
     onOrderClick: (String) -> Unit = {},
     onHomeClick: () -> Unit = {},
     onCartClick: () -> Unit = {},
+    onProfileClick: () -> Unit = {},
 ) {
     val viewModel: OrdersViewModel = viewModel()
     val orderListState by viewModel.orderListState.collectAsState()
@@ -104,7 +105,7 @@ fun OrdersScreen(
                 )
                 NavigationBarItem(
                     selected = false,
-                    onClick = { },
+                    onClick = onProfileClick,
                     icon = { Icon(Icons.Outlined.Person, contentDescription = "Profile") },
                     label = { Text("Profile", fontSize = 11.sp) },
                     colors = NavigationBarItemDefaults.colors(
@@ -121,7 +122,6 @@ fun OrdersScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // ===== FILTER CHIPS =====
             LazyRow(
                 contentPadding = PaddingValues(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -149,7 +149,6 @@ fun OrdersScreen(
                 }
             }
 
-            // ===== ORDER LIST =====
             when (orderListState) {
                 is OrderListState.Loading -> {
                     Box(
@@ -201,7 +200,6 @@ fun OrdersScreen(
     }
 }
 
-// ===== ORDER CARD =====
 @Composable
 fun OrderCard(
     order: Order,
@@ -220,7 +218,6 @@ fun OrderCard(
                 .fillMaxWidth()
                 .padding(14.dp)
         ) {
-            // Top row: Order number + Status
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -248,7 +245,6 @@ fun OrderCard(
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            // Date
             Text(
                 order.createdAt,
                 fontSize = 12.sp,
@@ -257,7 +253,6 @@ fun OrderCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Items preview
             val itemsPreview = order.items.take(2).joinToString(", ") { "${it.name} x${it.quantity}" }
             val moreCount = order.items.size - 2
             Text(
@@ -270,7 +265,6 @@ fun OrderCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Bottom row: Total + item count
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,

@@ -39,6 +39,7 @@ fun HomeScreen(
     onProductClick: (String) -> Unit = {},
     onCartClick: () -> Unit = {},
     onOrdersClick: () -> Unit = {},
+    onProfileClick: () -> Unit = {},
 ) {
     val viewModel: HomeViewModel = viewModel()
     val productState by viewModel.productState.collectAsState()
@@ -121,7 +122,7 @@ fun HomeScreen(
                 )
                 NavigationBarItem(
                     selected = false,
-                    onClick = { },
+                    onClick = onProfileClick,
                     icon = { Icon(Icons.Outlined.Person, contentDescription = "Profile") },
                     label = { Text("Profile", fontSize = 11.sp) },
                     colors = NavigationBarItemDefaults.colors(
@@ -139,7 +140,6 @@ fun HomeScreen(
                 .padding(paddingValues),
             verticalArrangement = Arrangement.spacedBy(0.dp)
         ) {
-            // ===== SEARCH BAR =====
             item {
                 OutlinedTextField(
                     value = searchInput,
@@ -163,7 +163,6 @@ fun HomeScreen(
                 )
             }
 
-            // ===== CATEGORIES =====
             item {
                 val categories = when (categoryState) {
                     is CategoryState.Success -> (categoryState as CategoryState.Success).categories
@@ -199,7 +198,6 @@ fun HomeScreen(
                 }
             }
 
-            // ===== FEATURED PRODUCTS =====
             val featuredProducts = viewModel.getFeaturedProducts()
             if (featuredProducts.isNotEmpty() && searchQuery.isBlank() && selectedCategory == "All") {
                 item {
@@ -227,7 +225,6 @@ fun HomeScreen(
                 item { Spacer(modifier = Modifier.height(8.dp)) }
             }
 
-            // ===== TOP SELLING =====
             val topSelling = viewModel.getTopSellingProducts()
             if (topSelling.isNotEmpty() && searchQuery.isBlank() && selectedCategory == "All") {
                 item {
@@ -255,7 +252,6 @@ fun HomeScreen(
                 item { Spacer(modifier = Modifier.height(8.dp)) }
             }
 
-            // ===== ALL PRODUCTS SECTION TITLE =====
             item {
                 val sectionTitle = when {
                     searchQuery.isNotBlank() -> "Search Results"
@@ -271,7 +267,6 @@ fun HomeScreen(
                 )
             }
 
-            // ===== ALL PRODUCTS GRID (as rows of 2) =====
             when (productState) {
                 is ProductListState.Loading -> {
                     item {
@@ -303,7 +298,6 @@ fun HomeScreen(
                             }
                         }
                     } else {
-                        // Products in pairs of 2 per row
                         val rows = products.chunked(2)
                         items(rows.size) { rowIndex ->
                             Row(
@@ -320,7 +314,6 @@ fun HomeScreen(
                                         )
                                     }
                                 }
-                                // If odd number, add spacer to keep layout even
                                 if (rows[rowIndex].size == 1) {
                                     Spacer(modifier = Modifier.weight(1f))
                                 }
@@ -346,13 +339,11 @@ fun HomeScreen(
                 else -> {}
             }
 
-            // Bottom spacing for nav bar clearance
             item { Spacer(modifier = Modifier.height(16.dp)) }
         }
     }
 }
 
-// ===== FEATURED PRODUCT CARD (Wide Horizontal) =====
 @Composable
 fun FeaturedProductCard(
     product: Product,
@@ -422,7 +413,6 @@ fun FeaturedProductCard(
     }
 }
 
-// ===== TOP SELLING CARD (Compact Horizontal) =====
 @Composable
 fun TopSellingCard(
     product: Product,
@@ -482,7 +472,6 @@ fun TopSellingCard(
     }
 }
 
-// ===== PRODUCT GRID CARD =====
 @Composable
 fun ProductCard(
     product: Product,
@@ -551,7 +540,6 @@ fun ProductCard(
     }
 }
 
-// Helper extension
 private fun Product.categoryEmoji(): String {
     return when (category.lowercase()) {
         "roses" -> "🌹"
