@@ -25,8 +25,10 @@ import com.example.havana.data.model.CheckoutState
 import com.example.havana.data.model.DeliveryAddress
 import com.example.havana.ui.theme.*
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+
 fun CheckoutScreen(
     onBackClick: () -> Unit = {},
     onOrderSuccess: (String) -> Unit = {},
@@ -34,6 +36,11 @@ fun CheckoutScreen(
     savedAddress: DeliveryAddress? = null,
     viewModel: CheckoutViewModel = viewModel()
 ) {
+
+    LaunchedEffect(Unit) {
+        viewModel.resetState()
+    }
+
     val cartItems by viewModel.cartItems.collectAsState()
     val checkoutState by viewModel.checkoutState.collectAsState()
     val deliveryAddress by viewModel.deliveryAddress.collectAsState()

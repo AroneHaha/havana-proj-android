@@ -38,6 +38,7 @@ import com.example.havana.ui.theme.*
 fun HomeScreen(
     onProductClick: (String) -> Unit = {},
     onCartClick: () -> Unit = {},
+    onOrdersClick: () -> Unit = {},
 ) {
     val viewModel: HomeViewModel = viewModel()
     val productState by viewModel.productState.collectAsState()
@@ -110,7 +111,7 @@ fun HomeScreen(
                 )
                 NavigationBarItem(
                     selected = false,
-                    onClick = { },
+                    onClick = onOrdersClick,
                     icon = { Icon(Icons.Outlined.ReceiptLong, contentDescription = "Orders") },
                     label = { Text("Orders", fontSize = 11.sp) },
                     colors = NavigationBarItemDefaults.colors(

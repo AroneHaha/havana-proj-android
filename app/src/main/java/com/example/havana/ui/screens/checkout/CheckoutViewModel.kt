@@ -104,5 +104,7 @@ class CheckoutViewModel(application: Application) : AndroidViewModel(application
 
     fun resetState() {
         _checkoutState.value = CheckoutState.Idle
+        _deliveryAddress.value = null
     }
+
 }
