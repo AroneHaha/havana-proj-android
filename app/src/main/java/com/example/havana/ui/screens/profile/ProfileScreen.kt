@@ -234,8 +234,7 @@ private fun ProfileContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp)
-                .imePadding(),
+                .padding(horizontal = 16.dp),   // <-- FIX: removed .imePadding()
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
