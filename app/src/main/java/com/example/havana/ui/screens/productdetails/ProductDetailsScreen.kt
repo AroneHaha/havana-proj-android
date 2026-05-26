@@ -394,7 +394,7 @@ fun ProductDetailsScreen(
                                     color = TextPrimary
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Column {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
                                     repeat(5) { i ->
                                         val starValue = i + 1
                                         val filled = starValue <= p.rating.toInt()
