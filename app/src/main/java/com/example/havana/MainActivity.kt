@@ -22,6 +22,9 @@ import com.example.havana.ui.screens.profile.ProfileScreen
 import com.example.havana.ui.theme.HavanaTheme
 import com.example.havana.data.session.SessionManager
 
+import com.example.havana.ui.screens.signup.SignupScreen
+
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -42,6 +42,8 @@ import org.osmdroid.views.overlay.Marker
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 data class SearchResult(
     val name: String,
