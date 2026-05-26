@@ -29,7 +29,9 @@ import androidx.core.content.ContextCompat
 import com.example.havana.data.model.DeliveryAddress
 import com.example.havana.ui.theme.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import org.osmdroid.config.Configuration
@@ -42,8 +44,6 @@ import org.osmdroid.views.overlay.Marker
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 data class SearchResult(
     val name: String,
@@ -179,7 +179,7 @@ fun MapPickerScreen(
     }
 
     fun reverseGeocode(point: GeoPoint) {
-        kotlinx.coroutines.GlobalScope.launch(Dispatchers.IO) {
+        GlobalScope.launch(Dispatchers.IO) {
             try {
                 val url = "https://nominatim.openstreetmap.org/reverse?lat=${point.latitude}&lon=${point.longitude}&format=json&countrycodes=kw&addressdetails=1"
                 val response = nominatimGet(url)

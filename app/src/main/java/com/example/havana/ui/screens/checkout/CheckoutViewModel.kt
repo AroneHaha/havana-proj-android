@@ -3,6 +3,7 @@ package com.example.havana.ui.screens.checkout
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.havana.data.cart.CartManager
 import com.example.havana.data.model.*
 import com.example.havana.data.remote.ApiClient
 import kotlinx.coroutines.delay
@@ -10,7 +11,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import com.example.havana.data.cart.CartManager
 
 class CheckoutViewModel(application: Application) : AndroidViewModel(application) {
 

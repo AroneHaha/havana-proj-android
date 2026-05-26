@@ -5,7 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.*
-import com.example.havana.data.cart.CartManager
 import com.example.havana.data.model.DeliveryAddress
 import com.example.havana.data.model.Order
 import com.example.havana.data.repository.OrderRepository
