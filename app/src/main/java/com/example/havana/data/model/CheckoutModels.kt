@@ -10,6 +10,7 @@ data class DeliveryAddress(
     val street: String = "",
     val building: String = "",
     val floor: String = "",
+    val apartment: String = "",
     val latitude: Double = 0.0,
     val longitude: Double = 0.0,
 )
@@ -116,4 +117,3 @@ fun Order.statusEmoji(): String {
         else -> "📋"
     }
 }
-

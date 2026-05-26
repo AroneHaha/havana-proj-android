@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.havana.data.model.*
 import com.example.havana.data.remote.ApiClient
+import com.example.havana.data.session.SessionManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,7 +37,6 @@ class ProductDetailsViewModel(application: Application) : AndroidViewModel(appli
                 val product = detailsApi.getProduct(productId)
                 _productState.value = product
             } catch (_: Exception) {
-                // Mock fallback
                 _productState.value = getMockProduct(productId)
             }
         }
@@ -50,7 +50,6 @@ class ProductDetailsViewModel(application: Application) : AndroidViewModel(appli
                 val reviews = detailsApi.getReviews(productId)
                 _reviewState.value = ReviewState.Success(reviews)
             } catch (_: Exception) {
-                // Mock fallback
                 _reviewState.value = ReviewState.Success(getMockReviews(productId))
             }
         }
@@ -70,11 +69,7 @@ class ProductDetailsViewModel(application: Application) : AndroidViewModel(appli
 
     fun addToCart() {
         val product = _productState.value ?: return
-
-        // Stock validation
-        if (!product.inStock) {
-            return
-        }
+        if (!product.inStock) return
 
         com.example.havana.data.cart.CartManager.addToCart(
             com.example.havana.data.model.CartItem(
@@ -92,8 +87,6 @@ class ProductDetailsViewModel(application: Application) : AndroidViewModel(appli
         _addedToCart.value = false
     }
 
-    // ===== MOCK DATA =====
-
     private fun getMockProduct(productId: String): Product {
         val products = mapOf(
             "1" to Product("1", "Royal Red Roses", "A stunning bouquet of 12 premium red roses, hand-picked and carefully arranged in luxury wrapping paper. Perfect for anniversaries, Valentine's Day, or any occasion that calls for a bold romantic gesture. Each rose is selected for its deep red hue and long stem.", 27.500, null, "Roses", 4.8f, 124, true, true),
@@ -106,8 +99,8 @@ class ProductDetailsViewModel(application: Application) : AndroidViewModel(appli
             "8" to Product("8", "Mini Rose Plant", "Beautiful mini rose plant in a ceramic pot. A living gift that keeps giving, these compact rose plants thrive indoors and bloom repeatedly.", 14.000, null, "Plants", 4.6f, 78, false, true),
             "9" to Product("9", "Peony Premium Box", "Luxury box of fresh seasonal peonies. Each box is carefully curated with the finest peonies available, creating a breathtaking display of lush, ruffled blooms.", 42.000, null, "Bouquets", 4.9f, 201, true, true),
             "10" to Product("10", "Succulent Garden", "Assorted succulents in a decorative tray. A modern and low-maintenance arrangement that brings green beauty to desks, shelves, and windowsills.", 12.000, null, "Plants", 4.3f, 56, false, false),
-            "11" to Product("11", "Romance Bundle", "Red roses + teddy bear + balloon set. The complete romance package — stunning roses paired with an adorable teddy and celebratory balloon.", 30.000, null, "Gifts", 4.7f, 143, true, true),
-            "12" to Product("12", "Daisy Delight", "Cheerful daisy bunch wrapped in kraft paper. Simple, fresh, and full of sunshine — perfect for brightening someone's day.", 10.000, null, "Bouquets", 4.2f, 29, false, false),
+            "11" to Product("11", "Romance Bundle", "Red roses + teddy bear + balloon set. The complete romance package - stunning roses paired with an adorable teddy and celebratory balloon.", 30.000, null, "Gifts", 4.7f, 143, true, true),
+            "12" to Product("12", "Daisy Delight", "Cheerful daisy bunch wrapped in kraft paper. Simple, fresh, and full of sunshine - perfect for brightening someone's day.", 10.000, null, "Bouquets", 4.2f, 29, false, false),
         )
         return products[productId] ?: Product(productId, "Unknown Product", "No description available", 0.0, null, "Bouquets")
     }

@@ -72,6 +72,9 @@ dependencies {
     // Icons extended
     implementation("androidx.compose.material:material-icons-extended")
 
+    // Image loading
+    implementation(libs.coil.compose)
+
     // Maps (OpenStreetMap - same as Leaflet)
     implementation("org.osmdroid:osmdroid-android:6.1.18")
 }

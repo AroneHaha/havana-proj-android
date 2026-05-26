@@ -31,7 +31,6 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private val _selectedCategory = MutableStateFlow("All")
     val selectedCategory: StateFlow<String> = _selectedCategory.asStateFlow()
 
-    // All products loaded (for local filtering)
     private var allProducts: List<Product> = emptyList()
 
     init {
@@ -44,15 +43,14 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 val categories = productApi.getCategories()
-                _categoryState.value = CategoryState.Success(listOf(Category("all", "All", "🌸")) + categories)
+                _categoryState.value = CategoryState.Success(listOf(Category("all", "All", "\uD83C\uDF38")) + categories)
             } catch (_: Exception) {
-                // Mock fallback
                 _categoryState.value = CategoryState.Success(getMockCategories())
             }
         }
     }
 
-    private fun loadProducts() {
+    fun loadProducts() {
         _productState.value = ProductListState.Loading
         viewModelScope.launch {
             try {
@@ -60,7 +58,6 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 allProducts = products
                 _productState.value = ProductListState.Success(products)
             } catch (_: Exception) {
-                // Mock fallback
                 allProducts = getMockProducts()
                 _productState.value = ProductListState.Success(allProducts)
             }
@@ -102,16 +99,14 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         return allProducts.filter { it.isTopSelling }
     }
 
-    // ===== MOCK DATA =====
-
     private fun getMockCategories(): List<Category> {
         return listOf(
-            Category("all", "All", "🌸"),
-            Category("bouquets", "Bouquets", "💐"),
-            Category("roses", "Roses", "🌹"),
-            Category("arrangements", "Arrangements", "🌺"),
-            Category("gifts", "Gifts", "🎁"),
-            Category("plants", "Plants", "🪴"),
+            Category("all", "All", "\uD83C\uDF38"),
+            Category("bouquets", "Bouquets", "\uD83D\uDC90"),
+            Category("roses", "Roses", "\uD83C\uDF39"),
+            Category("arrangements", "Arrangements", "\uD83C\uDF3A"),
+            Category("gifts", "Gifts", "\uD83C\uDF81"),
+            Category("plants", "Plants", "\uD83E\uDEB4"),
         )
     }
 

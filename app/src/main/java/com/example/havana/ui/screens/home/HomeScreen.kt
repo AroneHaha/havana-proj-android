@@ -4,11 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -19,6 +17,7 @@ import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,6 +31,7 @@ import com.example.havana.data.model.CategoryState
 import com.example.havana.data.model.Product
 import com.example.havana.data.model.ProductListState
 import com.example.havana.ui.theme.*
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,6 +48,8 @@ fun HomeScreen(
     val selectedCategory by viewModel.selectedCategory.collectAsState()
 
     var searchInput by remember { mutableStateOf("") }
+    val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -91,7 +93,10 @@ fun HomeScreen(
             ) {
                 NavigationBarItem(
                     selected = true,
-                    onClick = { },
+                    onClick = {
+                        coroutineScope.launch { listState.animateScrollToItem(0) }
+                        viewModel.loadProducts()
+                    },
                     icon = { Icon(Icons.Outlined.Home, contentDescription = "Home") },
                     label = { Text("Home", fontSize = 11.sp) },
                     colors = NavigationBarItemDefaults.colors(
@@ -135,6 +140,7 @@ fun HomeScreen(
         containerColor = CreamBg
     ) { paddingValues ->
         LazyColumn(
+            state = listState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
@@ -197,6 +203,31 @@ fun HomeScreen(
                     }
                 }
             }
+
+            // ===== SHOP BY OCCASION =====
+            item {
+                Text(
+                    "Shop by Occasion",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+            }
+            item {
+                LazyRow(
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    items(occasionList) { occasion ->
+                        OccasionCard(
+                            occasion = occasion,
+                            onClick = { }
+                        )
+                    }
+                }
+            }
+            item { Spacer(modifier = Modifier.height(8.dp)) }
 
             val featuredProducts = viewModel.getFeaturedProducts()
             if (featuredProducts.isNotEmpty() && searchQuery.isBlank() && selectedCategory == "All") {
@@ -329,10 +360,20 @@ fun HomeScreen(
                                 .padding(vertical = 40.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(
-                                (productState as ProductListState.Error).message,
-                                color = Error
-                            )
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    (productState as ProductListState.Error).message,
+                                    color = Error
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
+                                OutlinedButton(
+                                    onClick = { viewModel.loadProducts() },
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Maroon)
+                                ) {
+                                    Text("Retry")
+                                }
+                            }
                         }
                     }
                 }
@@ -401,7 +442,7 @@ fun FeaturedProductCard(
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("★", fontSize = 12.sp, color = Gold)
+                    Text("\u2605", fontSize = 12.sp, color = Gold)
                     Text(
                         " ${product.rating} (${product.reviewCount})",
                         fontSize = 11.sp,
@@ -519,7 +560,7 @@ fun ProductCard(
                         color = Maroon
                     )
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("★", fontSize = 10.sp, color = Gold)
+                        Text("\u2605", fontSize = 10.sp, color = Gold)
                         Text(
                             " ${product.rating}",
                             fontSize = 10.sp,
@@ -542,11 +583,58 @@ fun ProductCard(
 
 private fun Product.categoryEmoji(): String {
     return when (category.lowercase()) {
-        "roses" -> "🌹"
-        "bouquets" -> "💐"
-        "arrangements" -> "🌺"
-        "gifts" -> "🎁"
-        "plants" -> "🪴"
-        else -> "🌸"
+        "roses" -> "\uD83C\uDF39"
+        "bouquets" -> "\uD83D\uDC90"
+        "arrangements" -> "\uD83C\uDF3A"
+        "gifts" -> "\uD83C\uDF81"
+        "plants" -> "\uD83E\uDEB4"
+        else -> "\uD83C\uDF38"
+    }
+}
+
+data class OccasionItem(val key: String, val label: String, val emoji: String)
+
+val occasionList = listOf(
+    OccasionItem("birthday", "Birthday", "\uD83C\uDF82"),
+    OccasionItem("weddings", "Weddings", "\uD83D\uDC8D"),
+    OccasionItem("anniversary", "Anniversary", "\u2764\uFE0F"),
+    OccasionItem("graduation", "Graduation", "\uD83C\uDF93"),
+    OccasionItem("mothersDay", "Mother's Day", "\uD83C\uDF3A"),
+    OccasionItem("loveRomance", "Love", "\uD83D\uDC95"),
+    OccasionItem("eid", "Eid", "\uD83C\uDF38"),
+    OccasionItem("sympathy", "Sympathy", "\uD83D\uDE22")
+)
+
+@Composable
+fun OccasionCard(
+    occasion: OccasionItem,
+    onClick: () -> Unit
+) {
+    Card(
+        onClick = onClick,
+        shape = RoundedCornerShape(14.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
+    ) {
+        Column(
+            modifier = Modifier
+                .width(90.dp)
+                .padding(vertical = 12.dp, horizontal = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                occasion.emoji,
+                fontSize = 28.sp
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                occasion.label,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium,
+                color = TextPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
     }
 }

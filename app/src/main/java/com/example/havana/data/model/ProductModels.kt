@@ -13,6 +13,7 @@ data class Product(
     val isFeatured: Boolean = false,
     val isTopSelling: Boolean = false,
     val inStock: Boolean = true,
+    val images: List<String> = emptyList(),
 )
 
 data class Category(

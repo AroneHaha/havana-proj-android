@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -17,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,7 +31,6 @@ import com.example.havana.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-
 fun ProductDetailsScreen(
     productId: String,
     onBackClick: () -> Unit = {},
@@ -73,7 +75,6 @@ fun ProductDetailsScreen(
             )
         },
         bottomBar = {
-            // Add to Cart + Checkout Bar
             product?.let { p ->
                 Surface(
                     shadowElevation = 16.dp,
@@ -84,7 +85,6 @@ fun ProductDetailsScreen(
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 12.dp)
                     ) {
-                        // Quantity selector row
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
@@ -110,7 +110,7 @@ fun ProductDetailsScreen(
                                     ),
                                     border = ButtonDefaults.outlinedButtonBorder
                                 ) {
-                                    Text("−", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                                    Text("-", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                                 }
                                 Text(
                                     "$quantity",
@@ -135,12 +135,10 @@ fun ProductDetailsScreen(
 
                         Spacer(modifier = Modifier.height(10.dp))
 
-                        // Add to Cart + Checkout buttons
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            // Add to Cart
                             OutlinedButton(
                                 onClick = { viewModel.addToCart() },
                                 shape = RoundedCornerShape(12.dp),
@@ -157,13 +155,12 @@ fun ProductDetailsScreen(
                                 )
                             ) {
                                 if (addedToCart) {
-                                    Text("Added ✓", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                                    Text("Added", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                                 } else {
                                     Text("Add to Cart", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                                 }
                             }
 
-                            // Checkout
                             Button(
                                 onClick = {
                                     viewModel.addToCart()
@@ -178,7 +175,7 @@ fun ProductDetailsScreen(
                                     .height(48.dp)
                             ) {
                                 Text(
-                                    "Checkout  •  ${formatKdPrice(p.price * quantity)}",
+                                    "Checkout  \u2022  ${formatKdPrice(p.price * quantity)}",
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     color = Color.White,
@@ -209,19 +206,68 @@ fun ProductDetailsScreen(
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
-                // ===== PRODUCT IMAGE =====
+                // ===== IMAGE CAROUSEL =====
                 item {
+                    val imageCount = if (p.images.isNotEmpty()) p.images.size else 3
+                    val pagerState = rememberPagerState(pageCount = { imageCount })
+
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(280.dp)
-                            .background(Maroon.copy(alpha = 0.06f)),
-                        contentAlignment = Alignment.Center
+                            .height(300.dp)
                     ) {
-                        Text(
-                            p.categoryEmoji(),
-                            fontSize = 80.sp
-                        )
+                        HorizontalPager(
+                            state = pagerState,
+                            modifier = Modifier.fillMaxSize()
+                        ) { page ->
+                            val pageEmoji = p.categoryEmoji()
+                            val bgColors = listOf(
+                                Maroon.copy(alpha = 0.06f),
+                                Gold.copy(alpha = 0.08f),
+                                CreamBg.copy(alpha = 0.5f)
+                            )
+                            val labels = listOf("Front View", "Detail View", "Arrangement")
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(bgColors[page % bgColors.size]),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(
+                                        pageEmoji,
+                                        fontSize = 72.sp
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        labels[page % labels.size],
+                                        fontSize = 12.sp,
+                                        color = TextSecondary,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                            }
+                        }
+
+                        // Page indicator dots
+                        Row(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .padding(bottom = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            repeat(imageCount) { i ->
+                                val isSelected = pagerState.currentPage == i
+                                Surface(
+                                    modifier = Modifier
+                                        .width(if (isSelected) 20.dp else 8.dp)
+                                        .height(8.dp),
+                                    shape = RoundedCornerShape(4.dp),
+                                    color = if (isSelected) Maroon else Color.White.copy(alpha = 0.7f)
+                                ) {}
+                            }
+                        }
                     }
                 }
 
@@ -232,7 +278,6 @@ fun ProductDetailsScreen(
                             .fillMaxWidth()
                             .padding(16.dp)
                     ) {
-                        // Category
                         Surface(
                             shape = RoundedCornerShape(8.dp),
                             color = Maroon.copy(alpha = 0.1f)
@@ -248,7 +293,6 @@ fun ProductDetailsScreen(
 
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        // Name
                         Text(
                             p.name,
                             fontSize = 24.sp,
@@ -258,7 +302,6 @@ fun ProductDetailsScreen(
 
                         Spacer(modifier = Modifier.height(6.dp))
 
-                        // Price + Rating row
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
@@ -293,7 +336,6 @@ fun ProductDetailsScreen(
 
                         Spacer(modifier = Modifier.height(4.dp))
 
-                        // Stock
                         Text(
                             if (p.inStock) "In Stock" else "Out of Stock",
                             fontSize = 13.sp,
@@ -303,7 +345,6 @@ fun ProductDetailsScreen(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // Description
                         Text(
                             "Description",
                             fontSize = 16.sp,
@@ -328,7 +369,7 @@ fun ProductDetailsScreen(
                     )
                 }
 
-                // ===== REVIEWS SECTION =====
+                // ===== REVIEWS SECTION HEADER (read-only) =====
                 item {
                     Row(
                         modifier = Modifier
@@ -337,37 +378,39 @@ fun ProductDetailsScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(
-                            "Reviews & Ratings",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = TextPrimary
-                        )
-                        // Rating summary
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column {
                             Text(
-                                "${p.rating}",
-                                fontSize = 28.sp,
+                                "Reviews & Ratings",
+                                fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = TextPrimary
                             )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Column {
-                                repeat(5) { i ->
-                                    val starValue = i + 1
-                                    val filled = starValue <= p.rating.toInt()
-                                    Text(
-                                        if (filled) "★" else "☆",
-                                        fontSize = 12.sp,
-                                        color = if (filled) Gold else Color(0xFFD4C5B9)
-                                    )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    "${p.rating}",
+                                    fontSize = 22.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextPrimary
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Column {
+                                    repeat(5) { i ->
+                                        val starValue = i + 1
+                                        val filled = starValue <= p.rating.toInt()
+                                        Text(
+                                            if (filled) "\u2605" else "\u2606",
+                                            fontSize = 12.sp,
+                                            color = if (filled) Gold else Color(0xFFD4C5B9)
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
                 }
 
-                // ===== REVIEW LIST =====
+                // ===== REVIEW LIST (read-only) =====
                 when (reviewState) {
                     is ReviewState.Loading -> {
                         item {
@@ -399,7 +442,6 @@ fun ProductDetailsScreen(
                     else -> {}
                 }
 
-                // Bottom spacing
                 item { Spacer(modifier = Modifier.height(16.dp)) }
             }
         }
@@ -408,12 +450,12 @@ fun ProductDetailsScreen(
 
 private fun formatKdPrice(amount: Double): String {
     return when {
-        amount >= 100.0 -> "KD ${String.format("%.0f", amount)}"       // KD 210
-        amount >= 10.0 -> "KD ${String.format("%.1f", amount)}"        // KD 27.5
-        else -> "KD ${String.format("%.3f", amount)}"                   // KD 7.500
+        amount >= 100.0 -> "KD ${String.format("%.0f", amount)}"
+        amount >= 10.0 -> "KD ${String.format("%.1f", amount)}"
+        else -> "KD ${String.format("%.3f", amount)}"
     }
 }
-// ===== REVIEW CARD =====
+
 @Composable
 fun ReviewCard(review: Review) {
     Card(
@@ -429,12 +471,10 @@ fun ReviewCard(review: Review) {
                 .fillMaxWidth()
                 .padding(14.dp)
         ) {
-            // Top row: Avatar + Name + Date
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // Avatar circle
                 Surface(
                     modifier = Modifier.size(36.dp),
                     shape = CircleShape,
@@ -466,11 +506,10 @@ fun ReviewCard(review: Review) {
                     )
                 }
 
-                // Star rating
                 Row {
                     repeat(5) { i ->
                         Text(
-                            if (i < review.rating.toInt()) "★" else "☆",
+                            if (i < review.rating.toInt()) "\u2605" else "\u2606",
                             fontSize = 14.sp,
                             color = if (i < review.rating.toInt()) Gold else Color(0xFFD4C5B9)
                         )
@@ -480,7 +519,6 @@ fun ReviewCard(review: Review) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Comment
             Text(
                 review.comment,
                 fontSize = 13.sp,
@@ -491,14 +529,13 @@ fun ReviewCard(review: Review) {
     }
 }
 
-// Helper extension (same as HomeScreen)
 private fun Product.categoryEmoji(): String {
     return when (category.lowercase()) {
-        "roses" -> "🌹"
-        "bouquets" -> "💐"
-        "arrangements" -> "🌺"
-        "gifts" -> "🎁"
-        "plants" -> "🪴"
-        else -> "🌸"
+        "roses" -> "\uD83C\uDF39"
+        "bouquets" -> "\uD83D\uDC90"
+        "arrangements" -> "\uD83C\uDF3A"
+        "gifts" -> "\uD83C\uDF81"
+        "plants" -> "\uD83E\uDEB4"
+        else -> "\uD83C\uDF38"
     }
 }

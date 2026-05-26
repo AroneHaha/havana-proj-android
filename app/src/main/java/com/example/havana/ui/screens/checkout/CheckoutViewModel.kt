@@ -23,80 +23,60 @@ class CheckoutViewModel(application: Application) : AndroidViewModel(application
     private val _deliveryAddress = MutableStateFlow<DeliveryAddress?>(null)
     val deliveryAddress: StateFlow<DeliveryAddress?> = _deliveryAddress.asStateFlow()
 
+    private val _lastPlacedOrder = MutableStateFlow<Order?>(null)
+    val lastPlacedOrder: StateFlow<Order?> = _lastPlacedOrder.asStateFlow()
+
     val cartItems = CartManager.cartItems
 
     fun setDeliveryAddress(address: DeliveryAddress) {
         _deliveryAddress.value = address
     }
 
-    fun placeOrder(
-        customerName: String,
-        phone: String,
-        notes: String
-    ) {
-        // Validation
-        if (customerName.isBlank()) {
-            _checkoutState.value = CheckoutState.Error("Please enter your full name")
-            return
-        }
-
-        if (phone.isBlank()) {
-            _checkoutState.value = CheckoutState.Error("Please enter your contact number")
-            return
-        }
-
+    fun placeOrder(customerName: String, phone: String, notes: String) {
+        if (customerName.isBlank()) { _checkoutState.value = CheckoutState.Error("Please enter your full name"); return }
+        if (phone.isBlank()) { _checkoutState.value = CheckoutState.Error("Please enter your contact number"); return }
         val cleanPhone = phone.replace("+965", "").replace(" ", "").trim()
-        if (cleanPhone.length != 8 || !cleanPhone.first().toString().matches(Regex("[5689]"))) {
-            _checkoutState.value = CheckoutState.Error("Enter a valid Kuwait phone number")
-            return
-        }
-
+        if (cleanPhone.length != 8 || !cleanPhone.first().toString().matches(Regex("[5689]"))) { _checkoutState.value = CheckoutState.Error("Enter a valid Kuwait phone number"); return }
         val address = _deliveryAddress.value
-        if (address == null || address.fullAddress.isBlank()) {
-            _checkoutState.value = CheckoutState.Error("Please select a delivery address on the map")
-            return
-        }
-
+        if (address == null || address.fullAddress.isBlank()) { _checkoutState.value = CheckoutState.Error("Please select a delivery address on the map"); return }
         val items = cartItems.value
-        if (items.isEmpty()) {
-            _checkoutState.value = CheckoutState.Error("Your cart is empty")
-            return
-        }
-
+        if (items.isEmpty()) { _checkoutState.value = CheckoutState.Error("Your cart is empty"); return }
         _checkoutState.value = CheckoutState.Loading
-
         val subtotal = items.sumOf { it.price * it.quantity }
         val deliveryFee = 1.500
         val total = subtotal + deliveryFee
-
-        val orderRequest = OrderRequest(
+        val fullOrder = Order(
+            id = "order-${System.currentTimeMillis()}",
+            orderNumber = "",
             customerName = customerName,
             phone = phone,
             deliveryAddress = address,
             notes = notes,
             paymentMethod = "cod",
-            items = items.map { OrderItemRequest(it.productId, it.name, it.price, it.quantity) },
+            items = items.map { OrderItem(it.productId, it.name, it.price, it.quantity, it.category) },
             subtotal = subtotal,
             deliveryFee = deliveryFee,
-            total = total
+            total = total,
+            status = "confirmed",
+            createdAt = ""
         )
-
+        val orderRequest = OrderRequest(
+            customerName = customerName, phone = phone, deliveryAddress = address, notes = notes, paymentMethod = "cod",
+            items = items.map { OrderItemRequest(it.productId, it.name, it.price, it.quantity) },
+            subtotal = subtotal, deliveryFee = deliveryFee, total = total
+        )
         viewModelScope.launch {
             try {
                 val response = checkoutApi.placeOrder(orderRequest)
+                _lastPlacedOrder.value = fullOrder.copy(id = response.id, orderNumber = response.orderNumber, status = response.status, createdAt = response.createdAt)
                 _checkoutState.value = CheckoutState.Success(response)
                 CartManager.clearCart()
             } catch (_: Exception) {
-                // Mock fallback
                 Thread.sleep(1000)
-                val mockOrder = OrderResponse(
-                    id = "order-${System.currentTimeMillis()}",
-                    orderNumber = "HAV-${(1000..9999).random()}",
-                    status = "confirmed",
-                    total = total,
-                    createdAt = "2026-05-23"
-                )
-                _checkoutState.value = CheckoutState.Success(mockOrder)
+                val mockOrderNumber = "HAV-${(1000..9999).random()}"
+                val mockOrderResponse = OrderResponse(id = fullOrder.id, orderNumber = mockOrderNumber, status = "confirmed", total = total, createdAt = "2026-05-23")
+                _lastPlacedOrder.value = fullOrder.copy(orderNumber = mockOrderNumber, createdAt = mockOrderResponse.createdAt)
+                _checkoutState.value = CheckoutState.Success(mockOrderResponse)
                 CartManager.clearCart()
             }
         }
@@ -105,6 +85,6 @@ class CheckoutViewModel(application: Application) : AndroidViewModel(application
     fun resetState() {
         _checkoutState.value = CheckoutState.Idle
         _deliveryAddress.value = null
+        _lastPlacedOrder.value = null
     }
-
 }

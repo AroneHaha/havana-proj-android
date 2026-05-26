@@ -23,15 +23,14 @@ import com.example.havana.data.cart.CartManager
 import com.example.havana.data.model.CartItem
 import com.example.havana.data.model.CheckoutState
 import com.example.havana.data.model.DeliveryAddress
+import com.example.havana.data.model.Order
 import com.example.havana.ui.theme.*
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-
 fun CheckoutScreen(
     onBackClick: () -> Unit = {},
-    onOrderSuccess: (String) -> Unit = {},
+    onOrderSuccess: (orderNumber: String, order: Order) -> Unit = { _, _ -> },
     onPickOnMap: () -> Unit = {},
     savedAddress: DeliveryAddress? = null,
     viewModel: CheckoutViewModel = viewModel()
@@ -45,7 +44,6 @@ fun CheckoutScreen(
     val checkoutState by viewModel.checkoutState.collectAsState()
     val deliveryAddress by viewModel.deliveryAddress.collectAsState()
 
-    // Sync saved address from MapPicker
     LaunchedEffect(savedAddress) {
         if (savedAddress != null) {
             viewModel.setDeliveryAddress(savedAddress)
@@ -56,15 +54,23 @@ fun CheckoutScreen(
     var phone by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
 
+    var block by remember { mutableStateOf("") }
+    var street by remember { mutableStateOf("") }
+    var building by remember { mutableStateOf("") }
+    var floor by remember { mutableStateOf("") }
+    var apartment by remember { mutableStateOf("") }
+
     val subtotal = cartItems.sumOf { it.price * it.quantity }
     val deliveryFee = 1.500
     val total = subtotal + deliveryFee
 
-    // Handle success
     LaunchedEffect(checkoutState) {
         if (checkoutState is CheckoutState.Success) {
-            val order = (checkoutState as CheckoutState.Success).order
-            onOrderSuccess(order.orderNumber)
+            val response = (checkoutState as CheckoutState.Success).order
+            val fullOrder = viewModel.lastPlacedOrder.value
+            if (fullOrder != null) {
+                onOrderSuccess(response.orderNumber, fullOrder)
+            }
         }
     }
 
@@ -108,6 +114,17 @@ fun CheckoutScreen(
                         Spacer(modifier = Modifier.height(10.dp))
                         Button(
                             onClick = {
+                                val currentAddr = deliveryAddress
+                                if (currentAddr != null) {
+                                    val mergedAddr = currentAddr.copy(
+                                        block = block,
+                                        street = street,
+                                        building = building,
+                                        floor = floor,
+                                        apartment = apartment
+                                    )
+                                    viewModel.setDeliveryAddress(mergedAddr)
+                                }
                                 viewModel.placeOrder(customerName, phone, notes)
                             },
                             shape = RoundedCornerShape(12.dp),
@@ -120,7 +137,7 @@ fun CheckoutScreen(
                             if (checkoutState is CheckoutState.Loading) {
                                 CircularProgressIndicator(color = Color.White, modifier = Modifier.size(22.dp), strokeWidth = 2.5.dp)
                             } else {
-                                Text("Place Order  •  Cash on Delivery", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                                Text("Place Order  \u2022  Cash on Delivery", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
                             }
                         }
                     }
@@ -136,7 +153,6 @@ fun CheckoutScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // ===== ERROR BANNER =====
             if (checkoutState is CheckoutState.Error) {
                 item {
                     Card(
@@ -162,7 +178,6 @@ fun CheckoutScreen(
                 }
             }
 
-            // ===== ORDER SUMMARY =====
             item {
                 Text("Order Summary", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
             }
@@ -171,7 +186,6 @@ fun CheckoutScreen(
                 CheckoutItemCard(item)
             }
 
-            // Totals
             item {
                 Card(
                     shape = RoundedCornerShape(12.dp),
@@ -199,7 +213,6 @@ fun CheckoutScreen(
                 }
             }
 
-            // ===== DELIVERY ADDRESS =====
             item {
                 Text("Delivery Address", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
             }
@@ -226,13 +239,33 @@ fun CheckoutScreen(
                                     color = TextPrimary,
                                     lineHeight = 19.sp
                                 )
-                                Spacer(modifier = Modifier.height(2.dp))
                                 Text(
                                     "Lat: ${String.format("%.4f", deliveryAddress!!.latitude)}, Lon: ${String.format("%.4f", deliveryAddress!!.longitude)}",
                                     fontSize = 10.sp,
                                     color = TextSecondary
                                 )
                             }
+                        }
+                    }
+                } else {
+                    Card(
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF8E1)),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(14.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Default.Warning, contentDescription = null, tint = Color(0xFFF59E0B), modifier = Modifier.size(20.dp))
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                "Please pick your delivery location on the map below, then fill in your address details",
+                                fontSize = 12.sp,
+                                color = Color(0xFF92400E)
+                            )
                         }
                     }
                 }
@@ -249,13 +282,101 @@ fun CheckoutScreen(
                     Icon(Icons.Default.LocationOn, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        if (deliveryAddress != null) "Change Location" else "Pick Location on Map",
+                        if (deliveryAddress != null) "Change Location on Map" else "Pick Location on Map",
                         fontWeight = FontWeight.SemiBold
                     )
                 }
             }
 
-            // ===== CUSTOMER INFO =====
+            item {
+                Text("Address Details", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+            }
+
+            item {
+                OutlinedTextField(
+                    value = block,
+                    onValueChange = { block = it },
+                    label = { Text("Block") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Maroon,
+                        focusedLabelColor = Maroon,
+                        cursorColor = Maroon
+                    ),
+                    enabled = checkoutState !is CheckoutState.Loading
+                )
+            }
+
+            item {
+                OutlinedTextField(
+                    value = street,
+                    onValueChange = { street = it },
+                    label = { Text("Street") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Maroon,
+                        focusedLabelColor = Maroon,
+                        cursorColor = Maroon
+                    ),
+                    enabled = checkoutState !is CheckoutState.Loading
+                )
+            }
+
+            item {
+                OutlinedTextField(
+                    value = building,
+                    onValueChange = { building = it },
+                    label = { Text("Building / House") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Maroon,
+                        focusedLabelColor = Maroon,
+                        cursorColor = Maroon
+                    ),
+                    enabled = checkoutState !is CheckoutState.Loading
+                )
+            }
+
+            item {
+                OutlinedTextField(
+                    value = floor,
+                    onValueChange = { floor = it },
+                    label = { Text("Floor") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Maroon,
+                        focusedLabelColor = Maroon,
+                        cursorColor = Maroon
+                    ),
+                    enabled = checkoutState !is CheckoutState.Loading
+                )
+            }
+
+            item {
+                OutlinedTextField(
+                    value = apartment,
+                    onValueChange = { apartment = it },
+                    label = { Text("Apartment / Office") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Maroon,
+                        focusedLabelColor = Maroon,
+                        cursorColor = Maroon
+                    ),
+                    enabled = checkoutState !is CheckoutState.Loading
+                )
+            }
+
             item {
                 Text("Contact Information", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
             }
@@ -313,7 +434,6 @@ fun CheckoutScreen(
                 )
             }
 
-            // ===== PAYMENT METHOD =====
             item {
                 Text("Payment Method", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
             }
@@ -330,7 +450,7 @@ fun CheckoutScreen(
                             .padding(14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("💵", fontSize = 22.sp)
+                        Text("\uD83D\uDCB5", fontSize = 22.sp)
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
                             Text("Cash on Delivery", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = TextPrimary)
@@ -340,7 +460,6 @@ fun CheckoutScreen(
                 }
             }
 
-            // Bottom spacing
             item { Spacer(modifier = Modifier.height(80.dp)) }
         }
     }
@@ -370,7 +489,7 @@ fun CheckoutItemCard(item: CartItem) {
             Spacer(modifier = Modifier.width(10.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(item.name, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = TextPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text("Qty: ${item.quantity} x KD ${String.format("%.3f", item.price)}", fontSize = 11.sp, color = TextSecondary)
+                Text("Qty: ${item.quantity} x KD ${String.format("%.3f", item.price)}", fontSize = 12.sp, color = TextSecondary)
             }
             Text("KD ${String.format("%.3f", item.price * item.quantity)}", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Maroon)
         }
@@ -379,11 +498,11 @@ fun CheckoutItemCard(item: CartItem) {
 
 private fun CartItem.categoryEmoji(): String {
     return when (category.lowercase()) {
-        "roses" -> "🌹"
-        "bouquets" -> "💐"
-        "arrangements" -> "🌺"
-        "gifts" -> "🎁"
-        "plants" -> "🪴"
-        else -> "🌸"
+        "roses" -> "\uD83C\uDF39"
+        "bouquets" -> "\uD83D\uDC90"
+        "arrangements" -> "\uD83C\uDF3A"
+        "gifts" -> "\uD83C\uDF81"
+        "plants" -> "\uD83E\uDEB4"
+        else -> "\uD83C\uDF38"
     }
 }
