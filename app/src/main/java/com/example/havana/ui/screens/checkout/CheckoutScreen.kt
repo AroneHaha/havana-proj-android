@@ -19,6 +19,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.havana.data.mock.MockData
 import com.example.havana.data.model.CartItem
 import com.example.havana.data.model.CheckoutState
 import com.example.havana.data.model.DeliveryAddress
@@ -483,7 +484,7 @@ fun CheckoutItemCard(item: CartItem) {
                     .background(CreamBg, RoundedCornerShape(8.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(item.categoryEmoji(), fontSize = 20.sp)
+                Text(MockData.categoryEmoji(item.category), fontSize = 20.sp)
             }
             Spacer(modifier = Modifier.width(10.dp))
             Column(modifier = Modifier.weight(1f)) {
@@ -492,16 +493,5 @@ fun CheckoutItemCard(item: CartItem) {
             }
             Text("KD ${String.format("%.3f", item.price * item.quantity)}", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Maroon)
         }
-    }
-}
-
-private fun CartItem.categoryEmoji(): String {
-    return when (category.lowercase()) {
-        "roses" -> "\uD83C\uDF39"
-        "bouquets" -> "\uD83D\uDC90"
-        "arrangements" -> "\uD83C\uDF3A"
-        "gifts" -> "\uD83C\uDF81"
-        "plants" -> "\uD83E\uDEB4"
-        else -> "\uD83C\uDF38"
     }
 }

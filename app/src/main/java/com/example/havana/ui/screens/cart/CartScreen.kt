@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.havana.data.mock.MockData
 import com.example.havana.data.model.CartItem
 import com.example.havana.ui.theme.*
 
@@ -171,7 +172,7 @@ fun CartItemCard(item: CartItem, onIncrease: () -> Unit, onDecrease: () -> Unit,
             Box(
                 modifier = Modifier.size(80.dp).background(CreamBg, RoundedCornerShape(10.dp)),
                 contentAlignment = Alignment.Center
-            ) { Text(item.categoryEmoji(), fontSize = 32.sp) }
+            ) { Text(MockData.categoryEmoji(item.category), fontSize = 32.sp) }
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(item.name, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = TextPrimary, maxLines = 2, overflow = TextOverflow.Ellipsis)
@@ -192,16 +193,5 @@ fun CartItemCard(item: CartItem, onIncrease: () -> Unit, onDecrease: () -> Unit,
                 Text("KD ${String.format("%.3f", item.price * item.quantity)}", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Maroon)
             }
         }
-    }
-}
-
-private fun CartItem.categoryEmoji(): String {
-    return when (category.lowercase()) {
-        "roses" -> "🌹"
-        "bouquets" -> "💐"
-        "arrangements" -> "🌺"
-        "gifts" -> "🎁"
-        "plants" -> "🪴"
-        else -> "🌸"
     }
 }
