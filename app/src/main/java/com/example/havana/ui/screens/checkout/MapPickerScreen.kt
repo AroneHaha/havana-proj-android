@@ -177,7 +177,7 @@ fun MapPickerScreen(
     }
 
     fun reverseGeocode(point: GeoPoint) {
-        Thread {
+        kotlinx.coroutines.GlobalScope.launch(Dispatchers.IO) {
             try {
                 val url = "https://nominatim.openstreetmap.org/reverse?lat=${point.latitude}&lon=${point.longitude}&format=json&countrycodes=kw&addressdetails=1"
                 val response = nominatimGet(url)
@@ -198,14 +198,20 @@ fun MapPickerScreen(
                     if (state.isNotEmpty()) parts.add(state)
                     if (country.isNotEmpty()) parts.add(country)
 
-                    selectedAddress = if (parts.isNotEmpty()) parts.joinToString(", ") else json.optString("display_name", "Selected location")
+                    withContext(Dispatchers.Main) {
+                        selectedAddress = if (parts.isNotEmpty()) parts.joinToString(", ") else json.optString("display_name", "Selected location")
+                    }
                 } else {
-                    selectedAddress = "Lat: ${String.format("%.4f", point.latitude)}, Lon: ${String.format("%.4f", point.longitude)}"
+                    withContext(Dispatchers.Main) {
+                        selectedAddress = "Lat: ${String.format("%.4f", point.latitude)}, Lon: ${String.format("%.4f", point.longitude)}"
+                    }
                 }
             } catch (_: Exception) {
-                selectedAddress = "Lat: ${String.format("%.4f", point.latitude)}, Lon: ${String.format("%.4f", point.longitude)}"
+                withContext(Dispatchers.Main) {
+                    selectedAddress = "Lat: ${String.format("%.4f", point.latitude)}, Lon: ${String.format("%.4f", point.longitude)}"
+                }
             }
-        }.start()
+        }
     }
 
     Scaffold(

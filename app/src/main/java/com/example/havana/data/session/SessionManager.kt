@@ -5,12 +5,14 @@ import android.content.SharedPreferences
 import com.example.havana.data.model.DeliveryAddress
 import com.example.havana.data.model.HavanaUser
 import com.example.havana.data.model.UserProfile
+import com.google.gson.Gson
 
 object SessionManager {
 
     private const val PREFS_NAME = "havana_session"
     private const val KEY_AUTH_TOKEN = "auth_token"
     private const val KEY_USER_ID = "user_id"
+    private const val KEY_USER_JSON = "user_json"
     private const val KEY_DARK_MODE = "dark_mode"
     private const val KEY_LANGUAGE_ARABIC = "language_arabic"
 
@@ -20,6 +22,7 @@ object SessionManager {
     private var _isArabic: Boolean = false
 
     private var prefs: SharedPreferences? = null
+    private val gson = Gson()
 
     val currentUser: HavanaUser? get() = _currentUser
     val token: String? get() = _token
@@ -29,41 +32,63 @@ object SessionManager {
 
     fun initialize(context: Context) {
         prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-// TODO: Restore session from SharedPreferences on cold start
-// _isDarkMode = prefs?.getBoolean(KEY_DARK_MODE, false) ?: false
-// _isArabic = prefs?.getBoolean(KEY_LANGUAGE_ARABIC, false) ?: false
+        // Restore session from SharedPreferences on cold start
+        _token = prefs?.getString(KEY_AUTH_TOKEN, null)
+        _isDarkMode = prefs?.getBoolean(KEY_DARK_MODE, false) ?: false
+        _isArabic = prefs?.getBoolean(KEY_LANGUAGE_ARABIC, false) ?: false
+        val userJson = prefs?.getString(KEY_USER_JSON, null)
+        if (userJson != null) {
+            try {
+                _currentUser = gson.fromJson(userJson, HavanaUser::class.java)
+            } catch (_: Exception) {
+                _currentUser = null
+            }
+        }
     }
 
     fun saveSession(user: HavanaUser, token: String) {
         _currentUser = user
         _token = token
-// TODO: Persist to SharedPreferences
-// prefs?.edit()?.putString(KEY_AUTH_TOKEN, token)?.apply()
-// prefs?.edit()?.putString(KEY_USER_ID, user.id)?.apply()
+        // Persist to SharedPreferences
+        prefs?.edit()?.apply {
+            putString(KEY_AUTH_TOKEN, token)
+            putString(KEY_USER_ID, user.id)
+            putString(KEY_USER_JSON, gson.toJson(user))
+            apply()
+        }
     }
 
     fun clearSession() {
         _currentUser = null
         _token = null
-// TODO: Clear SharedPreferences
-// prefs?.edit()?.clear()?.apply()
+        // Clear SharedPreferences (keep dark mode & language prefs)
+        prefs?.edit()?.apply {
+            remove(KEY_AUTH_TOKEN)
+            remove(KEY_USER_ID)
+            remove(KEY_USER_JSON)
+            apply()
+        }
     }
 
     fun updateUser(user: HavanaUser) {
         _currentUser = user
-// TODO: Persist updated user to SharedPreferences
+        // Persist updated user to SharedPreferences
+        prefs?.edit()?.apply {
+            putString(KEY_USER_JSON, gson.toJson(user))
+            apply()
+        }
     }
 
     fun setDarkMode(enabled: Boolean) {
         _isDarkMode = enabled
-// TODO: Persist to SharedPreferences
-// prefs?.edit()?.putBoolean(KEY_DARK_MODE, enabled)?.apply()
+        // Persist to SharedPreferences
+        prefs?.edit()?.putBoolean(KEY_DARK_MODE, enabled)?.apply()
     }
 
     fun setArabic(enabled: Boolean) {
         _isArabic = enabled
-// TODO: Persist to SharedPreferences and apply locale
-// prefs?.edit()?.putBoolean(KEY_LANGUAGE_ARABIC, enabled)?.apply()
+        // Persist to SharedPreferences and apply locale
+        prefs?.edit()?.putBoolean(KEY_LANGUAGE_ARABIC, enabled)?.apply()
     }
 
     fun getUserProfile(): UserProfile? {

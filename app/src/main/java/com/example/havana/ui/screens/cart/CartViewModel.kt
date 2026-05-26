@@ -2,7 +2,6 @@ package com.example.havana.ui.screens.cart
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import com.example.havana.data.cart.CartManager
 import com.example.havana.data.model.CartItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

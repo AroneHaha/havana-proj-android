@@ -21,26 +21,30 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.havana.data.mock.MockData
 import com.example.havana.data.model.Order
 import com.example.havana.data.model.OrderItem
 import com.example.havana.data.model.Review
 import com.example.havana.data.model.statusColor
 import com.example.havana.data.model.statusLabel
 import com.example.havana.data.model.statusEmoji
+import com.example.havana.data.repository.OrderRepository
 import com.example.havana.data.session.SessionManager
 import com.example.havana.ui.theme.*
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrderDetailsScreen(
-    order: Order?,
+    orderId: String?,
     onBackClick: () -> Unit = {},
     onConfirmDelivery: (String) -> Unit = {},
+    viewModel: OrderDetailsViewModel = viewModel(),
 ) {
-    if (order == null) {
+    val order by OrderRepository.orders.collectAsState()
+    val resolvedOrder = remember(orderId, order) { order.find { it.id == orderId } }
+
+    if (resolvedOrder == null) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -50,18 +54,18 @@ fun OrderDetailsScreen(
         return
     }
 
-    var currentStatus by remember { mutableStateOf(order.status) }
-    val displayOrder = remember(order, currentStatus) {
-        order.copy(status = currentStatus)
+    var currentStatus by remember { mutableStateOf(resolvedOrder.status) }
+    val displayOrder = remember(resolvedOrder, currentStatus) {
+        resolvedOrder.copy(status = currentStatus)
     }
 
     var showReviewSheet by remember { mutableStateOf(false) }
     var reviewingItem by remember { mutableStateOf<OrderItem?>(null) }
     var selectedRating by remember { mutableStateOf(0) }
     var reviewText by remember { mutableStateOf("") }
-    var isSubmittingReview by remember { mutableStateOf(false) }
 
-    val itemReviews = remember { mutableStateMapOf<String, Review>() }
+    val itemReviews by viewModel.itemReviews.collectAsState()
+    val isSubmittingReview by viewModel.isSubmittingReview.collectAsState()
 
     Scaffold(
         topBar = {
@@ -229,7 +233,7 @@ fun OrderDetailsScreen(
                     Button(
                         onClick = {
                             currentStatus = "delivered"
-                            onConfirmDelivery(order.id)
+                            onConfirmDelivery(resolvedOrder.id)
                         },
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Success),
@@ -541,22 +545,17 @@ fun OrderDetailsScreen(
                 Button(
                     onClick = {
                         if (selectedRating > 0 && reviewText.isNotBlank() && reviewingItem != null) {
-                            isSubmittingReview = true
                             val user = SessionManager.currentUser
                             val userName = user?.let { "${it.firstName} ${it.lastName}" } ?: "Guest User"
                             val userId = user?.id ?: "guest"
 
-                            val newReview = Review(
-                                id = "r-${System.currentTimeMillis()}",
-                                userId = userId,
-                                userName = userName,
-                                rating = selectedRating.toFloat(),
+                            viewModel.submitReview(
+                                productId = reviewingItem!!.productId,
+                                rating = selectedRating,
                                 comment = reviewText.trim(),
-                                date = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
+                                userId = userId,
+                                userName = userName
                             )
-                            itemReviews[reviewingItem!!.productId] = newReview
-
-                            isSubmittingReview = false
                             showReviewSheet = false
                             reviewingItem = null
                             selectedRating = 0
@@ -611,7 +610,7 @@ fun OrderDetailItemCard(
                         .background(CreamBg, RoundedCornerShape(8.dp)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(item.categoryEmoji(), fontSize = 20.sp)
+                    Text(MockData.categoryEmoji(item.category), fontSize = 20.sp)
                 }
                 Spacer(modifier = Modifier.width(10.dp))
                 Column(modifier = Modifier.weight(1f)) {
@@ -681,16 +680,5 @@ fun InfoRow(label: String, value: String) {
     Row(modifier = Modifier.fillMaxWidth()) {
         Text("$label: ", fontSize = 13.sp, color = TextSecondary)
         Text(value, fontSize = 13.sp, fontWeight = FontWeight.Medium, color = TextPrimary)
-    }
-}
-
-private fun OrderItem.categoryEmoji(): String {
-    return when (category.lowercase()) {
-        "roses" -> "\uD83C\uDF39"
-        "bouquets" -> "\uD83D\uDC90"
-        "arrangements" -> "\uD83C\uDF3A"
-        "gifts" -> "\uD83C\uDF81"
-        "plants" -> "\uD83E\uDEB4"
-        else -> "\uD83C\uDF38"
     }
 }

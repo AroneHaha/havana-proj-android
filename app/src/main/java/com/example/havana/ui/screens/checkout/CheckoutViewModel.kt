@@ -3,9 +3,9 @@ package com.example.havana.ui.screens.checkout
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.havana.data.cart.CartManager
 import com.example.havana.data.model.*
 import com.example.havana.data.remote.ApiClient
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -72,7 +72,7 @@ class CheckoutViewModel(application: Application) : AndroidViewModel(application
                 _checkoutState.value = CheckoutState.Success(response)
                 CartManager.clearCart()
             } catch (_: Exception) {
-                Thread.sleep(1000)
+                delay(1000)
                 val mockOrderNumber = "HAV-${(1000..9999).random()}"
                 val mockOrderResponse = OrderResponse(id = fullOrder.id, orderNumber = mockOrderNumber, status = "confirmed", total = total, createdAt = "2026-05-23")
                 _lastPlacedOrder.value = fullOrder.copy(orderNumber = mockOrderNumber, createdAt = mockOrderResponse.createdAt)

@@ -3,6 +3,7 @@ package com.example.havana.ui.screens.home
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.havana.data.mock.MockData
 import com.example.havana.data.model.Category
 import com.example.havana.data.model.CategoryState
 import com.example.havana.data.model.Product
@@ -45,7 +46,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 val categories = productApi.getCategories()
                 _categoryState.value = CategoryState.Success(listOf(Category("all", "All", "\uD83C\uDF38")) + categories)
             } catch (_: Exception) {
-                _categoryState.value = CategoryState.Success(getMockCategories())
+                _categoryState.value = CategoryState.Success(MockData.categories)
             }
         }
     }
@@ -58,7 +59,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 allProducts = products
                 _productState.value = ProductListState.Success(products)
             } catch (_: Exception) {
-                allProducts = getMockProducts()
+                allProducts = MockData.products
                 _productState.value = ProductListState.Success(allProducts)
             }
         }
@@ -97,33 +98,5 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
     fun getTopSellingProducts(): List<Product> {
         return allProducts.filter { it.isTopSelling }
-    }
-
-    private fun getMockCategories(): List<Category> {
-        return listOf(
-            Category("all", "All", "\uD83C\uDF38"),
-            Category("bouquets", "Bouquets", "\uD83D\uDC90"),
-            Category("roses", "Roses", "\uD83C\uDF39"),
-            Category("arrangements", "Arrangements", "\uD83C\uDF3A"),
-            Category("gifts", "Gifts", "\uD83C\uDF81"),
-            Category("plants", "Plants", "\uD83E\uDEB4"),
-        )
-    }
-
-    private fun getMockProducts(): List<Product> {
-        return listOf(
-            Product("1", "Royal Red Roses", "A stunning bouquet of 12 premium red roses wrapped in luxury paper", 27.500, null, "Roses", 4.8f, 124, true, true),
-            Product("2", "Sunset Bouquet", "Warm-toned arrangement with sunflowers, roses, and carnations", 20.000, null, "Bouquets", 4.6f, 89, true, false),
-            Product("3", "Pink Blush Arrangement", "Elegant pink lilies and roses in a glass vase", 23.000, null, "Arrangements", 4.7f, 67, false, true),
-            Product("4", "Lavender Dreams", "Relaxing lavender and purple flower collection", 17.000, null, "Bouquets", 4.5f, 45, false, false),
-            Product("5", "Golden Gift Box", "Premium flower box with chocolates and a greeting card", 37.000, null, "Gifts", 4.9f, 156, true, true),
-            Product("6", "White Elegance", "Pure white lilies and orchids for special occasions", 29.000, null, "Arrangements", 4.8f, 98, true, true),
-            Product("7", "Tropical Paradise", "Bold tropical flowers with birds of paradise", 34.000, null, "Arrangements", 4.4f, 34, false, false),
-            Product("8", "Mini Rose Plant", "Beautiful mini rose plant in a ceramic pot", 14.000, null, "Plants", 4.6f, 78, false, true),
-            Product("9", "Peony Premium Box", "Luxury box of fresh seasonal peonies", 42.000, null, "Bouquets", 4.9f, 201, true, true),
-            Product("10", "Succulent Garden", "Assorted succulents in a decorative tray", 12.000, null, "Plants", 4.3f, 56, false, false),
-            Product("11", "Romance Bundle", "Red roses + teddy bear + balloon set", 30.000, null, "Gifts", 4.7f, 143, true, true),
-            Product("12", "Daisy Delight", "Cheerful daisy bunch wrapped in kraft paper", 10.000, null, "Bouquets", 4.2f, 29, false, false),
-        )
     }
 }

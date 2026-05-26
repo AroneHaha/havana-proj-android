@@ -77,19 +77,14 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    private fun tryMockSignup(
+    private suspend fun tryMockSignup(
         name: String,
         email: String,
         password: String,
         confirmPassword: String,
         phone: String
     ) {
-        Thread.sleep(800)
-
-        if (email.lowercase() != "user@gmail.com") {
-            _signupState.value = AuthState.Error("Registration failed. Please use user@gmail.com to test.")
-            return
-        }
+        kotlinx.coroutines.delay(800)
 
         val nameParts = name.trim().split(" ", limit = 2)
         val mockUser = HavanaUser(

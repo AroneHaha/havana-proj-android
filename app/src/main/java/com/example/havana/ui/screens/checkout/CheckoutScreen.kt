@@ -19,7 +19,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.havana.data.cart.CartManager
 import com.example.havana.data.model.CartItem
 import com.example.havana.data.model.CheckoutState
 import com.example.havana.data.model.DeliveryAddress
