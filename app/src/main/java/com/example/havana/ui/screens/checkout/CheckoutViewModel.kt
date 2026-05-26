@@ -3,7 +3,6 @@ package com.example.havana.ui.screens.checkout
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.havana.data.cart.CartManager
 import com.example.havana.data.model.*
 import com.example.havana.data.remote.ApiClient
 import kotlinx.coroutines.delay

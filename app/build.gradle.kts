@@ -79,4 +79,10 @@ dependencies {
 
     // Maps (OpenStreetMap - same as Leaflet)
     implementation("org.osmdroid:osmdroid-android:6.1.18")
+
+    // Gson (explicit — CartManager / SessionManager serialization)
+    implementation("com.google.code.gson:gson:2.11.0")
+
+    // Coroutines (explicit — StateFlow, collect, update used across app)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
 }

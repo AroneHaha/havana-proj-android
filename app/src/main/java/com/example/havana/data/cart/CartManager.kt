@@ -9,6 +9,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
+/**
+ * Singleton that manages the shopping cart state.
+ * Persists cart items to SharedPreferences so they survive process death.
+ */
 object CartManager {
 
     private const val PREFS_NAME = "havana_cart"
@@ -22,6 +26,7 @@ object CartManager {
 
     fun initialize(context: Context) {
         prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        // Restore cart from SharedPreferences
         val json = prefs?.getString(KEY_CART_ITEMS, null)
         if (json != null) {
             try {
@@ -37,22 +42,35 @@ object CartManager {
         _cartItems.update { current ->
             val existing = current.find { it.productId == item.productId }
             if (existing != null) {
-                current.map { if (it.productId == item.productId) it.copy(quantity = it.quantity + item.quantity) else it }
-            } else { current + item }
+                current.map {
+                    if (it.productId == item.productId) it.copy(quantity = it.quantity + item.quantity)
+                    else it
+                }
+            } else {
+                current + item
+            }
         }
         persist()
     }
 
     fun updateQuantity(productId: String, quantity: Int) {
         _cartItems.update { current ->
-            if (quantity <= 0) current.filter { it.productId != productId }
-            else current.map { if (it.productId == productId) it.copy(quantity = quantity) else it }
+            if (quantity <= 0) {
+                current.filter { it.productId != productId }
+            } else {
+                current.map {
+                    if (it.productId == productId) it.copy(quantity = quantity)
+                    else it
+                }
+            }
         }
         persist()
     }
 
     fun removeFromCart(productId: String) {
-        _cartItems.update { current -> current.filter { it.productId != productId } }
+        _cartItems.update { current ->
+            current.filter { it.productId != productId }
+        }
         persist()
     }
 
