@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <style name="Theme.Havana" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- DayNight-aware theme so that XML resources (values-night/) auto-switch.
+         Uses the AndroidX AppCompat DayNight parent which is provided by
+         the appcompat dependency already in build.gradle.kts. -->
+    <style name="Theme.Havana" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/maroon</item>
+        <item name="colorSecondary">@color/gold</item>
+        <item name="android:statusBarColor">@color/cream_bg</item>
+        <item name="android:navigationBarColor">@color/surface_light</item>
+        <item name="android:windowBackground">@color/cream_bg</item>
+    </style>
 </resources>

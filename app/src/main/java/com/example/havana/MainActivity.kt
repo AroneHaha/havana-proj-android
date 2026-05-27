@@ -20,6 +20,7 @@ import com.example.havana.ui.screens.orders.OrdersScreen
 import com.example.havana.ui.screens.productdetails.ProductDetailsScreen
 import com.example.havana.ui.screens.profile.ProfileScreen
 import com.example.havana.ui.theme.HavanaTheme
+import com.example.havana.ui.theme.ThemeManager
 import com.example.havana.data.session.SessionManager
 
 import com.example.havana.ui.screens.signup.SignupScreen
@@ -27,10 +28,13 @@ import com.example.havana.ui.screens.signup.SignupScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        // ── Anti-flicker: apply saved theme BEFORE super.onCreate ──
         SessionManager.initialize(applicationContext)
         CartManager.initialize(applicationContext)
+        ThemeManager.applySavedTheme()
+
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContent { HavanaTheme { HavanaApp() } }
     }
 }

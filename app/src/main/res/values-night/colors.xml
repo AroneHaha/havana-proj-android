@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark mode XML colors for splash screen / pre-Compose theming -->
+    <color name="havana_background">#FF0B0B0B</color>
+    <color name="havana_surface">#FF1A1A1A</color>
+    <color name="havana_primary">#FFC9A227</color>
+    <color name="havana_on_primary">#FF000000</color>
+    <color name="havana_status_bar">#FF0B0B0B</color>
+</resources>

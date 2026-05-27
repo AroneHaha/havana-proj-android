@@ -44,6 +44,10 @@ fun CheckoutScreen(
     val checkoutState by viewModel.checkoutState.collectAsState()
     val deliveryAddress by viewModel.deliveryAddress.collectAsState()
 
+    val isDark = ThemeManager.isDarkMode
+    val colorScheme = MaterialTheme.colorScheme
+    val cardColor = if (isDark) CardDark else CardLight
+
     LaunchedEffect(savedAddress) {
         if (savedAddress != null) {
             viewModel.setDeliveryAddress(savedAddress)
@@ -82,22 +86,22 @@ fun CheckoutScreen(
                         "Checkout",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextPrimary
+                        color = colorScheme.onBackground
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Maroon)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = colorScheme.primary)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = CreamBg)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background)
             )
         },
         bottomBar = {
             if (cartItems.isNotEmpty()) {
                 Surface(
                     shadowElevation = 16.dp,
-                    color = Color.White
+                    color = cardColor
                 ) {
                     Column(
                         modifier = Modifier
@@ -108,8 +112,8 @@ fun CheckoutScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text("Total", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
-                            Text("KD ${String.format("%.3f", total)}", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Maroon)
+                            Text("Total", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
+                            Text("KD ${String.format("%.3f", total)}", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
                         }
                         Spacer(modifier = Modifier.height(10.dp))
                         Button(
@@ -128,23 +132,23 @@ fun CheckoutScreen(
                                 viewModel.placeOrder(customerName, phone, notes)
                             },
                             shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Maroon),
+                            colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(50.dp),
                             enabled = checkoutState !is CheckoutState.Loading
                         ) {
                             if (checkoutState is CheckoutState.Loading) {
-                                CircularProgressIndicator(color = Color.White, modifier = Modifier.size(22.dp), strokeWidth = 2.5.dp)
+                                CircularProgressIndicator(color = colorScheme.onPrimary, modifier = Modifier.size(22.dp), strokeWidth = 2.5.dp)
                             } else {
-                                Text("Place Order  \u2022  Cash on Delivery", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                                Text("Place Order  \u2022  Cash on Delivery", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onPrimary)
                             }
                         }
                     }
                 }
             }
         },
-        containerColor = CreamBg
+        containerColor = colorScheme.background
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -157,7 +161,7 @@ fun CheckoutScreen(
                 item {
                     Card(
                         shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEBEE))
+                        colors = CardDefaults.cardColors(containerColor = if (isDark) BannerErrorBgDark else BannerErrorBgLight)
                     ) {
                         Row(
                             modifier = Modifier
@@ -165,11 +169,11 @@ fun CheckoutScreen(
                                 .padding(14.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(Icons.Default.Warning, contentDescription = null, tint = Color(0xFFD32F2F), modifier = Modifier.size(20.dp))
+                            Icon(Icons.Default.Warning, contentDescription = null, tint = if (isDark) BannerErrorFgDark else BannerErrorFgLight, modifier = Modifier.size(20.dp))
                             Spacer(modifier = Modifier.width(10.dp))
                             Text(
                                 (checkoutState as CheckoutState.Error).message,
-                                color = Color(0xFFD32F2F),
+                                color = if (isDark) BannerErrorFgDark else BannerErrorFgLight,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Medium
                             )
@@ -179,7 +183,7 @@ fun CheckoutScreen(
             }
 
             item {
-                Text("Order Summary", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                Text("Order Summary", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
             }
 
             items(cartItems) { item ->
@@ -189,39 +193,39 @@ fun CheckoutScreen(
             item {
                 Card(
                     shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    colors = CardDefaults.cardColors(containerColor = cardColor),
                     elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
                 ) {
                     Column(modifier = Modifier.padding(14.dp)) {
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Subtotal", fontSize = 13.sp, color = TextSecondary)
-                            Text("KD ${String.format("%.3f", subtotal)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = TextPrimary)
+                            Text("Subtotal", fontSize = 13.sp, color = colorScheme.onSurfaceVariant)
+                            Text("KD ${String.format("%.3f", subtotal)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground)
                         }
                         Spacer(modifier = Modifier.height(4.dp))
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Delivery Fee", fontSize = 13.sp, color = TextSecondary)
-                            Text("KD ${String.format("%.3f", deliveryFee)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = TextPrimary)
+                            Text("Delivery Fee", fontSize = 13.sp, color = colorScheme.onSurfaceVariant)
+                            Text("KD ${String.format("%.3f", deliveryFee)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground)
                         }
                         Spacer(modifier = Modifier.height(8.dp))
-                        HorizontalDivider(color = Color(0xFFE5E5E5))
+                        HorizontalDivider(color = colorScheme.outline)
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Total", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
-                            Text("KD ${String.format("%.3f", total)}", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Maroon)
+                            Text("Total", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
+                            Text("KD ${String.format("%.3f", total)}", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
                         }
                     }
                 }
             }
 
             item {
-                Text("Delivery Address", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                Text("Delivery Address", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
             }
 
             item {
                 if (deliveryAddress != null) {
                     Card(
                         shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(containerColor = Maroon.copy(alpha = 0.05f)),
+                        colors = CardDefaults.cardColors(containerColor = colorScheme.primary.copy(alpha = 0.05f)),
                         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
                     ) {
                         Row(
@@ -230,19 +234,19 @@ fun CheckoutScreen(
                                 .padding(14.dp),
                             verticalAlignment = Alignment.Top
                         ) {
-                            Icon(Icons.Default.LocationOn, contentDescription = null, tint = Maroon, modifier = Modifier.size(20.dp))
+                            Icon(Icons.Default.LocationOn, contentDescription = null, tint = colorScheme.primary, modifier = Modifier.size(20.dp))
                             Spacer(modifier = Modifier.width(10.dp))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     deliveryAddress!!.fullAddress,
                                     fontSize = 13.sp,
-                                    color = TextPrimary,
+                                    color = colorScheme.onBackground,
                                     lineHeight = 19.sp
                                 )
                                 Text(
                                     "Lat: ${String.format("%.4f", deliveryAddress!!.latitude)}, Lon: ${String.format("%.4f", deliveryAddress!!.longitude)}",
                                     fontSize = 10.sp,
-                                    color = TextSecondary
+                                    color = colorScheme.onSurfaceVariant
                                 )
                             }
                         }
@@ -250,7 +254,7 @@ fun CheckoutScreen(
                 } else {
                     Card(
                         shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF8E1)),
+                        colors = CardDefaults.cardColors(containerColor = if (isDark) Color(0xFF3A2F1A) else Color(0xFFFFF8E1)),
                         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
                     ) {
                         Row(
@@ -259,12 +263,12 @@ fun CheckoutScreen(
                                 .padding(14.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(Icons.Default.Warning, contentDescription = null, tint = Color(0xFFF59E0B), modifier = Modifier.size(20.dp))
+                            Icon(Icons.Default.Warning, contentDescription = null, tint = Warning, modifier = Modifier.size(20.dp))
                             Spacer(modifier = Modifier.width(10.dp))
                             Text(
                                 "Please pick your delivery location on the map below, then fill in your address details",
                                 fontSize = 12.sp,
-                                color = Color(0xFF92400E)
+                                color = if (isDark) GoldLight else Color(0xFF92400E)
                             )
                         }
                     }
@@ -275,8 +279,8 @@ fun CheckoutScreen(
                 OutlinedButton(
                     onClick = onPickOnMap,
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Maroon),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Maroon),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = colorScheme.primary),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, colorScheme.primary),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Icon(Icons.Default.LocationOn, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -289,131 +293,22 @@ fun CheckoutScreen(
             }
 
             item {
-                Text("Address Details", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                Text("Address Details", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
             }
 
-            item {
-                OutlinedTextField(
-                    value = block,
-                    onValueChange = { block = it },
-                    label = { Text("Block") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Maroon,
-                        focusedLabelColor = Maroon,
-                        cursorColor = Maroon
-                    ),
-                    enabled = checkoutState !is CheckoutState.Loading
-                )
-            }
+            // Address fields
+            item { CheckoutField("Block", block, { block = it }, checkoutState, colorScheme) }
+            item { CheckoutField("Street", street, { street = it }, checkoutState, colorScheme) }
+            item { CheckoutField("Building / House", building, { building = it }, checkoutState, colorScheme) }
+            item { CheckoutField("Floor", floor, { floor = it }, checkoutState, colorScheme) }
+            item { CheckoutField("Apartment / Office", apartment, { apartment = it }, checkoutState, colorScheme) }
 
             item {
-                OutlinedTextField(
-                    value = street,
-                    onValueChange = { street = it },
-                    label = { Text("Street") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Maroon,
-                        focusedLabelColor = Maroon,
-                        cursorColor = Maroon
-                    ),
-                    enabled = checkoutState !is CheckoutState.Loading
-                )
+                Text("Contact Information", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
             }
 
-            item {
-                OutlinedTextField(
-                    value = building,
-                    onValueChange = { building = it },
-                    label = { Text("Building / House") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Maroon,
-                        focusedLabelColor = Maroon,
-                        cursorColor = Maroon
-                    ),
-                    enabled = checkoutState !is CheckoutState.Loading
-                )
-            }
-
-            item {
-                OutlinedTextField(
-                    value = floor,
-                    onValueChange = { floor = it },
-                    label = { Text("Floor") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Maroon,
-                        focusedLabelColor = Maroon,
-                        cursorColor = Maroon
-                    ),
-                    enabled = checkoutState !is CheckoutState.Loading
-                )
-            }
-
-            item {
-                OutlinedTextField(
-                    value = apartment,
-                    onValueChange = { apartment = it },
-                    label = { Text("Apartment / Office") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Maroon,
-                        focusedLabelColor = Maroon,
-                        cursorColor = Maroon
-                    ),
-                    enabled = checkoutState !is CheckoutState.Loading
-                )
-            }
-
-            item {
-                Text("Contact Information", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
-            }
-
-            item {
-                OutlinedTextField(
-                    value = customerName,
-                    onValueChange = { customerName = it },
-                    label = { Text("Full Name *") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Maroon,
-                        focusedLabelColor = Maroon,
-                        cursorColor = Maroon
-                    ),
-                    enabled = checkoutState !is CheckoutState.Loading
-                )
-            }
-
-            item {
-                OutlinedTextField(
-                    value = phone,
-                    onValueChange = { phone = it },
-                    label = { Text("Contact Number * (+965)") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Maroon,
-                        focusedLabelColor = Maroon,
-                        cursorColor = Maroon
-                    ),
-                    enabled = checkoutState !is CheckoutState.Loading
-                )
-            }
+            item { CheckoutField("Full Name *", customerName, { customerName = it }, checkoutState, colorScheme) }
+            item { CheckoutField("Contact Number * (+965)", phone, { phone = it }, checkoutState, colorScheme) }
 
             item {
                 OutlinedTextField(
@@ -426,22 +321,22 @@ fun CheckoutScreen(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Maroon,
-                        focusedLabelColor = Maroon,
-                        cursorColor = Maroon
+                        focusedBorderColor = colorScheme.primary,
+                        focusedLabelColor = colorScheme.primary,
+                        cursorColor = colorScheme.primary
                     ),
                     enabled = checkoutState !is CheckoutState.Loading
                 )
             }
 
             item {
-                Text("Payment Method", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                Text("Payment Method", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
             }
 
             item {
                 Card(
                     shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = Maroon.copy(alpha = 0.05f)),
+                    colors = CardDefaults.cardColors(containerColor = colorScheme.primary.copy(alpha = 0.05f)),
                     elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
                 ) {
                     Row(
@@ -453,8 +348,8 @@ fun CheckoutScreen(
                         Text("\uD83D\uDCB5", fontSize = 22.sp)
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
-                            Text("Cash on Delivery", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = TextPrimary)
-                            Text("Pay when your order arrives", fontSize = 12.sp, color = TextSecondary)
+                            Text("Cash on Delivery", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onBackground)
+                            Text("Pay when your order arrives", fontSize = 12.sp, color = colorScheme.onSurfaceVariant)
                         }
                     }
                 }
@@ -466,10 +361,37 @@ fun CheckoutScreen(
 }
 
 @Composable
+private fun CheckoutField(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    checkoutState: CheckoutState,
+    colorScheme: androidx.compose.material3.ColorScheme
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        singleLine = true,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = colorScheme.primary,
+            focusedLabelColor = colorScheme.primary,
+            cursorColor = colorScheme.primary
+        ),
+        enabled = checkoutState !is CheckoutState.Loading
+    )
+}
+
+@Composable
 fun CheckoutItemCard(item: CartItem) {
+    val colorScheme = MaterialTheme.colorScheme
+    val cardColor = if (ThemeManager.isDarkMode) CardDark else CardLight
+
     Card(
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = cardColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(
@@ -481,17 +403,17 @@ fun CheckoutItemCard(item: CartItem) {
             Box(
                 modifier = Modifier
                     .size(50.dp)
-                    .background(CreamBg, RoundedCornerShape(8.dp)),
+                    .background(colorScheme.surfaceVariant, RoundedCornerShape(8.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(MockData.categoryEmoji(item.category), fontSize = 20.sp)
             }
             Spacer(modifier = Modifier.width(10.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(item.name, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = TextPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text("Qty: ${item.quantity} x KD ${String.format("%.3f", item.price)}", fontSize = 12.sp, color = TextSecondary)
+                Text(item.name, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onBackground, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text("Qty: ${item.quantity} x KD ${String.format("%.3f", item.price)}", fontSize = 12.sp, color = colorScheme.onSurfaceVariant)
             }
-            Text("KD ${String.format("%.3f", item.price * item.quantity)}", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Maroon)
+            Text("KD ${String.format("%.3f", item.price * item.quantity)}", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
         }
     }
 }

@@ -1,7 +1,5 @@
 package com.example.havana.ui.screens.signup
 
-import androidx.compose.animation.Animatable
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,6 +11,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.outlined.DarkMode
+import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,21 +20,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.havana.data.model.AuthState
-import com.example.havana.ui.theme.Maroon
-import com.example.havana.ui.theme.Gold
-import com.example.havana.ui.theme.CreamBg
+import com.example.havana.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,7 +54,10 @@ fun SignupScreen(
     val passwordFocus = remember { FocusRequester() }
     val confirmPasswordFocus = remember { FocusRequester() }
 
-    // Handle success → show success briefly then redirect to login
+    val isDark = ThemeManager.isDarkMode
+    val colorScheme = MaterialTheme.colorScheme
+
+    // Handle success -> show success briefly then redirect to login
     LaunchedEffect(signupState) {
         if (signupState is AuthState.Success) {
             kotlinx.coroutines.delay(1500)
@@ -86,8 +84,22 @@ fun SignupScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(CreamBg)
+            .background(colorScheme.background)
     ) {
+        // ── Theme toggle button (top-end) ──
+        IconButton(
+            onClick = { ThemeManager.toggle() },
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(16.dp),
+        ) {
+            Icon(
+                imageVector = if (isDark) Icons.Outlined.LightMode else Icons.Outlined.DarkMode,
+                contentDescription = if (isDark) "Switch to light mode" else "Switch to dark mode",
+                tint = colorScheme.onBackground.copy(alpha = 0.6f),
+            )
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -101,13 +113,13 @@ fun SignupScreen(
                 text = "HAVANA",
                 fontSize = 36.sp,
                 fontWeight = FontWeight.Bold,
-                color = Maroon,
+                color = colorScheme.primary,
                 letterSpacing = 6.sp
             )
             Text(
                 text = "Luxury Flowers & Gifts",
                 fontSize = 13.sp,
-                color = Gold,
+                color = colorScheme.secondary,
                 letterSpacing = 3.sp,
                 fontWeight = FontWeight.Medium
             )
@@ -119,12 +131,12 @@ fun SignupScreen(
                 text = "Create Account",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = Maroon
+                color = colorScheme.primary
             )
             Text(
                 text = "Join us and start ordering beautiful flowers",
                 fontSize = 14.sp,
-                color = Color(0xFF8B7E74),
+                color = if (isDark) AuthSubtitleDark else AuthSubtitleLight,
                 modifier = Modifier.padding(top = 4.dp)
             )
 
@@ -136,7 +148,7 @@ fun SignupScreen(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFFE8F5E9)
+                        containerColor = if (isDark) BannerSuccessBgDark else BannerSuccessBgLight
                     )
                 ) {
                     Row(
@@ -146,15 +158,15 @@ fun SignupScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "✓",
-                            color = Color(0xFF2E7D32),
+                            text = "\u2713",
+                            color = if (isDark) BannerSuccessFgDark else BannerSuccessFgLight,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                         Text(
                             text = "Account created! Redirecting to login...",
-                            color = Color(0xFF2E7D32),
+                            color = if (isDark) BannerSuccessFgDark else BannerSuccessFgLight,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Medium
                         )
@@ -170,7 +182,7 @@ fun SignupScreen(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFFFFEBEE)
+                        containerColor = if (isDark) BannerErrorBgDark else BannerErrorBgLight
                     )
                 ) {
                     Row(
@@ -182,13 +194,13 @@ fun SignupScreen(
                         Icon(
                             Icons.Default.Warning,
                             contentDescription = "Error",
-                            tint = Color(0xFFD32F2F),
+                            tint = if (isDark) BannerErrorFgDark else BannerErrorFgLight,
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                         Text(
                             text = errorMessage,
-                            color = Color(0xFFD32F2F),
+                            color = if (isDark) BannerErrorFgDark else BannerErrorFgLight,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Medium
                         )
@@ -206,11 +218,11 @@ fun SignupScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Maroon,
-                    focusedLabelColor = Maroon,
-                    cursorColor = Maroon,
-                    unfocusedBorderColor = Color(0xFFD4C5B9),
-                    unfocusedLabelColor = Color(0xFF8B7E74)
+                    focusedBorderColor = colorScheme.primary,
+                    focusedLabelColor = colorScheme.primary,
+                    cursorColor = colorScheme.primary,
+                    unfocusedBorderColor = colorScheme.outlineVariant,
+                    unfocusedLabelColor = if (isDark) AuthSubtitleDark else AuthSubtitleLight
                 ),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Text
@@ -231,11 +243,11 @@ fun SignupScreen(
                     .focusRequester(emailFocus),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Maroon,
-                    focusedLabelColor = Maroon,
-                    cursorColor = Maroon,
-                    unfocusedBorderColor = Color(0xFFD4C5B9),
-                    unfocusedLabelColor = Color(0xFF8B7E74)
+                    focusedBorderColor = colorScheme.primary,
+                    focusedLabelColor = colorScheme.primary,
+                    cursorColor = colorScheme.primary,
+                    unfocusedBorderColor = colorScheme.outlineVariant,
+                    unfocusedLabelColor = if (isDark) AuthSubtitleDark else AuthSubtitleLight
                 ),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
@@ -257,11 +269,11 @@ fun SignupScreen(
                     .focusRequester(phoneFocus),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Maroon,
-                    focusedLabelColor = Maroon,
-                    cursorColor = Maroon,
-                    unfocusedBorderColor = Color(0xFFD4C5B9),
-                    unfocusedLabelColor = Color(0xFF8B7E74)
+                    focusedBorderColor = colorScheme.primary,
+                    focusedLabelColor = colorScheme.primary,
+                    cursorColor = colorScheme.primary,
+                    unfocusedBorderColor = colorScheme.outlineVariant,
+                    unfocusedLabelColor = if (isDark) AuthSubtitleDark else AuthSubtitleLight
                 ),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Phone,
@@ -283,11 +295,11 @@ fun SignupScreen(
                     .focusRequester(passwordFocus),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Maroon,
-                    focusedLabelColor = Maroon,
-                    cursorColor = Maroon,
-                    unfocusedBorderColor = Color(0xFFD4C5B9),
-                    unfocusedLabelColor = Color(0xFF8B7E74)
+                    focusedBorderColor = colorScheme.primary,
+                    focusedLabelColor = colorScheme.primary,
+                    cursorColor = colorScheme.primary,
+                    unfocusedBorderColor = colorScheme.outlineVariant,
+                    unfocusedLabelColor = if (isDark) AuthSubtitleDark else AuthSubtitleLight
                 ),
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
@@ -295,7 +307,7 @@ fun SignupScreen(
                         Icon(
                             imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                             contentDescription = if (passwordVisible) "Hide password" else "Show password",
-                            tint = Color(0xFF8B7E74)
+                            tint = if (isDark) AuthSubtitleDark else AuthSubtitleLight
                         )
                     }
                 },
@@ -319,11 +331,11 @@ fun SignupScreen(
                     .focusRequester(confirmPasswordFocus),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Maroon,
-                    focusedLabelColor = Maroon,
-                    cursorColor = Maroon,
-                    unfocusedBorderColor = Color(0xFFD4C5B9),
-                    unfocusedLabelColor = Color(0xFF8B7E74)
+                    focusedBorderColor = colorScheme.primary,
+                    focusedLabelColor = colorScheme.primary,
+                    cursorColor = colorScheme.primary,
+                    unfocusedBorderColor = colorScheme.outlineVariant,
+                    unfocusedLabelColor = if (isDark) AuthSubtitleDark else AuthSubtitleLight
                 ),
                 visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
@@ -331,7 +343,7 @@ fun SignupScreen(
                         Icon(
                             imageVector = if (confirmPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                             contentDescription = if (confirmPasswordVisible) "Hide password" else "Show password",
-                            tint = Color(0xFF8B7E74)
+                            tint = if (isDark) AuthSubtitleDark else AuthSubtitleLight
                         )
                     }
                 },
@@ -354,15 +366,15 @@ fun SignupScreen(
                     .height(52.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Maroon,
-                    disabledContainerColor = Maroon.copy(alpha = 0.5f)
+                    containerColor = colorScheme.primary,
+                    disabledContainerColor = colorScheme.primary.copy(alpha = 0.5f)
                 ),
                 enabled = !isLoading
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(22.dp),
-                        color = Color.White,
+                        color = colorScheme.onPrimary,
                         strokeWidth = 2.5.dp
                     )
                 } else {
@@ -370,7 +382,7 @@ fun SignupScreen(
                         text = "Create Account",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = Color.White
+                        color = colorScheme.onPrimary
                     )
                 }
             }
@@ -387,12 +399,12 @@ fun SignupScreen(
             ) {
                 Text(
                     text = "Already have an account? ",
-                    color = Color(0xFF8B7E74),
+                    color = if (isDark) AuthSubtitleDark else AuthSubtitleLight,
                     fontSize = 14.sp
                 )
                 Text(
                     text = "Sign In",
-                    color = Maroon,
+                    color = colorScheme.primary,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
                     textDecoration = TextDecoration.Underline

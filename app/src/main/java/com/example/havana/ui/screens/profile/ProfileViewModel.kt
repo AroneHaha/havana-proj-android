@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.havana.data.model.*
 import com.example.havana.data.session.SessionManager
+import com.example.havana.ui.theme.ThemeManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,7 +25,7 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
     private val _editingField = MutableStateFlow<EditableField?>(null)
     val editingField: StateFlow<EditableField?> = _editingField.asStateFlow()
 
-    private val _isDarkMode = MutableStateFlow(SessionManager.isDarkMode)
+    private val _isDarkMode = MutableStateFlow(ThemeManager.isDarkMode)
     val isDarkMode: StateFlow<Boolean> = _isDarkMode.asStateFlow()
 
     private val _isArabic = MutableStateFlow(SessionManager.isArabic)
@@ -110,10 +111,10 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         _editState.value = EditProfileState.Idle
     }
 
+    /** Toggle dark mode via the centralized [ThemeManager]. */
     fun toggleDarkMode(enabled: Boolean) {
         _isDarkMode.value = enabled
-        SessionManager.setDarkMode(enabled)
-// TODO: Trigger theme change via HavanaTheme(darkTheme = enabled)
+        ThemeManager.setDarkMode(enabled)
     }
 
     fun toggleArabic(enabled: Boolean) {

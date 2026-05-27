@@ -51,6 +51,13 @@ fun HomeScreen(
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
+    val isDark = ThemeManager.isDarkMode
+    val colorScheme = MaterialTheme.colorScheme
+    val cardColor = if (isDark) CardDark else CardLight
+    val navBarColor = if (isDark) NavBarDark else NavBarLight
+    val dividerColor = if (isDark) DividerDark else DividerLight
+    val switchUncheckedTrack = if (isDark) SwitchUncheckedTrackDark else SwitchUncheckedTrackLight
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -60,13 +67,13 @@ fun HomeScreen(
                             "HAVANA",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Maroon,
+                            color = colorScheme.primary,
                             letterSpacing = 3.sp
                         )
                         Text(
                             "Luxury Flowers & Gifts",
                             fontSize = 10.sp,
-                            color = Gold,
+                            color = colorScheme.secondary,
                             letterSpacing = 2.sp,
                             fontWeight = FontWeight.Medium
                         )
@@ -77,18 +84,18 @@ fun HomeScreen(
                         Icon(
                             Icons.Filled.ShoppingCart,
                             contentDescription = "Cart",
-                            tint = Maroon
+                            tint = colorScheme.primary
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = CreamBg
+                    containerColor = colorScheme.background
                 )
             )
         },
         bottomBar = {
             NavigationBar(
-                containerColor = Color.White,
+                containerColor = navBarColor,
                 tonalElevation = 8.dp
             ) {
                 NavigationBarItem(
@@ -100,9 +107,9 @@ fun HomeScreen(
                     icon = { Icon(Icons.Outlined.Home, contentDescription = "Home") },
                     label = { Text("Home", fontSize = 11.sp) },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Maroon,
-                        selectedTextColor = Maroon,
-                        indicatorColor = Maroon.copy(alpha = 0.1f)
+                        selectedIconColor = colorScheme.primary,
+                        selectedTextColor = colorScheme.primary,
+                        indicatorColor = colorScheme.primary.copy(alpha = 0.1f)
                     )
                 )
                 NavigationBarItem(
@@ -111,8 +118,8 @@ fun HomeScreen(
                     icon = { Icon(Icons.Outlined.ShoppingCart, contentDescription = "Cart") },
                     label = { Text("Cart", fontSize = 11.sp) },
                     colors = NavigationBarItemDefaults.colors(
-                        unselectedIconColor = TextSecondary,
-                        unselectedTextColor = TextSecondary
+                        unselectedIconColor = colorScheme.onSurfaceVariant,
+                        unselectedTextColor = colorScheme.onSurfaceVariant
                     )
                 )
                 NavigationBarItem(
@@ -121,8 +128,8 @@ fun HomeScreen(
                     icon = { Icon(Icons.Outlined.ReceiptLong, contentDescription = "Orders") },
                     label = { Text("Orders", fontSize = 11.sp) },
                     colors = NavigationBarItemDefaults.colors(
-                        unselectedIconColor = TextSecondary,
-                        unselectedTextColor = TextSecondary
+                        unselectedIconColor = colorScheme.onSurfaceVariant,
+                        unselectedTextColor = colorScheme.onSurfaceVariant
                     )
                 )
                 NavigationBarItem(
@@ -131,13 +138,13 @@ fun HomeScreen(
                     icon = { Icon(Icons.Outlined.Person, contentDescription = "Profile") },
                     label = { Text("Profile", fontSize = 11.sp) },
                     colors = NavigationBarItemDefaults.colors(
-                        unselectedIconColor = TextSecondary,
-                        unselectedTextColor = TextSecondary
+                        unselectedIconColor = colorScheme.onSurfaceVariant,
+                        unselectedTextColor = colorScheme.onSurfaceVariant
                     )
                 )
             }
         },
-        containerColor = CreamBg
+        containerColor = colorScheme.background
     ) { paddingValues ->
         LazyColumn(
             state = listState,
@@ -152,7 +159,7 @@ fun HomeScreen(
                     onValueChange = { searchInput = it; viewModel.updateSearchQuery(it) },
                     placeholder = { Text("Search flowers, gifts...") },
                     leadingIcon = {
-                        Icon(Icons.Default.Search, contentDescription = null, tint = TextSecondary)
+                        Icon(Icons.Default.Search, contentDescription = null, tint = colorScheme.onSurfaceVariant)
                     },
                     singleLine = true,
                     shape = RoundedCornerShape(24.dp),
@@ -160,11 +167,11 @@ fun HomeScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Maroon,
-                        unfocusedBorderColor = Color(0xFFE5E5E5),
-                        cursorColor = Maroon,
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White
+                        focusedBorderColor = colorScheme.primary,
+                        unfocusedBorderColor = colorScheme.outline,
+                        cursorColor = colorScheme.primary,
+                        focusedContainerColor = cardColor,
+                        unfocusedContainerColor = cardColor
                     )
                 )
             }
@@ -188,14 +195,14 @@ fun HomeScreen(
                             label = { Text("${category.emoji} ${category.name}", fontSize = 13.sp) },
                             shape = RoundedCornerShape(20.dp),
                             colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = Maroon,
-                                selectedLabelColor = Color.White,
-                                containerColor = Color.White,
-                                labelColor = TextSecondary
+                                selectedContainerColor = colorScheme.primary,
+                                selectedLabelColor = colorScheme.onPrimary,
+                                containerColor = cardColor,
+                                labelColor = colorScheme.onSurfaceVariant
                             ),
                             border = FilterChipDefaults.filterChipBorder(
-                                borderColor = Color(0xFFE5E5E5),
-                                selectedBorderColor = Maroon,
+                                borderColor = colorScheme.outline,
+                                selectedBorderColor = colorScheme.primary,
                                 enabled = true,
                                 selected = isSelected
                             )
@@ -210,7 +217,7 @@ fun HomeScreen(
                     "Shop by Occasion",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextPrimary,
+                    color = colorScheme.onBackground,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                 )
             }
@@ -236,7 +243,7 @@ fun HomeScreen(
                         "Featured",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextPrimary,
+                        color = colorScheme.onBackground,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                     )
                 }
@@ -263,7 +270,7 @@ fun HomeScreen(
                         "Top Selling",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextPrimary,
+                        color = colorScheme.onBackground,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                     )
                 }
@@ -293,7 +300,7 @@ fun HomeScreen(
                     sectionTitle,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextPrimary,
+                    color = colorScheme.onBackground,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                 )
             }
@@ -307,7 +314,7 @@ fun HomeScreen(
                                 .padding(vertical = 60.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            CircularProgressIndicator(color = Maroon)
+                            CircularProgressIndicator(color = colorScheme.primary)
                         }
                     }
                 }
@@ -323,7 +330,7 @@ fun HomeScreen(
                             ) {
                                 Text(
                                     "No products found",
-                                    color = TextSecondary,
+                                    color = colorScheme.onSurfaceVariant,
                                     fontSize = 14.sp
                                 )
                             }
@@ -369,7 +376,7 @@ fun HomeScreen(
                                 OutlinedButton(
                                     onClick = { viewModel.loadProducts() },
                                     shape = RoundedCornerShape(12.dp),
-                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Maroon)
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = colorScheme.primary)
                                 ) {
                                     Text("Retry")
                                 }
@@ -390,20 +397,24 @@ fun FeaturedProductCard(
     product: Product,
     onClick: () -> Unit
 ) {
+    val isDark = ThemeManager.isDarkMode
+    val colorScheme = MaterialTheme.colorScheme
+    val cardColor = if (isDark) CardDark else CardLight
+
     Card(
         modifier = Modifier
             .width(200.dp)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = cardColor)
     ) {
         Column {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(140.dp)
-                    .background(Maroon.copy(alpha = 0.08f)),
+                    .background(colorScheme.primary.copy(alpha = 0.08f)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(product.categoryEmoji(), fontSize = 40.sp)
@@ -412,13 +423,13 @@ fun FeaturedProductCard(
                         .align(Alignment.TopStart)
                         .padding(8.dp),
                     shape = RoundedCornerShape(8.dp),
-                    color = Gold
+                    color = colorScheme.secondary
                 ) {
                     Text(
                         "Featured",
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White,
+                        color = colorScheme.onSecondary,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                     )
                 }
@@ -429,7 +440,7 @@ fun FeaturedProductCard(
                     product.name,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = TextPrimary,
+                    color = colorScheme.onBackground,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -438,15 +449,15 @@ fun FeaturedProductCard(
                     "KD ${String.format("%.3f", product.price)}",
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Maroon
+                    color = colorScheme.primary
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("\u2605", fontSize = 12.sp, color = Gold)
+                    Text("\u2605", fontSize = 12.sp, color = colorScheme.secondary)
                     Text(
                         " ${product.rating} (${product.reviewCount})",
                         fontSize = 11.sp,
-                        color = TextSecondary
+                        color = colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -459,20 +470,24 @@ fun TopSellingCard(
     product: Product,
     onClick: () -> Unit
 ) {
+    val isDark = ThemeManager.isDarkMode
+    val colorScheme = MaterialTheme.colorScheme
+    val cardColor = if (isDark) CardDark else CardLight
+
     Card(
         modifier = Modifier
             .width(150.dp)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(14.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = cardColor)
     ) {
         Column {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(110.dp)
-                    .background(Gold.copy(alpha = 0.08f)),
+                    .background(colorScheme.secondary.copy(alpha = 0.08f)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(product.categoryEmoji(), fontSize = 32.sp)
@@ -481,13 +496,13 @@ fun TopSellingCard(
                         .align(Alignment.TopStart)
                         .padding(6.dp),
                     shape = RoundedCornerShape(6.dp),
-                    color = Maroon
+                    color = colorScheme.primary
                 ) {
                     Text(
                         "Top",
                         fontSize = 9.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White,
+                        color = colorScheme.onPrimary,
                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                     )
                 }
@@ -498,7 +513,7 @@ fun TopSellingCard(
                     product.name,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = TextPrimary,
+                    color = colorScheme.onBackground,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -506,7 +521,7 @@ fun TopSellingCard(
                     "KD ${String.format("%.3f", product.price)}",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Maroon
+                    color = colorScheme.primary
                 )
             }
         }
@@ -518,20 +533,24 @@ fun ProductCard(
     product: Product,
     onClick: () -> Unit
 ) {
+    val isDark = ThemeManager.isDarkMode
+    val colorScheme = MaterialTheme.colorScheme
+    val cardColor = if (isDark) CardDark else CardLight
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(14.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = cardColor)
     ) {
         Column {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(130.dp)
-                    .background(CreamBg),
+                    .background(colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
                 Text(product.categoryEmoji(), fontSize = 36.sp)
@@ -542,7 +561,7 @@ fun ProductCard(
                     product.name,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = TextPrimary,
+                    color = colorScheme.onBackground,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     minLines = 2
@@ -557,14 +576,14 @@ fun ProductCard(
                         "KD ${String.format("%.3f", product.price)}",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Maroon
+                        color = colorScheme.primary
                     )
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("\u2605", fontSize = 10.sp, color = Gold)
+                        Text("\u2605", fontSize = 10.sp, color = colorScheme.secondary)
                         Text(
                             " ${product.rating}",
                             fontSize = 10.sp,
-                            color = TextSecondary
+                            color = colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -610,11 +629,15 @@ fun OccasionCard(
     occasion: OccasionItem,
     onClick: () -> Unit
 ) {
+    val isDark = ThemeManager.isDarkMode
+    val colorScheme = MaterialTheme.colorScheme
+    val cardColor = if (isDark) CardDark else CardLight
+
     Card(
         onClick = onClick,
         shape = RoundedCornerShape(14.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = cardColor)
     ) {
         Column(
             modifier = Modifier
@@ -631,7 +654,7 @@ fun OccasionCard(
                 occasion.label,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Medium,
-                color = TextPrimary,
+                color = colorScheme.onBackground,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )

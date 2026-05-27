@@ -15,6 +15,8 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.outlined.DarkMode
+import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,7 +33,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.havana.data.model.AuthState
 import com.example.havana.ui.theme.*
 import androidx.compose.ui.text.style.TextDecoration
-import com.example.havana.ui.theme.Maroon
+import com.example.havana.ui.theme.ThemeManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,6 +47,9 @@ fun LoginScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     val authState by viewModel.authState.collectAsState()
 
+    val isDark = ThemeManager.isDarkMode
+    val colorScheme = MaterialTheme.colorScheme
+
     LaunchedEffect(authState) {
         if (authState is AuthState.Success) {
             onLoginSuccess()
@@ -54,8 +59,22 @@ fun LoginScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(colorScheme.background)
     ) {
+        // ── Theme toggle button (top-end) ──
+        IconButton(
+            onClick = { ThemeManager.toggle() },
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(16.dp),
+        ) {
+            Icon(
+                imageVector = if (isDark) Icons.Outlined.LightMode else Icons.Outlined.DarkMode,
+                contentDescription = if (isDark) "Switch to light mode" else "Switch to dark mode",
+                tint = colorScheme.onBackground.copy(alpha = 0.6f),
+            )
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -73,10 +92,10 @@ fun LoginScreen(
                     Surface(
                         modifier = Modifier.size(64.dp),
                         shape = RoundedCornerShape(20.dp),
-                        color = Maroon.copy(alpha = 0.1f),
+                        color = colorScheme.primary.copy(alpha = 0.1f),
                     ) {
                         Box(contentAlignment = Alignment.Center) {
-                            Text("🌸", fontSize = 28.sp)
+                            Text("\uD83C\uDF38", fontSize = 28.sp)
                         }
                     }
 
@@ -85,13 +104,13 @@ fun LoginScreen(
                     Text(
                         text = "Havana",
                         style = MaterialTheme.typography.displayLarge,
-                        color = Maroon,
+                        color = colorScheme.primary,
                     )
 
                     Text(
                         text = "Luxury Floral Boutique",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                        color = colorScheme.onBackground.copy(alpha = 0.5f),
                     )
                 }
             }
@@ -101,13 +120,13 @@ fun LoginScreen(
             Text(
                 text = "Welcome Back",
                 style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onBackground,
+                color = colorScheme.onBackground,
             )
 
             Text(
                 text = "Sign in to your account",
                 style = MaterialTheme.typography.bodyMedium,
-                color = TextSecondary,
+                color = colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 4.dp),
             )
 
@@ -125,7 +144,7 @@ fun LoginScreen(
                     Icon(
                         Icons.Default.Email,
                         contentDescription = null,
-                        tint = if (email.isNotEmpty()) Maroon else TextSecondary,
+                        tint = if (email.isNotEmpty()) colorScheme.primary else colorScheme.onSurfaceVariant,
                     )
                 },
                 singleLine = true,
@@ -136,10 +155,10 @@ fun LoginScreen(
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Maroon,
-                    focusedLabelColor = Maroon,
-                    cursorColor = Maroon,
-                    unfocusedBorderColor = Color(0xFFE5E5E5),
+                    focusedBorderColor = colorScheme.primary,
+                    focusedLabelColor = colorScheme.primary,
+                    cursorColor = colorScheme.primary,
+                    unfocusedBorderColor = colorScheme.outline,
                 ),
             )
 
@@ -157,7 +176,7 @@ fun LoginScreen(
                     Icon(
                         Icons.Default.Lock,
                         contentDescription = null,
-                        tint = if (password.isNotEmpty()) Maroon else TextSecondary,
+                        tint = if (password.isNotEmpty()) colorScheme.primary else colorScheme.onSurfaceVariant,
                     )
                 },
                 trailingIcon = {
@@ -165,7 +184,7 @@ fun LoginScreen(
                         Icon(
                             if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                             contentDescription = if (passwordVisible) "Hide password" else "Show password",
-                            tint = TextSecondary,
+                            tint = colorScheme.onSurfaceVariant,
                         )
                     }
                 },
@@ -181,10 +200,10 @@ fun LoginScreen(
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Maroon,
-                    focusedLabelColor = Maroon,
-                    cursorColor = Maroon,
-                    unfocusedBorderColor = Color(0xFFE5E5E5),
+                    focusedBorderColor = colorScheme.primary,
+                    focusedLabelColor = colorScheme.primary,
+                    cursorColor = colorScheme.primary,
+                    unfocusedBorderColor = colorScheme.outline,
                 ),
             )
 
@@ -197,7 +216,7 @@ fun LoginScreen(
                 TextButton(onClick = { /* TODO */ }) {
                     Text(
                         text = "Forgot password?",
-                        color = Maroon,
+                        color = colorScheme.primary,
                         style = MaterialTheme.typography.labelSmall,
                     )
                 }
@@ -210,11 +229,11 @@ fun LoginScreen(
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
-                    color = Error.copy(alpha = 0.1f),
+                    color = if (isDark) BannerErrorBgDark else BannerErrorBgLight,
                 ) {
                     Text(
                         text = errorMessage,
-                        color = Error,
+                        color = if (isDark) BannerErrorFgDark else BannerErrorFgLight,
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.padding(12.dp),
                     )
@@ -230,15 +249,15 @@ fun LoginScreen(
                     .height(52.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Maroon,
-                    contentColor = Color.White,
-                    disabledContainerColor = Maroon.copy(alpha = 0.5f),
+                    containerColor = colorScheme.primary,
+                    contentColor = colorScheme.onPrimary,
+                    disabledContainerColor = colorScheme.primary.copy(alpha = 0.5f),
                 ),
             ) {
                 if (authState is AuthState.Loading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(20.dp),
-                        color = Color.White,
+                        color = colorScheme.onPrimary,
                         strokeWidth = 2.dp,
                     )
                 } else {
@@ -256,13 +275,13 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                HorizontalDivider(modifier = Modifier.weight(1f), color = Color(0xFFE5E5E5))
+                HorizontalDivider(modifier = Modifier.weight(1f), color = colorScheme.outline)
                 Text(
                     text = "  or  ",
                     style = MaterialTheme.typography.bodySmall,
-                    color = TextSecondary,
+                    color = colorScheme.onSurfaceVariant,
                 )
-                HorizontalDivider(modifier = Modifier.weight(1f), color = Color(0xFFE5E5E5))
+                HorizontalDivider(modifier = Modifier.weight(1f), color = colorScheme.outline)
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -270,12 +289,12 @@ fun LoginScreen(
             TextButton(onClick = onNavigateToSignup) {
                 Text(
                     text = "Don't have an account? ",
-                    color = TextSecondary,
+                    color = colorScheme.onSurfaceVariant,
                     fontSize = 14.sp
                 )
                 Text(
                     text = "Sign Up",
-                    color = Maroon,
+                    color = colorScheme.primary,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
                     textDecoration = TextDecoration.Underline

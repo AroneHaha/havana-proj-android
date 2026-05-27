@@ -1,6 +1,5 @@
 package com.example.havana.ui.screens.orders
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,7 +15,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -41,14 +39,19 @@ fun OrdersScreen(
     val orderListState by viewModel.orderListState.collectAsState()
     val selectedFilter by viewModel.selectedFilter.collectAsState()
 
+    val isDark = ThemeManager.isDarkMode
+    val colorScheme = MaterialTheme.colorScheme
+    val cardColor = if (isDark) CardDark else CardLight
+    val navBarColor = if (isDark) NavBarDark else NavBarLight
+
     val filters = listOf(
         "all" to "All",
-        "pending" to "⏳ Pending",
-        "confirmed" to "✅ Confirmed",
-        "preparing" to "📦 Preparing",
-        "out_for_delivery" to "🚚 Delivery",
-        "delivered" to "🎉 Done",
-        "cancelled" to "❌ Cancelled",
+        "pending" to "\u23F3 Pending",
+        "confirmed" to "\u2705 Confirmed",
+        "preparing" to "\uD83D\uDCE6 Preparing",
+        "out_for_delivery" to "\uD83D\uDE9A Delivery",
+        "delivered" to "\uD83C\uDF89 Done",
+        "cancelled" to "\u274C Cancelled",
     )
 
     Scaffold(
@@ -59,17 +62,17 @@ fun OrdersScreen(
                         "My Orders",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextPrimary
+                        color = colorScheme.onBackground
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = CreamBg
+                    containerColor = colorScheme.background
                 )
             )
         },
         bottomBar = {
             NavigationBar(
-                containerColor = Color.White,
+                containerColor = navBarColor,
                 tonalElevation = 8.dp
             ) {
                 NavigationBarItem(
@@ -78,8 +81,8 @@ fun OrdersScreen(
                     icon = { Icon(Icons.Outlined.Home, contentDescription = "Home") },
                     label = { Text("Home", fontSize = 11.sp) },
                     colors = NavigationBarItemDefaults.colors(
-                        unselectedIconColor = TextSecondary,
-                        unselectedTextColor = TextSecondary
+                        unselectedIconColor = colorScheme.onSurfaceVariant,
+                        unselectedTextColor = colorScheme.onSurfaceVariant
                     )
                 )
                 NavigationBarItem(
@@ -88,8 +91,8 @@ fun OrdersScreen(
                     icon = { Icon(Icons.Outlined.ShoppingCart, contentDescription = "Cart") },
                     label = { Text("Cart", fontSize = 11.sp) },
                     colors = NavigationBarItemDefaults.colors(
-                        unselectedIconColor = TextSecondary,
-                        unselectedTextColor = TextSecondary
+                        unselectedIconColor = colorScheme.onSurfaceVariant,
+                        unselectedTextColor = colorScheme.onSurfaceVariant
                     )
                 )
                 NavigationBarItem(
@@ -98,9 +101,9 @@ fun OrdersScreen(
                     icon = { Icon(Icons.Outlined.ReceiptLong, contentDescription = "Orders") },
                     label = { Text("Orders", fontSize = 11.sp) },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Maroon,
-                        selectedTextColor = Maroon,
-                        indicatorColor = Maroon.copy(alpha = 0.1f)
+                        selectedIconColor = colorScheme.primary,
+                        selectedTextColor = colorScheme.primary,
+                        indicatorColor = colorScheme.primary.copy(alpha = 0.1f)
                     )
                 )
                 NavigationBarItem(
@@ -109,13 +112,13 @@ fun OrdersScreen(
                     icon = { Icon(Icons.Outlined.Person, contentDescription = "Profile") },
                     label = { Text("Profile", fontSize = 11.sp) },
                     colors = NavigationBarItemDefaults.colors(
-                        unselectedIconColor = TextSecondary,
-                        unselectedTextColor = TextSecondary
+                        unselectedIconColor = colorScheme.onSurfaceVariant,
+                        unselectedTextColor = colorScheme.onSurfaceVariant
                     )
                 )
             }
         },
-        containerColor = CreamBg
+        containerColor = colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -134,14 +137,14 @@ fun OrdersScreen(
                         label = { Text(label, fontSize = 12.sp) },
                         shape = RoundedCornerShape(20.dp),
                         colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = Maroon,
-                            selectedLabelColor = Color.White,
-                            containerColor = Color.White,
-                            labelColor = TextSecondary
+                            selectedContainerColor = colorScheme.primary,
+                            selectedLabelColor = colorScheme.onPrimary,
+                            containerColor = cardColor,
+                            labelColor = colorScheme.onSurfaceVariant
                         ),
                         border = FilterChipDefaults.filterChipBorder(
-                            borderColor = Color(0xFFE5E5E5),
-                            selectedBorderColor = Maroon,
+                            borderColor = colorScheme.outline,
+                            selectedBorderColor = colorScheme.primary,
                             enabled = true,
                             selected = selectedFilter == key
                         )
@@ -155,7 +158,7 @@ fun OrdersScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator(color = Maroon)
+                        CircularProgressIndicator(color = colorScheme.primary)
                     }
                 }
                 is OrderListState.Success -> {
@@ -166,10 +169,10 @@ fun OrdersScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text("📋", fontSize = 48.sp)
+                                Text("\uD83D\uDCCB", fontSize = 48.sp)
                                 Spacer(modifier = Modifier.height(12.dp))
-                                Text("No orders found", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = TextPrimary)
-                                Text("Your orders will appear here", fontSize = 13.sp, color = TextSecondary)
+                                Text("No orders found", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onBackground)
+                                Text("Your orders will appear here", fontSize = 13.sp, color = colorScheme.onSurfaceVariant)
                             }
                         }
                     } else {
@@ -205,12 +208,16 @@ fun OrderCard(
     order: Order,
     onClick: () -> Unit
 ) {
+    val isDark = ThemeManager.isDarkMode
+    val colorScheme = MaterialTheme.colorScheme
+    val cardColor = if (isDark) CardDark else CardLight
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = cardColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
@@ -227,7 +234,7 @@ fun OrderCard(
                     order.orderNumber,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextPrimary
+                    color = colorScheme.onBackground
                 )
                 Surface(
                     shape = RoundedCornerShape(8.dp),
@@ -248,7 +255,7 @@ fun OrderCard(
             Text(
                 order.createdAt,
                 fontSize = 12.sp,
-                color = TextSecondary
+                color = colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -258,7 +265,7 @@ fun OrderCard(
             Text(
                 if (moreCount > 0) "$itemsPreview +$moreCount more" else itemsPreview,
                 fontSize = 13.sp,
-                color = TextPrimary,
+                color = colorScheme.onBackground,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -273,13 +280,13 @@ fun OrderCard(
                 Text(
                     "${order.items.sumOf { it.quantity }} items",
                     fontSize = 12.sp,
-                    color = TextSecondary
+                    color = colorScheme.onSurfaceVariant
                 )
                 Text(
                     "KD ${String.format("%.3f", order.total)}",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Maroon
+                    color = colorScheme.primary
                 )
             }
         }

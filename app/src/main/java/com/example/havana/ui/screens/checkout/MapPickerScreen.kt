@@ -87,6 +87,11 @@ fun MapPickerScreen(
     var showSuggestions by remember { mutableStateOf(false) }
     var mapViewRef by remember { mutableStateOf<MapView?>(null) }
 
+    val isDark = ThemeManager.isDarkMode
+    val colorScheme = MaterialTheme.colorScheme
+    val cardColor = if (isDark) CardDark else CardLight
+    val dividerColor = if (isDark) DividerDark else DividerLight
+
     val kuwaitCenter = GeoPoint(29.3759, 47.9774)
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
@@ -224,18 +229,18 @@ fun MapPickerScreen(
                         "Pick Delivery Location",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextPrimary
+                        color = colorScheme.onBackground
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Maroon)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = colorScheme.primary)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = CreamBg)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background)
             )
         },
-        containerColor = CreamBg
+        containerColor = colorScheme.background
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -263,10 +268,10 @@ fun MapPickerScreen(
                         shape = RoundedCornerShape(12.dp),
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Maroon,
-                            cursorColor = Maroon,
-                            focusedContainerColor = Color.White,
-                            unfocusedContainerColor = Color.White
+                            focusedBorderColor = colorScheme.primary,
+                            cursorColor = colorScheme.primary,
+                            focusedContainerColor = cardColor,
+                            unfocusedContainerColor = cardColor
                         )
                     )
                     Button(
@@ -277,7 +282,7 @@ fun MapPickerScreen(
                             }
                         },
                         shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Maroon),
+                        colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
                         modifier = Modifier.height(56.dp)
                     ) {
                         Text("Go")
@@ -291,7 +296,7 @@ fun MapPickerScreen(
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp)
                             .shadow(4.dp, RoundedCornerShape(12.dp))
-                            .background(Color.White, RoundedCornerShape(12.dp))
+                            .background(cardColor, RoundedCornerShape(12.dp))
                             .heightIn(max = 180.dp),
                         contentPadding = PaddingValues(vertical = 4.dp)
                     ) {
@@ -306,27 +311,27 @@ fun MapPickerScreen(
                                     .padding(horizontal = 14.dp, vertical = 10.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text("📍", fontSize = 16.sp)
+                                Text("\uD83D\uDCCD", fontSize = 16.sp)
                                 Spacer(modifier = Modifier.width(10.dp))
                                 Column {
                                     Text(
                                         result.name,
                                         fontSize = 13.sp,
                                         fontWeight = FontWeight.SemiBold,
-                                        color = TextPrimary,
+                                        color = colorScheme.onBackground,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
                                     Text(
                                         result.displayName,
                                         fontSize = 11.sp,
-                                        color = TextSecondary,
+                                        color = colorScheme.onSurfaceVariant,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
                                 }
                             }
-                            HorizontalDivider(color = Color(0xFFF0F0F0), modifier = Modifier.padding(horizontal = 14.dp))
+                            HorizontalDivider(color = dividerColor, modifier = Modifier.padding(horizontal = 14.dp))
                         }
                     }
                 }
@@ -379,7 +384,7 @@ fun MapPickerScreen(
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
                         shadowElevation = 8.dp,
-                        color = Color.White
+                        color = cardColor
                     ) {
                         Column(
                             modifier = Modifier
@@ -387,20 +392,20 @@ fun MapPickerScreen(
                                 .padding(16.dp)
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text("📍", fontSize = 18.sp)
+                                Text("\uD83D\uDCCD", fontSize = 18.sp)
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     "Delivery Address",
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = TextPrimary
+                                    color = colorScheme.onBackground
                                 )
                             }
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 selectedAddress,
                                 fontSize = 13.sp,
-                                color = TextPrimary,
+                                color = colorScheme.onBackground,
                                 lineHeight = 19.sp,
                                 fontWeight = FontWeight.Medium,
                                 maxLines = 3,
@@ -410,7 +415,7 @@ fun MapPickerScreen(
                             Text(
                                 "${String.format("%.6f", selectedPoint!!.latitude)}, ${String.format("%.6f", selectedPoint!!.longitude)}",
                                 fontSize = 10.sp,
-                                color = TextSecondary
+                                color = colorScheme.onSurfaceVariant
                             )
                             Spacer(modifier = Modifier.height(12.dp))
                             Button(
@@ -423,12 +428,12 @@ fun MapPickerScreen(
                                     onAddressConfirmed(address)
                                 },
                                 shape = RoundedCornerShape(12.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = Maroon),
+                                colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(48.dp)
                             ) {
-                                Text("Confirm Address", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                                Text("Confirm Address", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onPrimary)
                             }
                         }
                     }
@@ -436,12 +441,12 @@ fun MapPickerScreen(
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
                         shadowElevation = 4.dp,
-                        color = Color.White
+                        color = cardColor
                     ) {
                         Text(
                             "Tap on the map or search to select your delivery location",
                             fontSize = 13.sp,
-                            color = TextSecondary,
+                            color = colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(16.dp)
                         )
                     }

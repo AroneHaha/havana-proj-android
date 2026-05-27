@@ -1,4 +1,4 @@
-plugins {
+    plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
 }
@@ -79,4 +79,8 @@ dependencies {
 
     // Maps (OpenStreetMap - same as Leaflet)
     implementation("org.osmdroid:osmdroid-android:6.1.18")
+
+    // AppCompat (needed for AppCompatDelegate.setDefaultNightMode — theme switching)
+    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("com.google.android.material:material:1.12.0")
 }

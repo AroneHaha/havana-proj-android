@@ -27,11 +27,12 @@
     <string name="profile_address_not_set">No address set</string>
 
     <!-- Preferences -->
-    <string name="profile_dark_mode">Dark Mode</string>
-    <string name="profile_dark_mode_desc">Switch to dark theme</string>
+    <string name="profile_dark_mode">Appearance</string>
+    <string name="profile_dark_mode_desc">Choose Light, Dark, or System theme</string>
     <string name="profile_language">Language</string>
     <string name="profile_language_desc">Switch to Arabic</string>
     <string name="profile_language_arabic">Switch to English</string>
 
     <!-- Account Actions -->
-    <string name="profile_logout">Logout</string></resources>
+    <string name="profile_logout">Logout</string>
+</resources>

@@ -3,8 +3,7 @@ package com.example.havana.ui.theme
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
@@ -20,6 +19,10 @@ private val LightColorScheme = lightColorScheme(
     onBackground = TextPrimary,
     surface = SurfaceLight,
     onSurface = TextPrimary,
+    surfaceVariant = LightSurfaceVariant,
+    onSurfaceVariant = TextSecondary,
+    outline = LightOutline,
+    outlineVariant = LightOutlineVariant,
     error = Error,
     onError = Color.White,
 )
@@ -34,17 +37,30 @@ private val DarkColorScheme = darkColorScheme(
     onBackground = TextPrimaryDark,
     surface = SurfaceDark,
     onSurface = TextPrimaryDark,
+    surfaceVariant = DarkSurfaceVariant,
+    onSurfaceVariant = DarkOnSurfaceVariant,
+    outline = DarkOutline,
+    outlineVariant = DarkOutlineVariant,
     error = Error,
     onError = Color.White,
 )
 
+/**
+ * Havana's root theme composable.
+ *
+ * @param darkTheme  Whether to use the dark colour scheme.
+ *                   Defaults to the value persisted in [ThemeManager],
+ *                   falling back to the system setting on first launch.
+ * @param content    The composable subtree.
+ */
 @Composable
 fun HavanaTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = ThemeManager.isDarkMode,
     content: @Composable () -> Unit,
 ) {
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
+    // Keep the Activity's status bar in sync with the theme.
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
@@ -53,6 +69,9 @@ fun HavanaTheme(
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
         }
     }
+
+    // Also sync via ThemeManager (covers navigation bar, etc.)
+    ThemeManager.ObserveThemeForStatusBar()
 
     MaterialTheme(
         colorScheme = colorScheme,

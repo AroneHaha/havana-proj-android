@@ -45,12 +45,17 @@ fun OrderDetailsScreen(
     val order by OrderRepository.orders.collectAsState()
     val resolvedOrder = remember(orderId, order) { order.find { it.id == orderId } }
 
+    val isDark = ThemeManager.isDarkMode
+    val colorScheme = MaterialTheme.colorScheme
+    val cardColor = if (isDark) CardDark else CardLight
+    val dividerColor = if (isDark) DividerDark else DividerLight
+
     if (resolvedOrder == null) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Text("Order not found", color = TextSecondary)
+            Text("Order not found", color = colorScheme.onSurfaceVariant)
         }
         return
     }
@@ -76,18 +81,18 @@ fun OrderDetailsScreen(
                         displayOrder.orderNumber,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextPrimary
+                        color = colorScheme.onBackground
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Maroon)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = colorScheme.primary)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = CreamBg)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background)
             )
         },
-        containerColor = CreamBg
+        containerColor = colorScheme.background
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -99,7 +104,7 @@ fun OrderDetailsScreen(
             item {
                 Card(
                     shape = RoundedCornerShape(14.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    colors = CardDefaults.cardColors(containerColor = cardColor),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Column(
@@ -126,7 +131,7 @@ fun OrderDetailsScreen(
                         Text(
                             "Ordered on ${displayOrder.createdAt}",
                             fontSize = 12.sp,
-                            color = TextSecondary
+                            color = colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -135,7 +140,7 @@ fun OrderDetailsScreen(
             item {
                 Card(
                     shape = RoundedCornerShape(14.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    colors = CardDefaults.cardColors(containerColor = cardColor),
                     elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
                 ) {
                     Column(
@@ -143,7 +148,7 @@ fun OrderDetailsScreen(
                             .fillMaxWidth()
                             .padding(16.dp)
                     ) {
-                        Text("Order Progress", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                        Text("Order Progress", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
                         Spacer(modifier = Modifier.height(12.dp))
 
                         val statuses = listOf("pending", "confirmed", "preparing", "out_for_delivery", "delivered")
@@ -159,10 +164,10 @@ fun OrderDetailsScreen(
                                     modifier = Modifier.size(24.dp),
                                     shape = RoundedCornerShape(12.dp),
                                     color = when {
-                                        isCancelled -> Color(0xFFE5E5E5)
+                                        isCancelled -> colorScheme.outlineVariant
                                         isCurrent -> displayOrder.statusColor()
                                         isCompleted -> Success
-                                        else -> Color(0xFFE5E5E5)
+                                        else -> colorScheme.outlineVariant
                                     }
                                 ) {
                                     Box(contentAlignment = Alignment.Center) {
@@ -194,10 +199,10 @@ fun OrderDetailsScreen(
                                     fontSize = 13.sp,
                                     fontWeight = if (isCurrent) FontWeight.SemiBold else FontWeight.Normal,
                                     color = when {
-                                        isCancelled -> TextSecondary
-                                        isCurrent -> TextPrimary
-                                        isCompleted -> TextPrimary
-                                        else -> TextSecondary.copy(alpha = 0.5f)
+                                        isCancelled -> colorScheme.onSurfaceVariant
+                                        isCurrent -> colorScheme.onBackground
+                                        isCompleted -> colorScheme.onBackground
+                                        else -> colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                                     }
                                 )
                             }
@@ -210,7 +215,7 @@ fun OrderDetailsScreen(
                                         .height(16.dp)
                                         .background(
                                             if (!isCancelled && isCompleted && index < currentIndex) Success
-                                            else Color(0xFFE5E5E5)
+                                            else colorScheme.outlineVariant
                                         )
                                 )
                             }
@@ -265,12 +270,12 @@ fun OrderDetailsScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("Items", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                    Text("Items", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
                     if (displayOrder.status == "delivered") {
                         Text(
                             "Tap an item to rate",
                             fontSize = 12.sp,
-                            color = Gold,
+                            color = colorScheme.secondary,
                             fontWeight = FontWeight.Medium
                         )
                     }
@@ -295,38 +300,38 @@ fun OrderDetailsScreen(
             item {
                 Card(
                     shape = RoundedCornerShape(14.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    colors = CardDefaults.cardColors(containerColor = cardColor),
                     elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
                 ) {
                     Column(modifier = Modifier.padding(14.dp)) {
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Subtotal", fontSize = 13.sp, color = TextSecondary)
-                            Text("KD ${String.format("%.3f", displayOrder.subtotal)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = TextPrimary)
+                            Text("Subtotal", fontSize = 13.sp, color = colorScheme.onSurfaceVariant)
+                            Text("KD ${String.format("%.3f", displayOrder.subtotal)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground)
                         }
                         Spacer(modifier = Modifier.height(4.dp))
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Delivery Fee", fontSize = 13.sp, color = TextSecondary)
-                            Text("KD ${String.format("%.3f", displayOrder.deliveryFee)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = TextPrimary)
+                            Text("Delivery Fee", fontSize = 13.sp, color = colorScheme.onSurfaceVariant)
+                            Text("KD ${String.format("%.3f", displayOrder.deliveryFee)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground)
                         }
                         Spacer(modifier = Modifier.height(8.dp))
-                        HorizontalDivider(color = Color(0xFFE5E5E5))
+                        HorizontalDivider(color = dividerColor)
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Total", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
-                            Text("KD ${String.format("%.3f", displayOrder.total)}", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Maroon)
+                            Text("Total", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
+                            Text("KD ${String.format("%.3f", displayOrder.total)}", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
                         }
                     }
                 }
             }
 
             item {
-                Text("Delivery Address", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                Text("Delivery Address", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
             }
 
             item {
                 Card(
                     shape = RoundedCornerShape(14.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    colors = CardDefaults.cardColors(containerColor = cardColor),
                     elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
                 ) {
                     Column(
@@ -338,7 +343,7 @@ fun OrderDetailsScreen(
                             Icon(
                                 Icons.Default.LocationOn,
                                 contentDescription = null,
-                                tint = Maroon,
+                                tint = colorScheme.primary,
                                 modifier = Modifier.size(20.dp)
                             )
                             Spacer(modifier = Modifier.width(10.dp))
@@ -346,7 +351,7 @@ fun OrderDetailsScreen(
                                 Text(
                                     displayOrder.deliveryAddress.fullAddress,
                                     fontSize = 13.sp,
-                                    color = TextPrimary,
+                                    color = colorScheme.onBackground,
                                     lineHeight = 19.sp
                                 )
                             }
@@ -361,7 +366,7 @@ fun OrderDetailsScreen(
 
                         if (hasDetails) {
                             Spacer(modifier = Modifier.height(10.dp))
-                            HorizontalDivider(color = Color(0xFFF0F0F0))
+                            HorizontalDivider(color = dividerColor)
                             Spacer(modifier = Modifier.height(10.dp))
                         }
 
@@ -390,20 +395,20 @@ fun OrderDetailsScreen(
                         Text(
                             "Lat: ${String.format("%.6f", displayOrder.deliveryAddress.latitude)}, Lon: ${String.format("%.6f", displayOrder.deliveryAddress.longitude)}",
                             fontSize = 10.sp,
-                            color = TextSecondary
+                            color = colorScheme.onSurfaceVariant
                         )
                     }
                 }
             }
 
             item {
-                Text("Contact Information", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                Text("Contact Information", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
             }
 
             item {
                 Card(
                     shape = RoundedCornerShape(14.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    colors = CardDefaults.cardColors(containerColor = cardColor),
                     elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
                 ) {
                     Column(modifier = Modifier.padding(14.dp)) {
@@ -430,7 +435,7 @@ fun OrderDetailsScreen(
                 showReviewSheet = false
                 reviewingItem = null
             },
-            containerColor = Color.White,
+            containerColor = cardColor,
             sheetState = rememberModalBottomSheetState()
         ) {
             Column(
@@ -442,7 +447,7 @@ fun OrderDetailsScreen(
                     "Rate This Item",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextPrimary
+                    color = colorScheme.onBackground
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
@@ -450,7 +455,7 @@ fun OrderDetailsScreen(
                 Text(
                     reviewingItem!!.name,
                     fontSize = 14.sp,
-                    color = TextSecondary,
+                    color = colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -461,7 +466,7 @@ fun OrderDetailsScreen(
                     "Tap to rate:",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
-                    color = TextPrimary
+                    color = colorScheme.onBackground
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -475,7 +480,7 @@ fun OrderDetailsScreen(
                         Text(
                             if (isSelected) "\u2605" else "\u2606",
                             fontSize = 40.sp,
-                            color = if (isSelected) Gold else Color(0xFFD4C5B9),
+                            color = if (isSelected) colorScheme.secondary else colorScheme.outlineVariant,
                             modifier = Modifier
                                 .clickable { selectedRating = starValue }
                                 .padding(4.dp)
@@ -495,7 +500,7 @@ fun OrderDetailsScreen(
                             else -> ""
                         },
                         fontSize = 13.sp,
-                        color = Gold,
+                        color = colorScheme.secondary,
                         fontWeight = FontWeight.Medium
                     )
                 }
@@ -514,9 +519,9 @@ fun OrderDetailsScreen(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Maroon,
-                        focusedLabelColor = Maroon,
-                        cursorColor = Maroon
+                        focusedBorderColor = colorScheme.primary,
+                        focusedLabelColor = colorScheme.primary,
+                        cursorColor = colorScheme.primary
                     ),
                     enabled = !isSubmittingReview
                 )
@@ -526,7 +531,7 @@ fun OrderDetailsScreen(
                 Text(
                     "${reviewText.length} / 500",
                     fontSize = 11.sp,
-                    color = TextSecondary,
+                    color = colorScheme.onSurfaceVariant,
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.End
                 )
@@ -564,7 +569,7 @@ fun OrderDetailsScreen(
                         }
                     },
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Maroon),
+                    colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
@@ -572,12 +577,12 @@ fun OrderDetailsScreen(
                 ) {
                     if (isSubmittingReview) {
                         CircularProgressIndicator(
-                            color = Color.White,
+                            color = colorScheme.onPrimary,
                             modifier = Modifier.size(22.dp),
                             strokeWidth = 2.5.dp
                         )
                     } else {
-                        Text("Submit Review", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                        Text("Submit Review", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onPrimary)
                     }
                 }
 
@@ -594,9 +599,13 @@ fun OrderDetailItemCard(
     existingReview: Review? = null,
     onRateClick: () -> Unit = {}
 ) {
+    val isDark = ThemeManager.isDarkMode
+    val colorScheme = MaterialTheme.colorScheme
+    val cardColor = if (isDark) CardDark else CardLight
+
     Card(
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = cardColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(
@@ -608,22 +617,22 @@ fun OrderDetailItemCard(
                 Box(
                     modifier = Modifier
                         .size(50.dp)
-                        .background(CreamBg, RoundedCornerShape(8.dp)),
+                        .background(colorScheme.surfaceVariant, RoundedCornerShape(8.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(MockData.categoryEmoji(item.category), fontSize = 20.sp)
                 }
                 Spacer(modifier = Modifier.width(10.dp))
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(item.name, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = TextPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Text("Qty: ${item.quantity} x KD ${String.format("%.3f", item.price)}", fontSize = 12.sp, color = TextSecondary)
+                    Text(item.name, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onBackground, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text("Qty: ${item.quantity} x KD ${String.format("%.3f", item.price)}", fontSize = 12.sp, color = colorScheme.onSurfaceVariant)
                 }
-                Text("KD ${String.format("%.3f", item.price * item.quantity)}", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Maroon)
+                Text("KD ${String.format("%.3f", item.price * item.quantity)}", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
             }
 
             if (existingReview != null) {
                 Spacer(modifier = Modifier.height(8.dp))
-                HorizontalDivider(color = Color(0xFFF0F0F0))
+                HorizontalDivider(color = if (isDark) DividerDark else DividerLight)
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -634,7 +643,7 @@ fun OrderDetailItemCard(
                             Text(
                                 if (i < existingReview.rating.toInt()) "\u2605" else "\u2606",
                                 fontSize = 14.sp,
-                                color = if (i < existingReview.rating.toInt()) Gold else Color(0xFFD4C5B9)
+                                color = if (i < existingReview.rating.toInt()) colorScheme.secondary else colorScheme.outlineVariant
                             )
                         }
                     }
@@ -642,7 +651,7 @@ fun OrderDetailItemCard(
                     Text(
                         existingReview.comment,
                         fontSize = 12.sp,
-                        color = TextSecondary,
+                        color = colorScheme.onSurfaceVariant,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                         lineHeight = 18.sp,
@@ -663,11 +672,11 @@ fun OrderDetailItemCard(
                     onClick = onRateClick,
                     shape = RoundedCornerShape(8.dp),
                     contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Gold),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Gold),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = colorScheme.secondary),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, colorScheme.secondary),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Icon(Icons.Filled.Star, contentDescription = null, tint = Gold, modifier = Modifier.size(16.dp))
+                    Icon(Icons.Filled.Star, contentDescription = null, tint = colorScheme.secondary, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(6.dp))
                     Text("Rate This Item", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                 }
@@ -678,8 +687,9 @@ fun OrderDetailItemCard(
 
 @Composable
 fun InfoRow(label: String, value: String) {
+    val colorScheme = MaterialTheme.colorScheme
     Row(modifier = Modifier.fillMaxWidth()) {
-        Text("$label: ", fontSize = 13.sp, color = TextSecondary)
-        Text(value, fontSize = 13.sp, fontWeight = FontWeight.Medium, color = TextPrimary)
+        Text("$label: ", fontSize = 13.sp, color = colorScheme.onSurfaceVariant)
+        Text(value, fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground)
     }
 }

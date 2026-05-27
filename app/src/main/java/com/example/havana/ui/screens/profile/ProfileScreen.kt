@@ -52,7 +52,14 @@ fun ProfileScreen(
     val isDarkMode by viewModel.isDarkMode.collectAsState()
     val isArabic by viewModel.isArabic.collectAsState()
 
-    // Handle edit success — close edit mode
+    val isDark = ThemeManager.isDarkMode
+    val colorScheme = MaterialTheme.colorScheme
+    val cardColor = if (isDark) CardDark else CardLight
+    val navBarColor = if (isDark) NavBarDark else NavBarLight
+    val dividerColor = if (isDark) DividerDark else DividerLight
+    val switchUncheckedTrack = if (isDark) SwitchUncheckedTrackDark else SwitchUncheckedTrackLight
+
+    // Handle edit success - close edit mode
     LaunchedEffect(editState) {
         if (editState is EditProfileState.Success) {
             viewModel.resetEditState()
@@ -67,7 +74,7 @@ fun ProfileScreen(
                         text = stringResource(R.string.profile_title),
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextPrimary,
+                        color = colorScheme.onBackground,
                     )
                 },
                 navigationIcon = {
@@ -75,18 +82,18 @@ fun ProfileScreen(
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.profile_back),
-                            tint = Maroon,
+                            tint = colorScheme.primary,
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = CreamBg,
+                    containerColor = colorScheme.background,
                 ),
             )
         },
         bottomBar = {
             NavigationBar(
-                containerColor = Color.White,
+                containerColor = navBarColor,
                 tonalElevation = 8.dp,
             ) {
                 NavigationBarItem(
@@ -95,8 +102,8 @@ fun ProfileScreen(
                     icon = { Icon(Icons.Outlined.Home, contentDescription = "Home") },
                     label = { Text("Home", fontSize = 11.sp) },
                     colors = NavigationBarItemDefaults.colors(
-                        unselectedIconColor = TextSecondary,
-                        unselectedTextColor = TextSecondary,
+                        unselectedIconColor = colorScheme.onSurfaceVariant,
+                        unselectedTextColor = colorScheme.onSurfaceVariant,
                     ),
                 )
                 NavigationBarItem(
@@ -105,8 +112,8 @@ fun ProfileScreen(
                     icon = { Icon(Icons.Outlined.ShoppingCart, contentDescription = "Cart") },
                     label = { Text("Cart", fontSize = 11.sp) },
                     colors = NavigationBarItemDefaults.colors(
-                        unselectedIconColor = TextSecondary,
-                        unselectedTextColor = TextSecondary,
+                        unselectedIconColor = colorScheme.onSurfaceVariant,
+                        unselectedTextColor = colorScheme.onSurfaceVariant,
                     ),
                 )
                 NavigationBarItem(
@@ -115,8 +122,8 @@ fun ProfileScreen(
                     icon = { Icon(Icons.Outlined.ReceiptLong, contentDescription = "Orders") },
                     label = { Text("Orders", fontSize = 11.sp) },
                     colors = NavigationBarItemDefaults.colors(
-                        unselectedIconColor = TextSecondary,
-                        unselectedTextColor = TextSecondary,
+                        unselectedIconColor = colorScheme.onSurfaceVariant,
+                        unselectedTextColor = colorScheme.onSurfaceVariant,
                     ),
                 )
                 NavigationBarItem(
@@ -125,14 +132,14 @@ fun ProfileScreen(
                     icon = { Icon(Icons.Outlined.Person, contentDescription = "Profile") },
                     label = { Text("Profile", fontSize = 11.sp) },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Maroon,
-                        selectedTextColor = Maroon,
-                        indicatorColor = Maroon.copy(alpha = 0.1f),
+                        selectedIconColor = colorScheme.primary,
+                        selectedTextColor = colorScheme.primary,
+                        indicatorColor = colorScheme.primary.copy(alpha = 0.1f),
                     ),
                 )
             }
         },
-        containerColor = CreamBg,
+        containerColor = colorScheme.background,
     ) { paddingValues ->
         when (profileState) {
             is ProfileState.Loading -> {
@@ -142,7 +149,7 @@ fun ProfileScreen(
                         .padding(paddingValues),
                     contentAlignment = Alignment.Center,
                 ) {
-                    CircularProgressIndicator(color = Maroon)
+                    CircularProgressIndicator(color = colorScheme.primary)
                 }
             }
             is ProfileState.Success -> {
@@ -184,7 +191,7 @@ fun ProfileScreen(
                         OutlinedButton(
                             onClick = { viewModel.loadProfile() },
                             shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Maroon),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = colorScheme.primary),
                         ) {
                             Text(stringResource(R.string.profile_retry))
                         }
@@ -211,6 +218,12 @@ private fun ProfileContent(
     onArabicToggle: (Boolean) -> Unit,
     onLogout: () -> Unit,
 ) {
+    val isDark = ThemeManager.isDarkMode
+    val colorScheme = MaterialTheme.colorScheme
+    val cardColor = if (isDark) CardDark else CardLight
+    val dividerColor = if (isDark) DividerDark else DividerLight
+    val switchUncheckedTrack = if (isDark) SwitchUncheckedTrackDark else SwitchUncheckedTrackLight
+
     // Local edit field values
     var editFirstName by remember { mutableStateOf(profile.firstName) }
     var editLastName by remember { mutableStateOf(profile.lastName) }
@@ -234,7 +247,7 @@ private fun ProfileContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp),   // <-- FIX: removed .imePadding()
+                .padding(horizontal = 16.dp),
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -249,11 +262,11 @@ private fun ProfileContent(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = cardColor),
                 elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
             ) {
                 Column(modifier = Modifier.padding(4.dp)) {
-                    // Full Name — editable
+                    // Full Name - editable
                     if (editingField == EditableField.FULL_NAME) {
                         EditableFieldEditor(
                             label = stringResource(R.string.profile_full_name),
@@ -286,9 +299,9 @@ private fun ProfileContent(
                         )
                     }
 
-                    HorizontalDivider(color = Color(0xFFF0ECE8), modifier = Modifier.padding(horizontal = 12.dp))
+                    HorizontalDivider(color = dividerColor, modifier = Modifier.padding(horizontal = 12.dp))
 
-                    // Email — read-only
+                    // Email - read-only
                     ProfileInfoRow(
                         label = stringResource(R.string.profile_email),
                         value = profile.email,
@@ -296,9 +309,9 @@ private fun ProfileContent(
                         onEdit = null,
                     )
 
-                    HorizontalDivider(color = Color(0xFFF0ECE8), modifier = Modifier.padding(horizontal = 12.dp))
+                    HorizontalDivider(color = dividerColor, modifier = Modifier.padding(horizontal = 12.dp))
 
-                    // Contact Number — editable
+                    // Contact Number - editable
                     if (editingField == EditableField.CONTACT_NUMBER) {
                         EditableFieldEditor(
                             label = stringResource(R.string.profile_contact),
@@ -355,7 +368,7 @@ private fun ProfileContent(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = cardColor),
                 elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
             ) {
                 Column(modifier = Modifier.padding(4.dp)) {
@@ -392,7 +405,7 @@ private fun ProfileContent(
                                 Icon(
                                     Icons.Default.LocationOn,
                                     contentDescription = null,
-                                    tint = Maroon,
+                                    tint = colorScheme.primary,
                                     modifier = Modifier.size(18.dp),
                                 )
                             },
@@ -409,7 +422,7 @@ private fun ProfileContent(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = cardColor),
                 elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
             ) {
                 Column(modifier = Modifier.padding(4.dp)) {
@@ -421,11 +434,11 @@ private fun ProfileContent(
                         onCheckedChange = onDarkModeToggle,
                     )
 
-                    HorizontalDivider(color = Color(0xFFF0ECE8), modifier = Modifier.padding(horizontal = 12.dp))
+                    HorizontalDivider(color = dividerColor, modifier = Modifier.padding(horizontal = 12.dp))
 
                     // Arabic/English Toggle
                     PreferenceRow(
-                        label = if (isArabic) "العربية / English" else stringResource(R.string.profile_language),
+                        label = if (isArabic) "\u0627\u0644\u0639\u0631\u0628\u064A\u0629 / English" else stringResource(R.string.profile_language),
                         subtitle = if (isArabic)
                             stringResource(R.string.profile_language_arabic)
                         else
@@ -466,10 +479,12 @@ private fun ProfileContent(
 
 @Composable
 private fun ProfileHeader(profile: UserProfile) {
+    val colorScheme = MaterialTheme.colorScheme
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Maroon.copy(alpha = 0.06f)),
+        colors = CardDefaults.cardColors(containerColor = colorScheme.primary.copy(alpha = 0.06f)),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Row(
@@ -478,17 +493,17 @@ private fun ProfileHeader(profile: UserProfile) {
                 .padding(20.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // Avatar placeholder — circle with initial
+            // Avatar placeholder - circle with initial
             Surface(
                 modifier = Modifier.size(64.dp),
                 shape = CircleShape,
-                color = Maroon,
+                color = colorScheme.primary,
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     val initial = (profile.firstName.firstOrNull() ?: '?').uppercaseChar()
                     Text(
                         text = initial.toString(),
-                        color = Color.White,
+                        color = colorScheme.onPrimary,
                         fontSize = 26.sp,
                         fontWeight = FontWeight.Bold,
                     )
@@ -502,13 +517,13 @@ private fun ProfileHeader(profile: UserProfile) {
                     text = "${profile.firstName} ${profile.lastName}",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextPrimary,
+                    color = colorScheme.onBackground,
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = profile.email,
                     fontSize = 13.sp,
-                    color = TextSecondary,
+                    color = colorScheme.onSurfaceVariant,
                 )
                 if (profile.emailVerified) {
                     Spacer(modifier = Modifier.height(4.dp))
@@ -534,11 +549,12 @@ private fun ProfileHeader(profile: UserProfile) {
 
 @Composable
 private fun SectionHeader(title: String) {
+    val colorScheme = MaterialTheme.colorScheme
     Text(
         text = title,
         fontSize = 13.sp,
         fontWeight = FontWeight.SemiBold,
-        color = TextSecondary,
+        color = colorScheme.onSurfaceVariant,
         letterSpacing = 0.5.sp,
         modifier = Modifier.padding(start = 4.dp, bottom = 8.dp),
     )
@@ -554,6 +570,8 @@ private fun ProfileInfoRow(
     onEdit: (() -> Unit)?,
     leadingIcon: (@Composable () -> Unit)? = null,
 ) {
+    val colorScheme = MaterialTheme.colorScheme
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -569,14 +587,14 @@ private fun ProfileInfoRow(
             Text(
                 text = label,
                 fontSize = 11.sp,
-                color = TextSecondary,
+                color = colorScheme.onSurfaceVariant,
                 fontWeight = FontWeight.Medium,
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = value,
                 fontSize = 14.sp,
-                color = TextPrimary,
+                color = colorScheme.onBackground,
                 fontWeight = FontWeight.Normal,
                 lineHeight = 19.sp,
             )
@@ -590,7 +608,7 @@ private fun ProfileInfoRow(
                 Icon(
                     Icons.Default.Edit,
                     contentDescription = stringResource(R.string.profile_edit),
-                    tint = Maroon,
+                    tint = colorScheme.primary,
                     modifier = Modifier.size(16.dp),
                 )
             }
@@ -613,13 +631,15 @@ private fun EditableFieldEditor(
     maxLines: Int = 1,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
 ) {
+    val colorScheme = MaterialTheme.colorScheme
+
     Column(
         modifier = Modifier.padding(12.dp),
     ) {
         Text(
             text = label,
             fontSize = 11.sp,
-            color = TextSecondary,
+            color = colorScheme.onSurfaceVariant,
             fontWeight = FontWeight.Medium,
         )
         Spacer(modifier = Modifier.height(6.dp))
@@ -628,17 +648,17 @@ private fun EditableFieldEditor(
             OutlinedTextField(
                 value = value,
                 onValueChange = { onValueChange(index, it) },
-                placeholder = { Text(placeholder, fontSize = 13.sp, color = TextSecondary) },
+                placeholder = { Text(placeholder, fontSize = 13.sp, color = colorScheme.onSurfaceVariant) },
                 singleLine = singleLine,
                 minLines = minLines,
                 maxLines = maxLines,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(10.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Maroon,
-                    focusedLabelColor = Maroon,
-                    cursorColor = Maroon,
-                    unfocusedBorderColor = Color(0xFFE5E5E5),
+                    focusedBorderColor = colorScheme.primary,
+                    focusedLabelColor = colorScheme.primary,
+                    cursorColor = colorScheme.primary,
+                    unfocusedBorderColor = colorScheme.outline,
                 ),
                 keyboardOptions = keyboardOptions,
                 enabled = !isSaving,
@@ -661,7 +681,7 @@ private fun EditableFieldEditor(
             ) {
                 Text(
                     text = stringResource(R.string.profile_cancel),
-                    color = TextSecondary,
+                    color = colorScheme.onSurfaceVariant,
                     fontSize = 13.sp,
                 )
             }
@@ -671,8 +691,8 @@ private fun EditableFieldEditor(
                 enabled = !isSaving,
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Maroon,
-                    disabledContainerColor = Maroon.copy(alpha = 0.5f),
+                    containerColor = colorScheme.primary,
+                    disabledContainerColor = colorScheme.primary.copy(alpha = 0.5f),
                 ),
                 modifier = Modifier.height(36.dp),
                 contentPadding = PaddingValues(horizontal = 20.dp),
@@ -680,7 +700,7 @@ private fun EditableFieldEditor(
                 if (isSaving) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(16.dp),
-                        color = Color.White,
+                        color = colorScheme.onPrimary,
                         strokeWidth = 2.dp,
                     )
                 } else {
@@ -688,7 +708,7 @@ private fun EditableFieldEditor(
                         text = stringResource(R.string.profile_save),
                         fontSize = 13.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = Color.White,
+                        color = colorScheme.onPrimary,
                     )
                 }
             }
@@ -705,6 +725,10 @@ private fun PreferenceRow(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
 ) {
+    val colorScheme = MaterialTheme.colorScheme
+    val isDark = ThemeManager.isDarkMode
+    val switchUncheckedTrack = if (isDark) SwitchUncheckedTrackDark else SwitchUncheckedTrackLight
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -716,23 +740,23 @@ private fun PreferenceRow(
                 text = label,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
-                color = TextPrimary,
+                color = colorScheme.onBackground,
             )
             Spacer(modifier = Modifier.height(1.dp))
             Text(
                 text = subtitle,
                 fontSize = 11.sp,
-                color = TextSecondary,
+                color = colorScheme.onSurfaceVariant,
             )
         }
         Switch(
             checked = checked,
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
-                checkedTrackColor = Maroon,
-                checkedThumbColor = Color.White,
-                uncheckedTrackColor = Color(0xFFE0E0E0),
-                uncheckedThumbColor = Color.White,
+                checkedTrackColor = colorScheme.primary,
+                checkedThumbColor = colorScheme.onPrimary,
+                uncheckedTrackColor = switchUncheckedTrack,
+                uncheckedThumbColor = if (isDark) Color(0xFFBDBDBD) else Color.White,
             ),
         )
     }

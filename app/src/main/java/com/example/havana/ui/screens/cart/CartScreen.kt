@@ -41,6 +41,12 @@ fun CartScreen(
     val total by viewModel.total.collectAsState()
     val itemCount by viewModel.itemCount.collectAsState()
 
+    val isDark = ThemeManager.isDarkMode
+    val colorScheme = MaterialTheme.colorScheme
+    val cardColor = if (isDark) CardDark else CardLight
+    val navBarColor = if (isDark) NavBarDark else NavBarLight
+    val dividerColor = if (isDark) DividerDark else DividerLight
+
     var showRemoveDialog by remember { mutableStateOf(false) }
     var itemToRemove by remember { mutableStateOf<CartItem?>(null) }
 
@@ -57,9 +63,9 @@ fun CartScreen(
                 }) { Text("Remove", color = Error, fontWeight = FontWeight.SemiBold) }
             },
             dismissButton = {
-                TextButton(onClick = { showRemoveDialog = false; itemToRemove = null }) { Text("Cancel", color = TextSecondary) }
+                TextButton(onClick = { showRemoveDialog = false; itemToRemove = null }) { Text("Cancel", color = colorScheme.onSurfaceVariant) }
             },
-            containerColor = Color.White,
+            containerColor = cardColor,
             shape = RoundedCornerShape(16.dp)
         )
     }
@@ -67,53 +73,53 @@ fun CartScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("My Cart", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextPrimary) },
+                title = { Text("My Cart", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Maroon)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = colorScheme.primary)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = CreamBg)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background)
             )
         },
         bottomBar = {
             if (cartItems.isNotEmpty()) {
-                Surface(shadowElevation = 16.dp, color = Color.White) {
+                Surface(shadowElevation = 16.dp, color = cardColor) {
                     Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                            Text("Total ($itemCount items)", fontSize = 14.sp, color = TextSecondary)
-                            Text("KD ${String.format("%.3f", total)}", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Maroon)
+                            Text("Total ($itemCount items)", fontSize = 14.sp, color = colorScheme.onSurfaceVariant)
+                            Text("KD ${String.format("%.3f", total)}", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
                         }
                         Spacer(modifier = Modifier.height(12.dp))
                         Button(
                             onClick = onCheckoutClick,
                             shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Maroon),
+                            colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
                             modifier = Modifier.fillMaxWidth().height(50.dp)
-                        ) { Text("Proceed to Checkout", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Color.White) }
+                        ) { Text("Proceed to Checkout", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onPrimary) }
                     }
                 }
             } else {
-                NavigationBar(containerColor = Color.White, tonalElevation = 8.dp) {
-                    NavigationBarItem(selected = false, onClick = onHomeClick, icon = { Icon(Icons.Outlined.Home, contentDescription = "Home") }, label = { Text("Home", fontSize = 11.sp) }, colors = NavigationBarItemDefaults.colors(unselectedIconColor = TextSecondary, unselectedTextColor = TextSecondary))
-                    NavigationBarItem(selected = true, onClick = { }, icon = { Icon(Icons.Outlined.ShoppingCart, contentDescription = "Cart") }, label = { Text("Cart", fontSize = 11.sp) }, colors = NavigationBarItemDefaults.colors(selectedIconColor = Maroon, selectedTextColor = Maroon, indicatorColor = Maroon.copy(alpha = 0.1f)))
-                    NavigationBarItem(selected = false, onClick = onOrdersClick, icon = { Icon(Icons.Outlined.ReceiptLong, contentDescription = "Orders") }, label = { Text("Orders", fontSize = 11.sp) }, colors = NavigationBarItemDefaults.colors(unselectedIconColor = TextSecondary, unselectedTextColor = TextSecondary))
-                    NavigationBarItem(selected = false, onClick = onProfileClick, icon = { Icon(Icons.Outlined.Person, contentDescription = "Profile") }, label = { Text("Profile", fontSize = 11.sp) }, colors = NavigationBarItemDefaults.colors(unselectedIconColor = TextSecondary, unselectedTextColor = TextSecondary))
+                NavigationBar(containerColor = navBarColor, tonalElevation = 8.dp) {
+                    NavigationBarItem(selected = false, onClick = onHomeClick, icon = { Icon(Icons.Outlined.Home, contentDescription = "Home") }, label = { Text("Home", fontSize = 11.sp) }, colors = NavigationBarItemDefaults.colors(unselectedIconColor = colorScheme.onSurfaceVariant, unselectedTextColor = colorScheme.onSurfaceVariant))
+                    NavigationBarItem(selected = true, onClick = { }, icon = { Icon(Icons.Outlined.ShoppingCart, contentDescription = "Cart") }, label = { Text("Cart", fontSize = 11.sp) }, colors = NavigationBarItemDefaults.colors(selectedIconColor = colorScheme.primary, selectedTextColor = colorScheme.primary, indicatorColor = colorScheme.primary.copy(alpha = 0.1f)))
+                    NavigationBarItem(selected = false, onClick = onOrdersClick, icon = { Icon(Icons.Outlined.ReceiptLong, contentDescription = "Orders") }, label = { Text("Orders", fontSize = 11.sp) }, colors = NavigationBarItemDefaults.colors(unselectedIconColor = colorScheme.onSurfaceVariant, unselectedTextColor = colorScheme.onSurfaceVariant))
+                    NavigationBarItem(selected = false, onClick = onProfileClick, icon = { Icon(Icons.Outlined.Person, contentDescription = "Profile") }, label = { Text("Profile", fontSize = 11.sp) }, colors = NavigationBarItemDefaults.colors(unselectedIconColor = colorScheme.onSurfaceVariant, unselectedTextColor = colorScheme.onSurfaceVariant))
                 }
             }
         },
-        containerColor = CreamBg
+        containerColor = colorScheme.background
     ) { paddingValues ->
         if (cartItems.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("🛒", fontSize = 56.sp)
+                    Text("\uD83D\uDED2", fontSize = 56.sp)
                     Spacer(modifier = Modifier.height(12.dp))
-                    Text("Your cart is empty", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = TextPrimary)
+                    Text("Your cart is empty", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onBackground)
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text("Browse our collection and add some beautiful flowers!", fontSize = 13.sp, color = TextSecondary, modifier = Modifier.padding(horizontal = 40.dp))
+                    Text("Browse our collection and add some beautiful flowers!", fontSize = 13.sp, color = colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 40.dp))
                     Spacer(modifier = Modifier.height(20.dp))
-                    OutlinedButton(onClick = onHomeClick, shape = RoundedCornerShape(12.dp), colors = ButtonDefaults.outlinedButtonColors(contentColor = Maroon), border = androidx.compose.foundation.BorderStroke(1.dp, Maroon)) { Text("Browse Products", fontWeight = FontWeight.SemiBold) }
+                    OutlinedButton(onClick = onHomeClick, shape = RoundedCornerShape(12.dp), colors = ButtonDefaults.outlinedButtonColors(contentColor = colorScheme.primary), border = androidx.compose.foundation.BorderStroke(1.dp, colorScheme.primary)) { Text("Browse Products", fontWeight = FontWeight.SemiBold) }
                 }
             }
         } else {
@@ -132,23 +138,23 @@ fun CartScreen(
                 }
                 item {
                     Spacer(modifier = Modifier.height(8.dp))
-                    HorizontalDivider(color = Color(0xFFE5E5E5))
+                    HorizontalDivider(color = colorScheme.outline)
                     Spacer(modifier = Modifier.height(12.dp))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("Subtotal", fontSize = 14.sp, color = TextSecondary)
-                        Text("KD ${String.format("%.3f", total)}", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = TextPrimary)
+                        Text("Subtotal", fontSize = 14.sp, color = colorScheme.onSurfaceVariant)
+                        Text("KD ${String.format("%.3f", total)}", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground)
                     }
                     Spacer(modifier = Modifier.height(6.dp))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("Delivery Fee", fontSize = 14.sp, color = TextSecondary)
-                        Text("KD 1.500", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = TextPrimary)
+                        Text("Delivery Fee", fontSize = 14.sp, color = colorScheme.onSurfaceVariant)
+                        Text("KD 1.500", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground)
                     }
                     Spacer(modifier = Modifier.height(6.dp))
-                    HorizontalDivider(color = Color(0xFFE5E5E5))
+                    HorizontalDivider(color = colorScheme.outline)
                     Spacer(modifier = Modifier.height(6.dp))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                        Text("Grand Total", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
-                        Text("KD ${String.format("%.3f", total + 1.500)}", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Maroon)
+                        Text("Grand Total", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
+                        Text("KD ${String.format("%.3f", total + 1.500)}", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
                     }
                     Spacer(modifier = Modifier.height(80.dp))
                 }
@@ -159,10 +165,14 @@ fun CartScreen(
 
 @Composable
 fun CartItemCard(item: CartItem, onIncrease: () -> Unit, onDecrease: () -> Unit, onRemove: () -> Unit) {
+    val isDark = ThemeManager.isDarkMode
+    val colorScheme = MaterialTheme.colorScheme
+    val cardColor = if (isDark) CardDark else CardLight
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = cardColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
@@ -170,27 +180,27 @@ fun CartItemCard(item: CartItem, onIncrease: () -> Unit, onDecrease: () -> Unit,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
-                modifier = Modifier.size(80.dp).background(CreamBg, RoundedCornerShape(10.dp)),
+                modifier = Modifier.size(80.dp).background(colorScheme.surfaceVariant, RoundedCornerShape(10.dp)),
                 contentAlignment = Alignment.Center
             ) { Text(MockData.categoryEmoji(item.category), fontSize = 32.sp) }
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(item.name, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = TextPrimary, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Text(item.name, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onBackground, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 Spacer(modifier = Modifier.height(4.dp))
-                Text("KD ${String.format("%.3f", item.price)} each", fontSize = 12.sp, color = TextSecondary)
+                Text("KD ${String.format("%.3f", item.price)} each", fontSize = 12.sp, color = colorScheme.onSurfaceVariant)
                 Spacer(modifier = Modifier.height(6.dp))
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedButton(onClick = onDecrease, shape = CircleShape, modifier = Modifier.size(30.dp), contentPadding = PaddingValues(0.dp), colors = ButtonDefaults.outlinedButtonColors(contentColor = Maroon), border = androidx.compose.foundation.BorderStroke(1.dp, Maroon.copy(alpha = 0.4f))) { Text("-", fontSize = 14.sp, fontWeight = FontWeight.Bold) }
-                    Text("${item.quantity}", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
-                    OutlinedButton(onClick = onIncrease, shape = CircleShape, modifier = Modifier.size(30.dp), contentPadding = PaddingValues(0.dp), colors = ButtonDefaults.outlinedButtonColors(contentColor = Maroon), border = androidx.compose.foundation.BorderStroke(1.dp, Maroon.copy(alpha = 0.4f))) { Text("+", fontSize = 14.sp, fontWeight = FontWeight.Bold) }
+                    OutlinedButton(onClick = onDecrease, shape = CircleShape, modifier = Modifier.size(30.dp), contentPadding = PaddingValues(0.dp), colors = ButtonDefaults.outlinedButtonColors(contentColor = colorScheme.primary), border = androidx.compose.foundation.BorderStroke(1.dp, colorScheme.primary.copy(alpha = 0.4f))) { Text("-", fontSize = 14.sp, fontWeight = FontWeight.Bold) }
+                    Text("${item.quantity}", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
+                    OutlinedButton(onClick = onIncrease, shape = CircleShape, modifier = Modifier.size(30.dp), contentPadding = PaddingValues(0.dp), colors = ButtonDefaults.outlinedButtonColors(contentColor = colorScheme.primary), border = androidx.compose.foundation.BorderStroke(1.dp, colorScheme.primary.copy(alpha = 0.4f))) { Text("+", fontSize = 14.sp, fontWeight = FontWeight.Bold) }
                 }
             }
             Column(horizontalAlignment = Alignment.End) {
                 IconButton(onClick = onRemove, modifier = Modifier.size(28.dp)) {
-                    Icon(Icons.Default.Delete, contentDescription = "Remove", tint = Color(0xFFD32F2F), modifier = Modifier.size(18.dp))
+                    Icon(Icons.Default.Delete, contentDescription = "Remove", tint = if (isDark) BannerErrorFgDark else Color(0xFFD32F2F), modifier = Modifier.size(18.dp))
                 }
                 Spacer(modifier = Modifier.height(8.dp))
-                Text("KD ${String.format("%.3f", item.price * item.quantity)}", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Maroon)
+                Text("KD ${String.format("%.3f", item.price * item.quantity)}", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
             }
         }
     }
