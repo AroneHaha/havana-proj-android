@@ -9,6 +9,8 @@ import com.example.havana.data.model.CategoryState
 import com.example.havana.data.model.Product
 import com.example.havana.data.model.ProductListState
 import com.example.havana.data.remote.ApiClient
+import com.example.havana.data.remote.ApiResult
+import com.example.havana.data.remote.safeApiCall
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,11 +44,19 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private fun loadCategories() {
         _categoryState.value = CategoryState.Loading
         viewModelScope.launch {
-            try {
-                val categories = productApi.getCategories()
-                _categoryState.value = CategoryState.Success(listOf(Category("all", "All", "\uD83C\uDF38")) + categories)
-            } catch (_: Exception) {
-                _categoryState.value = CategoryState.Success(MockData.categories)
+            when (val result = safeApiCall { productApi.getCategories() }) {
+                is ApiResult.Success -> {
+                    _categoryState.value = CategoryState.Success(
+                        listOf(Category("all", "All", "\uD83C\uDF38")) + result.data
+                    )
+                }
+                is ApiResult.ServerError -> {
+                    _categoryState.value = CategoryState.Error(result.message)
+                }
+                is ApiResult.NetworkError -> {
+                    // Server unreachable — fall back to mock data during development
+                    _categoryState.value = CategoryState.Success(MockData.categories)
+                }
             }
         }
     }
@@ -54,13 +64,19 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     fun loadProducts() {
         _productState.value = ProductListState.Loading
         viewModelScope.launch {
-            try {
-                val products = productApi.getProducts()
-                allProducts = products
-                _productState.value = ProductListState.Success(products)
-            } catch (_: Exception) {
-                allProducts = MockData.products
-                _productState.value = ProductListState.Success(allProducts)
+            when (val result = safeApiCall { productApi.getProducts() }) {
+                is ApiResult.Success -> {
+                    allProducts = result.data
+                    _productState.value = ProductListState.Success(result.data)
+                }
+                is ApiResult.ServerError -> {
+                    _productState.value = ProductListState.Error(result.message)
+                }
+                is ApiResult.NetworkError -> {
+                    // Server unreachable — fall back to mock data during development
+                    allProducts = MockData.products
+                    _productState.value = ProductListState.Success(allProducts)
+                }
             }
         }
     }

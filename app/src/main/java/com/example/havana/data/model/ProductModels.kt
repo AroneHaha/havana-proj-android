@@ -9,9 +9,13 @@ data class Product(
     val image: String? = null,
     val category: String,
     val rating: Float = 0f,
+    @SerializedName("review_count")
     val reviewCount: Int = 0,
+    @SerializedName("is_featured")
     val isFeatured: Boolean = false,
+    @SerializedName("is_top_selling")
     val isTopSelling: Boolean = false,
+    @SerializedName("in_stock")
     val inStock: Boolean = true,
     val images: List<String> = emptyList(),
 )
@@ -38,7 +42,9 @@ sealed class CategoryState {
 
 data class Review(
     val id: String,
+    @SerializedName("user_id")
     val userId: String,
+    @SerializedName("user_name")
     val userName: String,
     val rating: Float,
     val comment: String,
@@ -54,6 +60,7 @@ sealed class ReviewState {
 }
 
 data class CartItem(
+    @SerializedName("product_id")
     val productId: String,
     val name: String,
     val price: Double,

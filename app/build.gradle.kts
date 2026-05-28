@@ -1,4 +1,4 @@
-    plugins {
+plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
 }
@@ -15,9 +15,19 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Backend URL — override via -P when building:
+        //   ./gradlew assembleDebug -PbaseUrl=https://api.havana.com/api/
+        val baseUrl: String = project.findProperty("baseUrl") as? String
+            ?: "http://10.0.2.2:8000/api/"
+        buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
     }
 
     buildTypes {
+        debug {
+            // Default debug URL targets emulator localhost
+            // Override via: ./gradlew assembleDebug -PbaseUrl=https://staging.havana.com/api/
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -32,6 +42,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 

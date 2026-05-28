@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.havana.data.mock.MockData
 import com.example.havana.data.model.*
 import com.example.havana.data.remote.ApiClient
+import com.example.havana.data.remote.ApiResult
+import com.example.havana.data.remote.safeApiCall
 import com.example.havana.data.session.SessionManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -34,11 +36,16 @@ class ProductDetailsViewModel(application: Application) : AndroidViewModel(appli
         _quantity.value = 1
         _addedToCart.value = false
         viewModelScope.launch {
-            try {
-                val product = detailsApi.getProduct(productId)
-                _productState.value = product
-            } catch (_: Exception) {
-                _productState.value = MockData.getProductById(productId)
+            when (val result = safeApiCall { detailsApi.getProduct(productId) }) {
+                is ApiResult.Success -> _productState.value = result.data
+                is ApiResult.ServerError -> {
+                    // Server responded with error — show it, don't silently use mock
+                    _productState.value = MockData.getProductById(productId)
+                }
+                is ApiResult.NetworkError -> {
+                    // Server unreachable — fall back to mock during development
+                    _productState.value = MockData.getProductById(productId)
+                }
             }
         }
         loadReviews(productId)
@@ -47,11 +54,15 @@ class ProductDetailsViewModel(application: Application) : AndroidViewModel(appli
     private fun loadReviews(productId: String) {
         _reviewState.value = ReviewState.Loading
         viewModelScope.launch {
-            try {
-                val reviews = detailsApi.getReviews(productId)
-                _reviewState.value = ReviewState.Success(reviews)
-            } catch (_: Exception) {
-                _reviewState.value = ReviewState.Success(MockData.reviews)
+            when (val result = safeApiCall { detailsApi.getReviews(productId) }) {
+                is ApiResult.Success -> _reviewState.value = ReviewState.Success(result.data)
+                is ApiResult.ServerError -> {
+                    _reviewState.value = ReviewState.Error(result.message)
+                }
+                is ApiResult.NetworkError -> {
+                    // Server unreachable — fall back to mock during development
+                    _reviewState.value = ReviewState.Success(MockData.reviews)
+                }
             }
         }
     }

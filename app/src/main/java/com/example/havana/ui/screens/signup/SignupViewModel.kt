@@ -9,6 +9,8 @@ import com.example.havana.data.model.SignupRequest
 import com.example.havana.data.model.SignupResponse
 import com.example.havana.data.model.UserDto
 import com.example.havana.data.remote.ApiClient
+import com.example.havana.data.remote.ApiResult
+import com.example.havana.data.remote.safeApiCall
 import com.example.havana.data.session.SessionManager
 import com.example.havana.R
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -66,14 +68,21 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
         _signupState.value = AuthState.Loading
 
         viewModelScope.launch {
-            try {
-                val request = SignupRequest(name, email, password, confirmPassword, phone)
-                val response: SignupResponse = authApi.register(request)
-                val user = mapToHavanaUser(response.user)
-                SessionManager.saveSession(user, response.token)
-                _signupState.value = AuthState.Success(user, response.token)
-            } catch (e: Exception) {
-                tryMockSignup(name, email, password, confirmPassword, phone)
+            val request = SignupRequest(name, email, password, confirmPassword, phone)
+            when (val result = safeApiCall { authApi.register(request) }) {
+                is ApiResult.Success -> {
+                    val user = mapToHavanaUser(result.data.user)
+                    SessionManager.saveSession(user, result.data.token)
+                    _signupState.value = AuthState.Success(user, result.data.token)
+                }
+                is ApiResult.ServerError -> {
+                    // Server responded with error — show it (email taken, validation, etc.)
+                    _signupState.value = AuthState.Error(result.message)
+                }
+                is ApiResult.NetworkError -> {
+                    // Server unreachable — fall back to mock signup during development
+                    tryMockSignup(name, email, phone)
+                }
             }
         }
     }
@@ -81,8 +90,6 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
     private suspend fun tryMockSignup(
         name: String,
         email: String,
-        password: String,
-        confirmPassword: String,
         phone: String
     ) {
         kotlinx.coroutines.delay(800)
@@ -101,6 +108,7 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
         SessionManager.saveSession(mockUser, mockToken)
         _signupState.value = AuthState.Success(mockUser, mockToken)
     }
+
     private fun mapToHavanaUser(dto: UserDto): HavanaUser {
         return HavanaUser(
             id = dto.id,
@@ -111,6 +119,7 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
             emailVerified = dto.emailVerifiedAt != null,
         )
     }
+
     fun resetState() {
         _signupState.value = AuthState.Idle
     }

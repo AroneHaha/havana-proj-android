@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName
 import androidx.compose.ui.graphics.Color
 
 data class DeliveryAddress(
+    @SerializedName("full_address")
     val fullAddress: String,
     val area: String = "",
     val block: String = "",
@@ -16,18 +17,23 @@ data class DeliveryAddress(
 )
 
 data class OrderRequest(
+    @SerializedName("customer_name")
     val customerName: String,
     val phone: String,
+    @SerializedName("delivery_address")
     val deliveryAddress: DeliveryAddress,
     val notes: String,
+    @SerializedName("payment_method")
     val paymentMethod: String = "cod",
     val items: List<OrderItemRequest>,
     val subtotal: Double,
+    @SerializedName("delivery_fee")
     val deliveryFee: Double,
     val total: Double,
 )
 
 data class OrderItemRequest(
+    @SerializedName("product_id")
     val productId: String,
     val name: String,
     val price: Double,
@@ -53,21 +59,28 @@ sealed class CheckoutState {
 
 data class Order(
     val id: String,
+    @SerializedName("order_number")
     val orderNumber: String,
+    @SerializedName("customer_name")
     val customerName: String,
     val phone: String,
+    @SerializedName("delivery_address")
     val deliveryAddress: DeliveryAddress,
     val notes: String,
+    @SerializedName("payment_method")
     val paymentMethod: String,
     val items: List<OrderItem>,
     val subtotal: Double,
+    @SerializedName("delivery_fee")
     val deliveryFee: Double,
     val total: Double,
     val status: String,
+    @SerializedName("created_at")
     val createdAt: String,
 )
 
 data class OrderItem(
+    @SerializedName("product_id")
     val productId: String,
     val name: String,
     val price: Double,

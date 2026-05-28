@@ -5,7 +5,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.havana.data.model.*
 import com.example.havana.data.remote.ApiClient
+import com.example.havana.data.remote.ApiResult
 import com.example.havana.data.remote.AuthApiService
+import com.example.havana.data.remote.safeApiCall
 import com.example.havana.data.session.SessionManager
 import com.example.havana.R
 import kotlinx.coroutines.delay
@@ -36,52 +38,60 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
 
-            try {
-                val response = apiService.login(LoginRequest(email, password))
-                val apiUser = HavanaUser(
-                    id = response.user.id,
-                    email = response.user.email,
-                    firstName = response.user.firstName,
-                    lastName = response.user.lastName,
-                    role = response.user.role,
-                    emailVerified = response.user.emailVerifiedAt != null,
-                )
-                SessionManager.saveSession(apiUser, response.token)
-                _authState.value = AuthState.Success(user = apiUser, token = response.token)
-                return@launch
-            } catch (_: Exception) {
-// API unreachable — fall through to mock
+            when (val result = safeApiCall { apiService.login(LoginRequest(email, password)) }) {
+                is ApiResult.Success -> {
+                    val apiUser = HavanaUser(
+                        id = result.data.user.id,
+                        email = result.data.user.email,
+                        firstName = result.data.user.firstName,
+                        lastName = result.data.user.lastName,
+                        role = result.data.user.role,
+                        emailVerified = result.data.user.emailVerifiedAt != null,
+                    )
+                    SessionManager.saveSession(apiUser, result.data.token)
+                    SessionManager.saveRefreshToken(result.data.refreshToken)
+                    _authState.value = AuthState.Success(user = apiUser, token = result.data.token)
+                }
+                is ApiResult.ServerError -> {
+                    // Server responded — show the real error (invalid credentials, etc.)
+                    _authState.value = AuthState.Error(result.message)
+                }
+                is ApiResult.NetworkError -> {
+                    // Server unreachable — fall back to mock login during development
+                    tryMockLogin(email, password)
+                }
             }
+        }
+    }
 
-// Mock login
-            delay(600)
-            val account = mockAccounts[email.lowercase()]
-            if (account != null && account.password == password) {
-                val mockUser = HavanaUser(
-                    id = "user-${System.currentTimeMillis()}",
-                    email = email,
-                    firstName = account.firstName,
-                    lastName = account.lastName,
-                    role = "customer",
-                    emailVerified = true,
-                    phone = account.phone,
-                    deliveryAddress = DeliveryAddress(
-                        fullAddress = "Salmiya, Salem Al Mubarak St, Block 12, Building 8, Floor 3, Hawalli Governorate, Kuwait",
-                        area = "Salmiya",
-                        block = "12",
-                        street = "Salem Al Mubarak St",
-                        building = "8",
-                        floor = "3",
-                        latitude = 29.3375,
-                        longitude = 48.0833
-                    ),
-                )
-                val mockToken = "mock-token-${System.currentTimeMillis()}"
-                SessionManager.saveSession(mockUser, mockToken)
-                _authState.value = AuthState.Success(user = mockUser, token = mockToken)
-            } else {
-                _authState.value = AuthState.Error(getApplication<Application>().getString(R.string.login_error_invalid_credentials))
-            }
+    private suspend fun tryMockLogin(email: String, password: String) {
+        delay(600)
+        val account = mockAccounts[email.lowercase()]
+        if (account != null && account.password == password) {
+            val mockUser = HavanaUser(
+                id = "user-${System.currentTimeMillis()}",
+                email = email,
+                firstName = account.firstName,
+                lastName = account.lastName,
+                role = "customer",
+                emailVerified = true,
+                phone = account.phone,
+                deliveryAddress = DeliveryAddress(
+                    fullAddress = "Salmiya, Salem Al Mubarak St, Block 12, Building 8, Floor 3, Hawalli Governorate, Kuwait",
+                    area = "Salmiya",
+                    block = "12",
+                    street = "Salem Al Mubarak St",
+                    building = "8",
+                    floor = "3",
+                    latitude = 29.3375,
+                    longitude = 48.0833
+                ),
+            )
+            val mockToken = "mock-token-${System.currentTimeMillis()}"
+            SessionManager.saveSession(mockUser, mockToken)
+            _authState.value = AuthState.Success(user = mockUser, token = mockToken)
+        } else {
+            _authState.value = AuthState.Error(getApplication<Application>().getString(R.string.login_error_invalid_credentials))
         }
     }
 

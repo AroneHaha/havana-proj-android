@@ -30,20 +30,51 @@ object SessionManager {
     val isArabic: Boolean get() = _isArabic
     val isLoggedIn: Boolean get() = _currentUser != null && _token != null
 
+    private const val KEY_REFRESH_TOKEN = "refresh_token"
+
     fun initialize(context: Context) {
         prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         _isDarkMode = prefs?.getBoolean(KEY_DARK_MODE, false) ?: false
         _isArabic = prefs?.getBoolean(KEY_LANGUAGE_ARABIC, false) ?: false
 
-        // ── Auth session is NOT restored across app restarts. ──
-        // In mock/dev mode there's no backend to validate the token,
-        // so persisting a stale mock-token would auto-login the user
-        // every cold start without any verification.
-        // When the real Laravel API is wired up, restore the token
-        // here and add a /auth/me call to validate it before setting
-        // _currentUser.
-        clearSession()
+        // ── Restore auth session from SharedPreferences ──
+        val savedToken = prefs?.getString(KEY_AUTH_TOKEN, null)
+        val savedUserJson = prefs?.getString(KEY_USER_JSON, null)
+
+        if (savedToken != null && savedUserJson != null) {
+            _token = savedToken
+            _currentUser = try {
+                gson.fromJson(savedUserJson, HavanaUser::class.java)
+            } catch (_: Exception) {
+                null
+            }
+            // If deserialization failed, clear the stale data
+            if (_currentUser == null) {
+                _token = null
+                prefs?.edit()?.apply {
+                    remove(KEY_AUTH_TOKEN)
+                    remove(KEY_USER_ID)
+                    remove(KEY_USER_JSON)
+                    remove(KEY_REFRESH_TOKEN)
+                    apply()
+                }
+            }
+        }
     }
+
+    fun saveRefreshToken(refreshToken: String?) {
+        prefs?.edit()?.apply {
+            if (refreshToken != null) {
+                putString(KEY_REFRESH_TOKEN, refreshToken)
+            } else {
+                remove(KEY_REFRESH_TOKEN)
+            }
+            apply()
+        }
+    }
+
+    val refreshToken: String?
+        get() = prefs?.getString(KEY_REFRESH_TOKEN, null)
 
     fun saveSession(user: HavanaUser, token: String) {
         _currentUser = user
@@ -65,6 +96,7 @@ object SessionManager {
             remove(KEY_AUTH_TOKEN)
             remove(KEY_USER_ID)
             remove(KEY_USER_JSON)
+            remove(KEY_REFRESH_TOKEN)
             apply()
         }
     }

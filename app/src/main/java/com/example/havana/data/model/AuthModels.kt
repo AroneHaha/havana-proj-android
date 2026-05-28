@@ -29,11 +29,15 @@ data class UserDto(
 data class HavanaUser(
     val id: String,
     val email: String,
+    @SerializedName("first_name")
     val firstName: String,
+    @SerializedName("last_name")
     val lastName: String,
     val role: String,
+    @SerializedName("email_verified")
     val emailVerified: Boolean,
     val phone: String = "",
+    @SerializedName("delivery_address")
     val deliveryAddress: DeliveryAddress? = null,
 )
 
@@ -50,6 +54,7 @@ data class SignupRequest(
     val name: String,
     val email: String,
     val password: String,
+    @SerializedName("confirm_password")
     val confirmPassword: String,
     val phone: String
 )

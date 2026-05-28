@@ -3,14 +3,16 @@ package com.example.havana.ui.screens.profile
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.havana.R
 import com.example.havana.data.model.*
+import com.example.havana.data.remote.ApiClient
+import com.example.havana.data.remote.AuthApiService
 import com.example.havana.data.session.SessionManager
 import com.example.havana.ui.theme.ThemeManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import com.example.havana.R
 
 class ProfileViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -123,8 +125,20 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         SessionManager.setArabic(enabled)
     }
 
+    private val authApi = ApiClient.retrofit.create(AuthApiService::class.java)
+
     fun logout() {
-        SessionManager.clearSession()
+        viewModelScope.launch {
+            try {
+                val token = SessionManager.token
+                if (token != null) {
+                    authApi.logout("Bearer $token")
+                }
+            } catch (_: Exception) {
+                // Server logout failed — still clear local session
+            }
+            SessionManager.clearSession()
+        }
     }
 
     fun resetEditState() {

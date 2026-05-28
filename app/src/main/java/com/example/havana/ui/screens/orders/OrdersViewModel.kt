@@ -7,6 +7,8 @@ import com.example.havana.data.model.Order
 import com.example.havana.data.model.OrderListState
 import com.example.havana.data.repository.OrderRepository
 import com.example.havana.data.remote.ApiClient
+import com.example.havana.data.remote.ApiResult
+import com.example.havana.data.remote.safeApiCall
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,15 +35,20 @@ class OrdersViewModel(application: Application) : AndroidViewModel(application) 
     fun loadOrders() {
         _orderListState.value = OrderListState.Loading
         viewModelScope.launch {
-            try {
-                val orders = orderApi.getOrders()
-                allOrders = orders
-                OrderRepository.setOrders(orders)
-                _orderListState.value = OrderListState.Success(orders)
-            } catch (_: Exception) {
-                // Use OrderRepository (initialized from MockData) as fallback
-                allOrders = OrderRepository.orders.value
-                _orderListState.value = OrderListState.Success(allOrders)
+            when (val result = safeApiCall { orderApi.getOrders() }) {
+                is ApiResult.Success -> {
+                    allOrders = result.data
+                    OrderRepository.setOrders(result.data)
+                    _orderListState.value = OrderListState.Success(result.data)
+                }
+                is ApiResult.ServerError -> {
+                    _orderListState.value = OrderListState.Error(result.message)
+                }
+                is ApiResult.NetworkError -> {
+                    // Server unreachable — fall back to OrderRepository (mock) during development
+                    allOrders = OrderRepository.orders.value
+                    _orderListState.value = OrderListState.Success(allOrders)
+                }
             }
         }
     }
