@@ -21,11 +21,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.havana.R
 import com.example.havana.data.model.Category
 import com.example.havana.data.model.CategoryState
 import com.example.havana.data.model.Product
@@ -64,14 +66,14 @@ fun HomeScreen(
                 title = {
                     Column {
                         Text(
-                            "HAVANA",
+                            stringResource(R.string.home_brand),
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             color = colorScheme.primary,
                             letterSpacing = 3.sp
                         )
                         Text(
-                            "Luxury Flowers & Gifts",
+                            stringResource(R.string.home_tagline),
                             fontSize = 10.sp,
                             color = colorScheme.secondary,
                             letterSpacing = 2.sp,
@@ -83,7 +85,7 @@ fun HomeScreen(
                     IconButton(onClick = onCartClick) {
                         Icon(
                             Icons.Filled.ShoppingCart,
-                            contentDescription = "Cart",
+                            contentDescription = stringResource(R.string.nav_cart),
                             tint = colorScheme.primary
                         )
                     }
@@ -104,8 +106,8 @@ fun HomeScreen(
                         coroutineScope.launch { listState.animateScrollToItem(0) }
                         viewModel.loadProducts()
                     },
-                    icon = { Icon(Icons.Outlined.Home, contentDescription = "Home") },
-                    label = { Text("Home", fontSize = 11.sp) },
+                    icon = { Icon(Icons.Outlined.Home, contentDescription = stringResource(R.string.nav_home)) },
+                    label = { Text(stringResource(R.string.nav_home), fontSize = 11.sp) },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = colorScheme.primary,
                         selectedTextColor = colorScheme.primary,
@@ -115,8 +117,8 @@ fun HomeScreen(
                 NavigationBarItem(
                     selected = false,
                     onClick = onCartClick,
-                    icon = { Icon(Icons.Outlined.ShoppingCart, contentDescription = "Cart") },
-                    label = { Text("Cart", fontSize = 11.sp) },
+                    icon = { Icon(Icons.Outlined.ShoppingCart, contentDescription = stringResource(R.string.nav_cart)) },
+                    label = { Text(stringResource(R.string.nav_cart), fontSize = 11.sp) },
                     colors = NavigationBarItemDefaults.colors(
                         unselectedIconColor = colorScheme.onSurfaceVariant,
                         unselectedTextColor = colorScheme.onSurfaceVariant
@@ -125,8 +127,8 @@ fun HomeScreen(
                 NavigationBarItem(
                     selected = false,
                     onClick = onOrdersClick,
-                    icon = { Icon(Icons.Outlined.ReceiptLong, contentDescription = "Orders") },
-                    label = { Text("Orders", fontSize = 11.sp) },
+                    icon = { Icon(Icons.Outlined.ReceiptLong, contentDescription = stringResource(R.string.nav_orders)) },
+                    label = { Text(stringResource(R.string.nav_orders), fontSize = 11.sp) },
                     colors = NavigationBarItemDefaults.colors(
                         unselectedIconColor = colorScheme.onSurfaceVariant,
                         unselectedTextColor = colorScheme.onSurfaceVariant
@@ -135,8 +137,8 @@ fun HomeScreen(
                 NavigationBarItem(
                     selected = false,
                     onClick = onProfileClick,
-                    icon = { Icon(Icons.Outlined.Person, contentDescription = "Profile") },
-                    label = { Text("Profile", fontSize = 11.sp) },
+                    icon = { Icon(Icons.Outlined.Person, contentDescription = stringResource(R.string.nav_profile)) },
+                    label = { Text(stringResource(R.string.nav_profile), fontSize = 11.sp) },
                     colors = NavigationBarItemDefaults.colors(
                         unselectedIconColor = colorScheme.onSurfaceVariant,
                         unselectedTextColor = colorScheme.onSurfaceVariant
@@ -157,7 +159,7 @@ fun HomeScreen(
                 OutlinedTextField(
                     value = searchInput,
                     onValueChange = { searchInput = it; viewModel.updateSearchQuery(it) },
-                    placeholder = { Text("Search flowers, gifts...") },
+                    placeholder = { Text(stringResource(R.string.home_search_placeholder)) },
                     leadingIcon = {
                         Icon(Icons.Default.Search, contentDescription = null, tint = colorScheme.onSurfaceVariant)
                     },
@@ -214,7 +216,7 @@ fun HomeScreen(
             // ===== SHOP BY OCCASION =====
             item {
                 Text(
-                    "Shop by Occasion",
+                    stringResource(R.string.home_shop_by_occasion),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = colorScheme.onBackground,
@@ -240,7 +242,7 @@ fun HomeScreen(
             if (featuredProducts.isNotEmpty() && searchQuery.isBlank() && selectedCategory == "All") {
                 item {
                     Text(
-                        "Featured",
+                        stringResource(R.string.home_featured),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = colorScheme.onBackground,
@@ -267,7 +269,7 @@ fun HomeScreen(
             if (topSelling.isNotEmpty() && searchQuery.isBlank() && selectedCategory == "All") {
                 item {
                     Text(
-                        "Top Selling",
+                        stringResource(R.string.home_top_selling),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = colorScheme.onBackground,
@@ -292,9 +294,9 @@ fun HomeScreen(
 
             item {
                 val sectionTitle = when {
-                    searchQuery.isNotBlank() -> "Search Results"
+                    searchQuery.isNotBlank() -> stringResource(R.string.home_search_results)
                     selectedCategory != "All" -> selectedCategory
-                    else -> "All Products"
+                    else -> stringResource(R.string.home_all_products)
                 }
                 Text(
                     sectionTitle,
@@ -329,7 +331,7 @@ fun HomeScreen(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    "No products found",
+                                    stringResource(R.string.home_no_products),
                                     color = colorScheme.onSurfaceVariant,
                                     fontSize = 14.sp
                                 )
@@ -378,7 +380,7 @@ fun HomeScreen(
                                     shape = RoundedCornerShape(12.dp),
                                     colors = ButtonDefaults.outlinedButtonColors(contentColor = colorScheme.primary)
                                 ) {
-                                    Text("Retry")
+                                    Text(stringResource(R.string.retry))
                                 }
                             }
                         }
@@ -426,7 +428,7 @@ fun FeaturedProductCard(
                     color = colorScheme.secondary
                 ) {
                     Text(
-                        "Featured",
+                        stringResource(R.string.home_featured_badge),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
                         color = colorScheme.onSecondary,
@@ -499,7 +501,7 @@ fun TopSellingCard(
                     color = colorScheme.primary
                 ) {
                     Text(
-                        "Top",
+                        stringResource(R.string.home_top_badge),
                         fontSize = 9.sp,
                         fontWeight = FontWeight.Bold,
                         color = colorScheme.onPrimary,
@@ -589,7 +591,7 @@ fun ProductCard(
                 }
                 if (!product.inStock) {
                     Text(
-                        "Out of Stock",
+                        stringResource(R.string.home_out_of_stock),
                         fontSize = 11.sp,
                         color = Error,
                         fontWeight = FontWeight.Medium
@@ -611,17 +613,17 @@ private fun Product.categoryEmoji(): String {
     }
 }
 
-data class OccasionItem(val key: String, val label: String, val emoji: String)
+data class OccasionItem(val key: String, val labelResId: Int, val emoji: String)
 
 val occasionList = listOf(
-    OccasionItem("birthday", "Birthday", "\uD83C\uDF82"),
-    OccasionItem("weddings", "Weddings", "\uD83D\uDC8D"),
-    OccasionItem("anniversary", "Anniversary", "\u2764\uFE0F"),
-    OccasionItem("graduation", "Graduation", "\uD83C\uDF93"),
-    OccasionItem("mothersDay", "Mother's Day", "\uD83C\uDF3A"),
-    OccasionItem("loveRomance", "Love", "\uD83D\uDC95"),
-    OccasionItem("eid", "Eid", "\uD83C\uDF38"),
-    OccasionItem("sympathy", "Sympathy", "\uD83D\uDE22")
+    OccasionItem("birthday", R.string.occasion_birthday, "\uD83C\uDF82"),
+    OccasionItem("weddings", R.string.occasion_weddings, "\uD83D\uDC8D"),
+    OccasionItem("anniversary", R.string.occasion_anniversary, "\u2764\uFE0F"),
+    OccasionItem("graduation", R.string.occasion_graduation, "\uD83C\uDF93"),
+    OccasionItem("mothersDay", R.string.occasion_mothers_day, "\uD83C\uDF3A"),
+    OccasionItem("loveRomance", R.string.occasion_love, "\uD83D\uDC95"),
+    OccasionItem("eid", R.string.occasion_eid, "\uD83C\uDF38"),
+    OccasionItem("sympathy", R.string.occasion_sympathy, "\uD83D\uDE22")
 )
 
 @Composable
@@ -651,7 +653,7 @@ fun OccasionCard(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                occasion.label,
+                stringResource(occasion.labelResId),
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Medium,
                 color = colorScheme.onBackground,

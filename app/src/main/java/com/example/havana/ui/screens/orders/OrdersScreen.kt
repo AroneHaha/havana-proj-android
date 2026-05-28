@@ -24,6 +24,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.havana.R
 import com.example.havana.data.model.Order
 import com.example.havana.data.model.OrderListState
+import com.example.havana.data.model.localizedStatus
 import com.example.havana.data.model.statusColor
 import com.example.havana.data.model.statusEmoji
 import com.example.havana.ui.theme.*

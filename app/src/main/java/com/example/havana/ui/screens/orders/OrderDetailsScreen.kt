@@ -489,7 +489,7 @@ fun OrderDetailsScreen(
                         Text(
                             if (isSelected) "\u2605" else "\u2606",
                             fontSize = 40.sp,
-                            color = if (isSelected) colorScheme.secondary else colorScheme.outlineVariant,
+                            color = if (isSelected) if (isDark) GoldLight else Gold else colorScheme.outlineVariant,
                             modifier = Modifier
                                 .clickable { selectedRating = starValue }
                                 .padding(4.dp)
@@ -557,11 +557,13 @@ fun OrderDetailsScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
+                val guestUserLabel = stringResource(R.string.guest_user)
+
                 Button(
                     onClick = {
                         if (selectedRating > 0 && reviewText.isNotBlank() && reviewingItem != null) {
                             val user = SessionManager.currentUser
-                            val userName = user?.let { "${it.firstName} ${it.lastName}" } ?: stringResource(R.string.guest_user)
+                            val userName = user?.let { "${it.firstName} ${it.lastName}" } ?: guestUserLabel
                             val userId = user?.id ?: "guest"
 
                             viewModel.submitReview(
@@ -652,7 +654,7 @@ fun OrderDetailItemCard(
                             Text(
                                 if (i < existingReview.rating.toInt()) "\u2605" else "\u2606",
                                 fontSize = 14.sp,
-                                color = if (i < existingReview.rating.toInt()) colorScheme.secondary else colorScheme.outlineVariant
+                                color = if (i < existingReview.rating.toInt()) if (isDark) GoldLight else Gold else colorScheme.outlineVariant
                             )
                         }
                     }
@@ -681,11 +683,11 @@ fun OrderDetailItemCard(
                     onClick = onRateClick,
                     shape = RoundedCornerShape(8.dp),
                     contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = colorScheme.secondary),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, colorScheme.secondary),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = if (isDark) GoldLight else Gold),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, if (isDark) GoldLight else Gold),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Icon(Icons.Filled.Star, contentDescription = null, tint = colorScheme.secondary, modifier = Modifier.size(16.dp))
+                    Icon(Icons.Filled.Star, contentDescription = null, tint = if (isDark) GoldLight else Gold, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(stringResource(R.string.review_rate_button), fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                 }

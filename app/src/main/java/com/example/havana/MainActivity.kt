@@ -1,11 +1,15 @@
 package com.example.havana
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import com.example.havana.data.cart.CartManager
+import com.example.havana.data.locale.LocaleHelper
 import com.example.havana.data.model.DeliveryAddress
 import com.example.havana.data.model.Order
 import com.example.havana.data.repository.OrderRepository
@@ -27,6 +31,12 @@ import com.example.havana.ui.screens.signup.SignupScreen
 
 
 class MainActivity : ComponentActivity() {
+
+    override fun attachBaseContext(newBase: Context) {
+        val context = LocaleHelper.applySavedLocale(newBase)
+        super.attachBaseContext(context)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         // ── Anti-flicker: apply saved theme BEFORE super.onCreate ──
         SessionManager.initialize(applicationContext)
@@ -35,7 +45,14 @@ class MainActivity : ComponentActivity() {
 
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent { HavanaTheme { HavanaApp() } }
+        setContent {
+            HavanaTheme {
+                val layoutDirection = if (SessionManager.isArabic) LayoutDirection.Rtl else LayoutDirection.Ltr
+                CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) {
+                    HavanaApp()
+                }
+            }
+        }
     }
 }
 

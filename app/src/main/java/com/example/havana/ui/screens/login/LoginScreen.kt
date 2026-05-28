@@ -30,10 +30,15 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.res.stringResource
+import com.example.havana.R
+import com.example.havana.data.locale.LocaleHelper
 import com.example.havana.data.model.AuthState
+import com.example.havana.data.session.SessionManager
 import com.example.havana.ui.theme.*
 import androidx.compose.ui.text.style.TextDecoration
 import com.example.havana.ui.theme.ThemeManager
+import androidx.compose.ui.platform.LocalContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,20 +70,6 @@ fun LoginScreen(
             .fillMaxSize()
             .background(colorScheme.background)
     ) {
-        // ── Theme toggle button (top-end) ──
-        IconButton(
-            onClick = { ThemeManager.toggle() },
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(16.dp),
-        ) {
-            Icon(
-                imageVector = if (isDark) Icons.Outlined.LightMode else Icons.Outlined.DarkMode,
-                contentDescription = if (isDark) "Switch to light mode" else "Switch to dark mode",
-                tint = colorScheme.onBackground.copy(alpha = 0.6f),
-            )
-        }
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -106,13 +97,13 @@ fun LoginScreen(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        text = "Havana",
+                        text = stringResource(R.string.login_brand),
                         style = MaterialTheme.typography.displayLarge,
                         color = colorScheme.primary,
                     )
 
                     Text(
-                        text = "Luxury Floral Boutique",
+                        text = stringResource(R.string.login_tagline),
                         style = MaterialTheme.typography.bodyMedium,
                         color = colorScheme.onBackground.copy(alpha = 0.5f),
                     )
@@ -122,13 +113,13 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(48.dp))
 
             Text(
-                text = "Welcome Back",
+                text = stringResource(R.string.login_welcome),
                 style = MaterialTheme.typography.headlineMedium,
                 color = colorScheme.onBackground,
             )
 
             Text(
-                text = "Sign in to your account",
+                text = stringResource(R.string.login_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 4.dp),
@@ -142,8 +133,8 @@ fun LoginScreen(
                     email = it
                     if (authState is AuthState.Error) viewModel.resetState()
                 },
-                label = { Text("Email Address") },
-                placeholder = { Text("you@example.com") },
+                label = { Text(stringResource(R.string.login_email_label)) },
+                placeholder = { Text(stringResource(R.string.login_email_placeholder)) },
                 leadingIcon = {
                     Icon(
                         Icons.Default.Email,
@@ -174,8 +165,8 @@ fun LoginScreen(
                     password = it
                     if (authState is AuthState.Error) viewModel.resetState()
                 },
-                label = { Text("Password") },
-                placeholder = { Text("Enter your password") },
+                label = { Text(stringResource(R.string.login_password_label)) },
+                placeholder = { Text(stringResource(R.string.login_password_placeholder)) },
                 leadingIcon = {
                     Icon(
                         Icons.Default.Lock,
@@ -187,7 +178,7 @@ fun LoginScreen(
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
                         Icon(
                             if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                            contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                            contentDescription = if (passwordVisible) stringResource(R.string.login_hide_password) else stringResource(R.string.login_show_password),
                             tint = colorScheme.onSurfaceVariant,
                         )
                     }
@@ -219,7 +210,7 @@ fun LoginScreen(
             ) {
                 TextButton(onClick = { /* TODO */ }) {
                     Text(
-                        text = "Forgot password?",
+                        text = stringResource(R.string.login_forgot_password),
                         color = colorScheme.primary,
                         style = MaterialTheme.typography.labelSmall,
                     )
@@ -266,7 +257,7 @@ fun LoginScreen(
                     )
                 } else {
                     Text(
-                        text = "Sign In",
+                        text = stringResource(R.string.login_button),
                         style = MaterialTheme.typography.labelLarge,
                         fontSize = 16.sp,
                     )
@@ -281,7 +272,7 @@ fun LoginScreen(
             ) {
                 HorizontalDivider(modifier = Modifier.weight(1f), color = colorScheme.outline)
                 Text(
-                    text = "  or  ",
+                    text = "  ${stringResource(R.string.or)}  ",
                     style = MaterialTheme.typography.bodySmall,
                     color = colorScheme.onSurfaceVariant,
                 )
@@ -292,12 +283,12 @@ fun LoginScreen(
 
             TextButton(onClick = onNavigateToSignup) {
                 Text(
-                    text = "Don't have an account? ",
+                    text = stringResource(R.string.login_no_account),
                     color = colorScheme.onSurfaceVariant,
                     fontSize = 14.sp
                 )
                 Text(
-                    text = "Sign Up",
+                    text = stringResource(R.string.login_signup_link),
                     color = colorScheme.primary,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -306,6 +297,41 @@ fun LoginScreen(
             }
 
             Spacer(modifier = Modifier.height(40.dp))
+        }
+
+        // ── Top-right toggles: theme + language (on top of Column for touch) ──
+        val activityContext = LocalContext.current
+        Row(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Language toggle
+            TextButton(
+                onClick = {
+                    LocaleHelper.setArabic(activityContext as android.app.Activity, !SessionManager.isArabic)
+                },
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+            ) {
+                Text(
+                    text = if (SessionManager.isArabic) stringResource(R.string.lang_toggle_en) else stringResource(R.string.lang_toggle_ar),
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = colorScheme.primary
+                )
+            }
+            // Theme toggle
+            IconButton(
+                onClick = { ThemeManager.toggle() },
+            ) {
+                Icon(
+                    imageVector = if (isDark) Icons.Outlined.LightMode else Icons.Outlined.DarkMode,
+                    contentDescription = if (isDark) stringResource(R.string.login_switch_light) else stringResource(R.string.login_switch_dark),
+                    tint = colorScheme.onBackground.copy(alpha = 0.6f),
+                )
+            }
         }
     }
 }

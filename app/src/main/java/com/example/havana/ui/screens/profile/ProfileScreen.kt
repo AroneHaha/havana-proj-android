@@ -156,6 +156,7 @@ fun ProfileScreen(
             }
             is ProfileState.Success -> {
                 val profile = (profileState as ProfileState.Success).profile
+                val activityContext = LocalContext.current
                 ProfileContent(
                     profile = profile,
                     editingField = editingField,
@@ -171,8 +172,7 @@ fun ProfileScreen(
                     onDarkModeToggle = { viewModel.toggleDarkMode(it) },
                     onArabicToggle = { enabled ->
                         viewModel.toggleArabic(enabled)
-                        val context = LocalContext.current
-                        LocaleHelper.setArabic(context as android.app.Activity, enabled)
+                        LocaleHelper.setArabic(activityContext as android.app.Activity, enabled)
                     },
                     onLogout = {
                         viewModel.logout()

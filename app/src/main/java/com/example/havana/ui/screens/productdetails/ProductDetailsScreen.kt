@@ -24,6 +24,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.res.stringResource
+import com.example.havana.R
 import com.example.havana.data.model.Product
 import com.example.havana.data.model.Review
 import com.example.havana.data.model.ReviewState
@@ -59,7 +61,7 @@ fun ProductDetailsScreen(
                     IconButton(onClick = onBackClick) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.back),
                             tint = colorScheme.primary
                         )
                     }
@@ -68,7 +70,7 @@ fun ProductDetailsScreen(
                     IconButton(onClick = onCartClick) {
                         Icon(
                             Icons.Filled.ShoppingCart,
-                            contentDescription = "Cart",
+                            contentDescription = stringResource(R.string.nav_cart),
                             tint = colorScheme.primary
                         )
                     }
@@ -95,7 +97,7 @@ fun ProductDetailsScreen(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                "Quantity",
+                                stringResource(R.string.product_quantity),
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = colorScheme.onSurfaceVariant
@@ -159,9 +161,9 @@ fun ProductDetailsScreen(
                                 )
                             ) {
                                 if (addedToCart) {
-                                    Text("Added", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                                    Text(stringResource(R.string.product_added), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                                 } else {
-                                    Text("Add to Cart", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                                    Text(stringResource(R.string.product_add_to_cart), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                                 }
                             }
 
@@ -179,7 +181,7 @@ fun ProductDetailsScreen(
                                     .height(48.dp)
                             ) {
                                 Text(
-                                    "Checkout  \u2022  ${formatKdPrice(p.price * quantity)}",
+                                    "${stringResource(R.string.product_checkout)}  \u2022  ${formatKdPrice(p.price * quantity)}",
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     color = colorScheme.onPrimary,
@@ -230,7 +232,11 @@ fun ProductDetailsScreen(
                                 colorScheme.secondary.copy(alpha = 0.08f),
                                 colorScheme.surfaceVariant.copy(alpha = 0.5f)
                             )
-                            val labels = listOf("Front View", "Detail View", "Arrangement")
+                            val labels = listOf(
+                                stringResource(R.string.product_front_view),
+                                stringResource(R.string.product_detail_view),
+                                stringResource(R.string.product_arrangement)
+                            )
 
                             Box(
                                 modifier = Modifier
@@ -321,7 +327,7 @@ fun ProductDetailsScreen(
                                 Icon(
                                     Icons.Filled.Star,
                                     contentDescription = null,
-                                    tint = colorScheme.secondary,
+                                    tint = if (isDark) GoldLight else Gold,
                                     modifier = Modifier.size(20.dp)
                                 )
                                 Text(
@@ -331,7 +337,7 @@ fun ProductDetailsScreen(
                                     color = colorScheme.onBackground
                                 )
                                 Text(
-                                    " (${p.reviewCount} reviews)",
+                                    " " + stringResource(R.string.product_reviews_count, p.reviewCount),
                                     fontSize = 13.sp,
                                     color = colorScheme.onSurfaceVariant
                                 )
@@ -341,7 +347,7 @@ fun ProductDetailsScreen(
                         Spacer(modifier = Modifier.height(4.dp))
 
                         Text(
-                            if (p.inStock) "In Stock" else "Out of Stock",
+                            if (p.inStock) stringResource(R.string.product_in_stock) else stringResource(R.string.product_out_of_stock),
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Medium,
                             color = if (p.inStock) Success else Error
@@ -350,7 +356,7 @@ fun ProductDetailsScreen(
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Text(
-                            "Description",
+                            stringResource(R.string.product_description),
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = colorScheme.onBackground
@@ -384,7 +390,7 @@ fun ProductDetailsScreen(
                     ) {
                         Column {
                             Text(
-                                "Reviews & Ratings",
+                                stringResource(R.string.product_reviews_ratings),
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = colorScheme.onBackground
@@ -405,7 +411,7 @@ fun ProductDetailsScreen(
                                         Text(
                                             if (filled) "\u2605" else "\u2606",
                                             fontSize = 12.sp,
-                                            color = if (filled) colorScheme.secondary else colorScheme.outlineVariant
+                                            color = if (filled) if (isDark) GoldLight else Gold else colorScheme.outlineVariant
                                         )
                                     }
                                 }
@@ -464,6 +470,7 @@ private fun formatKdPrice(amount: Double): String {
 fun ReviewCard(review: Review) {
     val colorScheme = MaterialTheme.colorScheme
     val cardColor = if (ThemeManager.isDarkMode) CardDark else CardLight
+    val isDark = ThemeManager.isDarkMode
 
     Card(
         modifier = Modifier
@@ -518,7 +525,7 @@ fun ReviewCard(review: Review) {
                         Text(
                             if (i < review.rating.toInt()) "\u2605" else "\u2606",
                             fontSize = 14.sp,
-                            color = if (i < review.rating.toInt()) colorScheme.secondary else colorScheme.outlineVariant
+                            color = if (i < review.rating.toInt()) if (isDark) GoldLight else Gold else colorScheme.outlineVariant
                         )
                     }
                 }

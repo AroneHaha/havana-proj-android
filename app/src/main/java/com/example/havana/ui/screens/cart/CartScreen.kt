@@ -18,11 +18,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.havana.R
 import com.example.havana.data.mock.MockData
 import com.example.havana.data.model.CartItem
 import com.example.havana.ui.theme.*
@@ -53,17 +55,17 @@ fun CartScreen(
     if (showRemoveDialog && itemToRemove != null) {
         AlertDialog(
             onDismissRequest = { showRemoveDialog = false; itemToRemove = null },
-            title = { Text("Remove Item", fontWeight = FontWeight.Bold) },
-            text = { Text("Remove \"${itemToRemove?.name}\" from your cart?") },
+            title = { Text(stringResource(R.string.cart_remove_title), fontWeight = FontWeight.Bold) },
+            text = { Text(stringResource(R.string.cart_remove_message, itemToRemove?.name ?: "")) },
             confirmButton = {
                 TextButton(onClick = {
                     itemToRemove?.let { viewModel.removeItem(it.productId) }
                     showRemoveDialog = false
                     itemToRemove = null
-                }) { Text("Remove", color = Error, fontWeight = FontWeight.SemiBold) }
+                }) { Text(stringResource(R.string.remove), color = Error, fontWeight = FontWeight.SemiBold) }
             },
             dismissButton = {
-                TextButton(onClick = { showRemoveDialog = false; itemToRemove = null }) { Text("Cancel", color = colorScheme.onSurfaceVariant) }
+                TextButton(onClick = { showRemoveDialog = false; itemToRemove = null }) { Text(stringResource(R.string.cancel), color = colorScheme.onSurfaceVariant) }
             },
             containerColor = cardColor,
             shape = RoundedCornerShape(16.dp)
@@ -73,10 +75,10 @@ fun CartScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("My Cart", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground) },
+                title = { Text(stringResource(R.string.cart_title), fontSize = 20.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = colorScheme.primary)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = colorScheme.primary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background)
@@ -87,7 +89,7 @@ fun CartScreen(
                 Surface(shadowElevation = 16.dp, color = cardColor) {
                     Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                            Text("Total ($itemCount items)", fontSize = 14.sp, color = colorScheme.onSurfaceVariant)
+                            Text(stringResource(R.string.cart_total_items, itemCount), fontSize = 14.sp, color = colorScheme.onSurfaceVariant)
                             Text("KD ${String.format("%.3f", total)}", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
                         }
                         Spacer(modifier = Modifier.height(12.dp))
@@ -96,15 +98,15 @@ fun CartScreen(
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
                             modifier = Modifier.fillMaxWidth().height(50.dp)
-                        ) { Text("Proceed to Checkout", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onPrimary) }
+                        ) { Text(stringResource(R.string.cart_proceed_checkout), fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onPrimary) }
                     }
                 }
             } else {
                 NavigationBar(containerColor = navBarColor, tonalElevation = 8.dp) {
-                    NavigationBarItem(selected = false, onClick = onHomeClick, icon = { Icon(Icons.Outlined.Home, contentDescription = "Home") }, label = { Text("Home", fontSize = 11.sp) }, colors = NavigationBarItemDefaults.colors(unselectedIconColor = colorScheme.onSurfaceVariant, unselectedTextColor = colorScheme.onSurfaceVariant))
-                    NavigationBarItem(selected = true, onClick = { }, icon = { Icon(Icons.Outlined.ShoppingCart, contentDescription = "Cart") }, label = { Text("Cart", fontSize = 11.sp) }, colors = NavigationBarItemDefaults.colors(selectedIconColor = colorScheme.primary, selectedTextColor = colorScheme.primary, indicatorColor = colorScheme.primary.copy(alpha = 0.1f)))
-                    NavigationBarItem(selected = false, onClick = onOrdersClick, icon = { Icon(Icons.Outlined.ReceiptLong, contentDescription = "Orders") }, label = { Text("Orders", fontSize = 11.sp) }, colors = NavigationBarItemDefaults.colors(unselectedIconColor = colorScheme.onSurfaceVariant, unselectedTextColor = colorScheme.onSurfaceVariant))
-                    NavigationBarItem(selected = false, onClick = onProfileClick, icon = { Icon(Icons.Outlined.Person, contentDescription = "Profile") }, label = { Text("Profile", fontSize = 11.sp) }, colors = NavigationBarItemDefaults.colors(unselectedIconColor = colorScheme.onSurfaceVariant, unselectedTextColor = colorScheme.onSurfaceVariant))
+                    NavigationBarItem(selected = false, onClick = onHomeClick, icon = { Icon(Icons.Outlined.Home, contentDescription = stringResource(R.string.nav_home)) }, label = { Text(stringResource(R.string.nav_home), fontSize = 11.sp) }, colors = NavigationBarItemDefaults.colors(unselectedIconColor = colorScheme.onSurfaceVariant, unselectedTextColor = colorScheme.onSurfaceVariant))
+                    NavigationBarItem(selected = true, onClick = { }, icon = { Icon(Icons.Outlined.ShoppingCart, contentDescription = stringResource(R.string.nav_cart)) }, label = { Text(stringResource(R.string.nav_cart), fontSize = 11.sp) }, colors = NavigationBarItemDefaults.colors(selectedIconColor = colorScheme.primary, selectedTextColor = colorScheme.primary, indicatorColor = colorScheme.primary.copy(alpha = 0.1f)))
+                    NavigationBarItem(selected = false, onClick = onOrdersClick, icon = { Icon(Icons.Outlined.ReceiptLong, contentDescription = stringResource(R.string.nav_orders)) }, label = { Text(stringResource(R.string.nav_orders), fontSize = 11.sp) }, colors = NavigationBarItemDefaults.colors(unselectedIconColor = colorScheme.onSurfaceVariant, unselectedTextColor = colorScheme.onSurfaceVariant))
+                    NavigationBarItem(selected = false, onClick = onProfileClick, icon = { Icon(Icons.Outlined.Person, contentDescription = stringResource(R.string.nav_profile)) }, label = { Text(stringResource(R.string.nav_profile), fontSize = 11.sp) }, colors = NavigationBarItemDefaults.colors(unselectedIconColor = colorScheme.onSurfaceVariant, unselectedTextColor = colorScheme.onSurfaceVariant))
                 }
             }
         },
@@ -115,11 +117,11 @@ fun CartScreen(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("\uD83D\uDED2", fontSize = 56.sp)
                     Spacer(modifier = Modifier.height(12.dp))
-                    Text("Your cart is empty", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onBackground)
+                    Text(stringResource(R.string.cart_empty), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onBackground)
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text("Browse our collection and add some beautiful flowers!", fontSize = 13.sp, color = colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 40.dp))
+                    Text(stringResource(R.string.cart_empty_subtitle), fontSize = 13.sp, color = colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 40.dp))
                     Spacer(modifier = Modifier.height(20.dp))
-                    OutlinedButton(onClick = onHomeClick, shape = RoundedCornerShape(12.dp), colors = ButtonDefaults.outlinedButtonColors(contentColor = colorScheme.primary), border = androidx.compose.foundation.BorderStroke(1.dp, colorScheme.primary)) { Text("Browse Products", fontWeight = FontWeight.SemiBold) }
+                    OutlinedButton(onClick = onHomeClick, shape = RoundedCornerShape(12.dp), colors = ButtonDefaults.outlinedButtonColors(contentColor = colorScheme.primary), border = androidx.compose.foundation.BorderStroke(1.dp, colorScheme.primary)) { Text(stringResource(R.string.cart_browse_products), fontWeight = FontWeight.SemiBold) }
                 }
             }
         } else {
@@ -141,19 +143,19 @@ fun CartScreen(
                     HorizontalDivider(color = colorScheme.outline)
                     Spacer(modifier = Modifier.height(12.dp))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("Subtotal", fontSize = 14.sp, color = colorScheme.onSurfaceVariant)
+                        Text(stringResource(R.string.subtotal), fontSize = 14.sp, color = colorScheme.onSurfaceVariant)
                         Text("KD ${String.format("%.3f", total)}", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground)
                     }
                     Spacer(modifier = Modifier.height(6.dp))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("Delivery Fee", fontSize = 14.sp, color = colorScheme.onSurfaceVariant)
+                        Text(stringResource(R.string.delivery_fee), fontSize = 14.sp, color = colorScheme.onSurfaceVariant)
                         Text("KD 1.500", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground)
                     }
                     Spacer(modifier = Modifier.height(6.dp))
                     HorizontalDivider(color = colorScheme.outline)
                     Spacer(modifier = Modifier.height(6.dp))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                        Text("Grand Total", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
+                        Text(stringResource(R.string.grand_total), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
                         Text("KD ${String.format("%.3f", total + 1.500)}", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
                     }
                     Spacer(modifier = Modifier.height(80.dp))
@@ -187,7 +189,7 @@ fun CartItemCard(item: CartItem, onIncrease: () -> Unit, onDecrease: () -> Unit,
             Column(modifier = Modifier.weight(1f)) {
                 Text(item.name, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onBackground, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 Spacer(modifier = Modifier.height(4.dp))
-                Text("KD ${String.format("%.3f", item.price)} each", fontSize = 12.sp, color = colorScheme.onSurfaceVariant)
+                Text("KD ${String.format("%.3f", item.price)} ${stringResource(R.string.cart_each)}", fontSize = 12.sp, color = colorScheme.onSurfaceVariant)
                 Spacer(modifier = Modifier.height(6.dp))
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedButton(onClick = onDecrease, shape = CircleShape, modifier = Modifier.size(30.dp), contentPadding = PaddingValues(0.dp), colors = ButtonDefaults.outlinedButtonColors(contentColor = colorScheme.primary), border = androidx.compose.foundation.BorderStroke(1.dp, colorScheme.primary.copy(alpha = 0.4f))) { Text("-", fontSize = 14.sp, fontWeight = FontWeight.Bold) }
@@ -197,7 +199,7 @@ fun CartItemCard(item: CartItem, onIncrease: () -> Unit, onDecrease: () -> Unit,
             }
             Column(horizontalAlignment = Alignment.End) {
                 IconButton(onClick = onRemove, modifier = Modifier.size(28.dp)) {
-                    Icon(Icons.Default.Delete, contentDescription = "Remove", tint = if (isDark) BannerErrorFgDark else Color(0xFFD32F2F), modifier = Modifier.size(18.dp))
+                    Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.remove), tint = if (isDark) BannerErrorFgDark else Color(0xFFD32F2F), modifier = Modifier.size(18.dp))
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text("KD ${String.format("%.3f", item.price * item.quantity)}", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)

@@ -28,8 +28,13 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.res.stringResource
+import com.example.havana.R
+import com.example.havana.data.locale.LocaleHelper
 import com.example.havana.data.model.AuthState
+import com.example.havana.data.session.SessionManager
 import com.example.havana.ui.theme.*
+import androidx.compose.ui.platform.LocalContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -86,20 +91,6 @@ fun SignupScreen(
             .fillMaxSize()
             .background(colorScheme.background)
     ) {
-        // ── Theme toggle button (top-end) ──
-        IconButton(
-            onClick = { ThemeManager.toggle() },
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(16.dp),
-        ) {
-            Icon(
-                imageVector = if (isDark) Icons.Outlined.LightMode else Icons.Outlined.DarkMode,
-                contentDescription = if (isDark) "Switch to light mode" else "Switch to dark mode",
-                tint = colorScheme.onBackground.copy(alpha = 0.6f),
-            )
-        }
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -110,14 +101,14 @@ fun SignupScreen(
         ) {
             // ===== LOGO / BRAND =====
             Text(
-                text = "HAVANA",
+                text = stringResource(R.string.signup_brand),
                 fontSize = 36.sp,
                 fontWeight = FontWeight.Bold,
                 color = colorScheme.primary,
                 letterSpacing = 6.sp
             )
             Text(
-                text = "Luxury Flowers & Gifts",
+                text = stringResource(R.string.signup_tagline),
                 fontSize = 13.sp,
                 color = colorScheme.secondary,
                 letterSpacing = 3.sp,
@@ -128,13 +119,13 @@ fun SignupScreen(
 
             // ===== WELCOME TEXT =====
             Text(
-                text = "Create Account",
+                text = stringResource(R.string.signup_title),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = colorScheme.primary
             )
             Text(
-                text = "Join us and start ordering beautiful flowers",
+                text = stringResource(R.string.signup_subtitle),
                 fontSize = 14.sp,
                 color = if (isDark) AuthSubtitleDark else AuthSubtitleLight,
                 modifier = Modifier.padding(top = 4.dp)
@@ -165,7 +156,7 @@ fun SignupScreen(
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                         Text(
-                            text = "Account created! Redirecting to login...",
+                            text = stringResource(R.string.signup_success),
                             color = if (isDark) BannerSuccessFgDark else BannerSuccessFgLight,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Medium
@@ -193,7 +184,7 @@ fun SignupScreen(
                     ) {
                         Icon(
                             Icons.Default.Warning,
-                            contentDescription = "Error",
+                            contentDescription = stringResource(R.string.error),
                             tint = if (isDark) BannerErrorFgDark else BannerErrorFgLight,
                             modifier = Modifier.size(20.dp)
                         )
@@ -213,7 +204,7 @@ fun SignupScreen(
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Full Name") },
+                label = { Text(stringResource(R.string.signup_name_label)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
@@ -236,7 +227,7 @@ fun SignupScreen(
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("Email Address") },
+                label = { Text(stringResource(R.string.signup_email_label)) },
                 singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -262,7 +253,7 @@ fun SignupScreen(
             OutlinedTextField(
                 value = phone,
                 onValueChange = { phone = it },
-                label = { Text("Phone Number") },
+                label = { Text(stringResource(R.string.signup_phone_label)) },
                 singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -288,7 +279,7 @@ fun SignupScreen(
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("Password") },
+                label = { Text(stringResource(R.string.signup_password_label)) },
                 singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -306,7 +297,7 @@ fun SignupScreen(
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
                         Icon(
                             imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                            contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                            contentDescription = if (passwordVisible) stringResource(R.string.signup_hide_password) else stringResource(R.string.signup_show_password),
                             tint = if (isDark) AuthSubtitleDark else AuthSubtitleLight
                         )
                     }
@@ -324,7 +315,7 @@ fun SignupScreen(
             OutlinedTextField(
                 value = confirmPassword,
                 onValueChange = { confirmPassword = it },
-                label = { Text("Confirm Password") },
+                label = { Text(stringResource(R.string.signup_confirm_password_label)) },
                 singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -342,7 +333,7 @@ fun SignupScreen(
                     IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
                         Icon(
                             imageVector = if (confirmPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                            contentDescription = if (confirmPasswordVisible) "Hide password" else "Show password",
+                            contentDescription = if (confirmPasswordVisible) stringResource(R.string.signup_hide_password) else stringResource(R.string.signup_show_password),
                             tint = if (isDark) AuthSubtitleDark else AuthSubtitleLight
                         )
                     }
@@ -379,7 +370,7 @@ fun SignupScreen(
                     )
                 } else {
                     Text(
-                        text = "Create Account",
+                        text = stringResource(R.string.signup_button),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = colorScheme.onPrimary
@@ -398,16 +389,51 @@ fun SignupScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Already have an account? ",
+                    text = stringResource(R.string.signup_has_account),
                     color = if (isDark) AuthSubtitleDark else AuthSubtitleLight,
                     fontSize = 14.sp
                 )
                 Text(
-                    text = "Sign In",
+                    text = stringResource(R.string.signup_signin_link),
                     color = colorScheme.primary,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
                     textDecoration = TextDecoration.Underline
+                )
+            }
+        }
+
+        // ── Top-right toggles: theme + language (on top of Column for touch) ──
+        val activityContext = LocalContext.current
+        Row(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Language toggle
+            TextButton(
+                onClick = {
+                    LocaleHelper.setArabic(activityContext as android.app.Activity, !SessionManager.isArabic)
+                },
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+            ) {
+                Text(
+                    text = if (SessionManager.isArabic) stringResource(R.string.lang_toggle_en) else stringResource(R.string.lang_toggle_ar),
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = colorScheme.primary
+                )
+            }
+            // Theme toggle
+            IconButton(
+                onClick = { ThemeManager.toggle() },
+            ) {
+                Icon(
+                    imageVector = if (isDark) Icons.Outlined.LightMode else Icons.Outlined.DarkMode,
+                    contentDescription = if (isDark) stringResource(R.string.login_switch_light) else stringResource(R.string.login_switch_dark),
+                    tint = colorScheme.onBackground.copy(alpha = 0.6f),
                 )
             }
         }
