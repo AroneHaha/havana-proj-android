@@ -38,10 +38,14 @@ import com.example.havana.ui.theme.ThemeManager
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
+    key: Int = 0,
     onLoginSuccess: () -> Unit = {},
     onNavigateToSignup: () -> Unit = {},
-    viewModel: LoginViewModel = viewModel(),
 ) {
+    // Use key to force a fresh ViewModel on each logout → re-login cycle.
+    // Without this, the cached ViewModel still holds AuthState.Success
+    // from the previous login, which triggers onLoginSuccess immediately.
+    val viewModel: LoginViewModel = viewModel(key = "login-$key")
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }

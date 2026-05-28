@@ -20,12 +20,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import com.example.havana.R
 import com.example.havana.data.model.DeliveryAddress
 import com.example.havana.ui.theme.*
 import kotlinx.coroutines.Dispatchers
@@ -176,7 +178,7 @@ fun MapPickerScreen(
             val marker = Marker(map).apply {
                 position = point
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                title = "Delivery Location"
+                title = context.getString(R.string.delivery_location)
             }
             map.overlays.add(marker)
             map.invalidate()
@@ -206,16 +208,16 @@ fun MapPickerScreen(
                     if (country.isNotEmpty()) parts.add(country)
 
                     withContext(Dispatchers.Main) {
-                        selectedAddress = if (parts.isNotEmpty()) parts.joinToString(", ") else json.optString("display_name", "Selected location")
+                        selectedAddress = if (parts.isNotEmpty()) parts.joinToString(", ") else json.optString("display_name", context.getString(R.string.map_selected_location))
                     }
                 } else {
                     withContext(Dispatchers.Main) {
-                        selectedAddress = "Lat: ${String.format("%.4f", point.latitude)}, Lon: ${String.format("%.4f", point.longitude)}"
+                        selectedAddress = context.getString(R.string.lat_lon, String.format("%.4f", point.latitude), String.format("%.4f", point.longitude))
                     }
                 }
             } catch (_: Exception) {
                 withContext(Dispatchers.Main) {
-                    selectedAddress = "Lat: ${String.format("%.4f", point.latitude)}, Lon: ${String.format("%.4f", point.longitude)}"
+                    selectedAddress = context.getString(R.string.lat_lon, String.format("%.4f", point.latitude), String.format("%.4f", point.longitude))
                 }
             }
         }
@@ -226,7 +228,7 @@ fun MapPickerScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "Pick Delivery Location",
+                        stringResource(R.string.map_picker_title),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = colorScheme.onBackground
@@ -234,7 +236,7 @@ fun MapPickerScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = colorScheme.primary)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = colorScheme.primary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background)
@@ -263,7 +265,7 @@ fun MapPickerScreen(
                             searchQuery = it
                             showSuggestions = it.length >= 2
                         },
-                        placeholder = { Text("Search area in Kuwait...") },
+                        placeholder = { Text(stringResource(R.string.map_search_placeholder)) },
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(12.dp),
                         singleLine = true,
@@ -285,7 +287,7 @@ fun MapPickerScreen(
                         colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary),
                         modifier = Modifier.height(56.dp)
                     ) {
-                        Text("Go")
+                        Text(stringResource(R.string.map_go))
                     }
                 }
 
@@ -360,7 +362,7 @@ fun MapPickerScreen(
                                         val marker = Marker(this@apply).apply {
                                             position = p
                                             setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                                            title = "Delivery Location"
+                                            title = context.getString(R.string.delivery_location)
                                         }
                                         overlays.add(marker)
                                         invalidate()
@@ -395,7 +397,7 @@ fun MapPickerScreen(
                                 Text("\uD83D\uDCCD", fontSize = 18.sp)
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    "Delivery Address",
+                                    stringResource(R.string.map_delivery_address),
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = colorScheme.onBackground
@@ -433,7 +435,7 @@ fun MapPickerScreen(
                                     .fillMaxWidth()
                                     .height(48.dp)
                             ) {
-                                Text("Confirm Address", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onPrimary)
+                                Text(stringResource(R.string.map_confirm_address), fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onPrimary)
                             }
                         }
                     }
@@ -444,7 +446,7 @@ fun MapPickerScreen(
                         color = cardColor
                     ) {
                         Text(
-                            "Tap on the map or search to select your delivery location",
+                            stringResource(R.string.map_tap_hint),
                             fontSize = 13.sp,
                             color = colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(16.dp)

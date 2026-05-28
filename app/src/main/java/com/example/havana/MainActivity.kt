@@ -47,8 +47,15 @@ fun HavanaApp() {
     var selectedOrderId by remember { mutableStateOf<String?>(null) }
     var lastPlacedOrder by remember { mutableStateOf<Order?>(null) }
 
+    // Track login state to detect logout and force a fresh LoginViewModel
+    var loginKey by remember { mutableStateOf(0) }
+
     when (currentScreen) {
-        "login" -> LoginScreen(onLoginSuccess = { currentScreen = "home" }, onNavigateToSignup = { currentScreen = "signup" })
+        "login" -> LoginScreen(
+            key = loginKey,
+            onLoginSuccess = { currentScreen = "home" },
+            onNavigateToSignup = { currentScreen = "signup" },
+        )
         "signup" -> SignupScreen(onNavigateToLogin = { currentScreen = "login" })
         "home" -> HomeScreen(onProductClick = { productId -> selectedProductId = productId; currentScreen = "productDetails" }, onCartClick = { currentScreen = "cart" }, onOrdersClick = { currentScreen = "orders" }, onProfileClick = { currentScreen = "profile" })
         "productDetails" -> ProductDetailsScreen(productId = selectedProductId ?: "", onBackClick = { currentScreen = "home" }, onCartClick = { currentScreen = "cart" }, onCheckoutClick = { currentScreen = "checkout" })
@@ -58,6 +65,15 @@ fun HavanaApp() {
         "mapPicker" -> MapPickerScreen(onAddressConfirmed = { address -> selectedAddress = address; currentScreen = "checkout" }, onBackClick = { currentScreen = "checkout" })
         "orders" -> OrdersScreen(onOrderClick = { orderId -> selectedOrderId = orderId; currentScreen = "orderDetails" }, onHomeClick = { currentScreen = "home" }, onCartClick = { currentScreen = "cart" }, onProfileClick = { currentScreen = "profile" })
         "orderDetails" -> OrderDetailsScreen(orderId = selectedOrderId, onBackClick = { currentScreen = "orders" }, onConfirmDelivery = { orderId -> OrderRepository.updateOrderStatus(orderId, "delivered") })
-        "profile" -> ProfileScreen(onBackClick = { currentScreen = "home" }, onHomeClick = { currentScreen = "home" }, onCartClick = { currentScreen = "cart" }, onOrdersClick = { currentScreen = "orders" }, onLogoutClick = { currentScreen = "login" })
+        "profile" -> ProfileScreen(
+            onBackClick = { currentScreen = "home" },
+            onHomeClick = { currentScreen = "home" },
+            onCartClick = { currentScreen = "cart" },
+            onOrdersClick = { currentScreen = "orders" },
+            onLogoutClick = {
+                loginKey++  // Force a fresh LoginViewModel on next login screen
+                currentScreen = "login"
+            },
+        )
     }
 }

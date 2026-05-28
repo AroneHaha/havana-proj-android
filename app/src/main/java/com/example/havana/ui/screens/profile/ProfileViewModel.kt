@@ -50,7 +50,7 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
                     _profileState.value = ProfileState.Success(SessionManager.getMockProfile())
                 }
             } catch (_: Exception) {
-                _profileState.value = ProfileState.Error("Failed to load profile")
+                _profileState.value = ProfileState.Error(getApplication<Application>().getString(R.string.profile_error_load))
             }
         }
     }
@@ -96,7 +96,7 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
                 _profileState.value = ProfileState.Success(updatedProfile)
                 _editState.value = EditProfileState.Success(updatedProfile)
             } catch (_: Exception) {
-                _editState.value = EditProfileState.Error("Failed to update profile")
+                _editState.value = EditProfileState.Error(getApplication<Application>().getString(R.string.profile_error_update))
             }
         }
     }
@@ -120,7 +120,6 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
     fun toggleArabic(enabled: Boolean) {
         _isArabic.value = enabled
         SessionManager.setArabic(enabled)
-// TODO: Trigger locale change and activity recreation
     }
 
     fun logout() {

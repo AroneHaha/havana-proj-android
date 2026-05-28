@@ -32,18 +32,17 @@ object SessionManager {
 
     fun initialize(context: Context) {
         prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        // Restore session from SharedPreferences on cold start
-        _token = prefs?.getString(KEY_AUTH_TOKEN, null)
         _isDarkMode = prefs?.getBoolean(KEY_DARK_MODE, false) ?: false
         _isArabic = prefs?.getBoolean(KEY_LANGUAGE_ARABIC, false) ?: false
-        val userJson = prefs?.getString(KEY_USER_JSON, null)
-        if (userJson != null) {
-            try {
-                _currentUser = gson.fromJson(userJson, HavanaUser::class.java)
-            } catch (_: Exception) {
-                _currentUser = null
-            }
-        }
+
+        // ── Auth session is NOT restored across app restarts. ──
+        // In mock/dev mode there's no backend to validate the token,
+        // so persisting a stale mock-token would auto-login the user
+        // every cold start without any verification.
+        // When the real Laravel API is wired up, restore the token
+        // here and add a /auth/me call to validate it before setting
+        // _currentUser.
+        clearSession()
     }
 
     fun saveSession(user: HavanaUser, token: String) {

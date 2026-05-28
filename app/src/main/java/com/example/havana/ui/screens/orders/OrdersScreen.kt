@@ -15,15 +15,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.havana.R
 import com.example.havana.data.model.Order
 import com.example.havana.data.model.OrderListState
 import com.example.havana.data.model.statusColor
-import com.example.havana.data.model.statusLabel
 import com.example.havana.data.model.statusEmoji
 import com.example.havana.ui.theme.*
 
@@ -45,13 +46,13 @@ fun OrdersScreen(
     val navBarColor = if (isDark) NavBarDark else NavBarLight
 
     val filters = listOf(
-        "all" to "All",
-        "pending" to "\u23F3 Pending",
-        "confirmed" to "\u2705 Confirmed",
-        "preparing" to "\uD83D\uDCE6 Preparing",
-        "out_for_delivery" to "\uD83D\uDE9A Delivery",
-        "delivered" to "\uD83C\uDF89 Done",
-        "cancelled" to "\u274C Cancelled",
+        "all" to stringResource(R.string.orders_filter_all),
+        "pending" to stringResource(R.string.orders_filter_pending),
+        "confirmed" to stringResource(R.string.orders_filter_confirmed),
+        "preparing" to stringResource(R.string.orders_filter_preparing),
+        "out_for_delivery" to stringResource(R.string.orders_filter_delivery),
+        "delivered" to stringResource(R.string.orders_filter_done),
+        "cancelled" to stringResource(R.string.orders_filter_cancelled),
     )
 
     Scaffold(
@@ -59,7 +60,7 @@ fun OrdersScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "My Orders",
+                        stringResource(R.string.orders_title),
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         color = colorScheme.onBackground
@@ -78,8 +79,8 @@ fun OrdersScreen(
                 NavigationBarItem(
                     selected = false,
                     onClick = onHomeClick,
-                    icon = { Icon(Icons.Outlined.Home, contentDescription = "Home") },
-                    label = { Text("Home", fontSize = 11.sp) },
+                    icon = { Icon(Icons.Outlined.Home, contentDescription = stringResource(R.string.nav_home)) },
+                    label = { Text(stringResource(R.string.nav_home), fontSize = 11.sp) },
                     colors = NavigationBarItemDefaults.colors(
                         unselectedIconColor = colorScheme.onSurfaceVariant,
                         unselectedTextColor = colorScheme.onSurfaceVariant
@@ -88,8 +89,8 @@ fun OrdersScreen(
                 NavigationBarItem(
                     selected = false,
                     onClick = onCartClick,
-                    icon = { Icon(Icons.Outlined.ShoppingCart, contentDescription = "Cart") },
-                    label = { Text("Cart", fontSize = 11.sp) },
+                    icon = { Icon(Icons.Outlined.ShoppingCart, contentDescription = stringResource(R.string.nav_cart)) },
+                    label = { Text(stringResource(R.string.nav_cart), fontSize = 11.sp) },
                     colors = NavigationBarItemDefaults.colors(
                         unselectedIconColor = colorScheme.onSurfaceVariant,
                         unselectedTextColor = colorScheme.onSurfaceVariant
@@ -98,8 +99,8 @@ fun OrdersScreen(
                 NavigationBarItem(
                     selected = true,
                     onClick = { },
-                    icon = { Icon(Icons.Outlined.ReceiptLong, contentDescription = "Orders") },
-                    label = { Text("Orders", fontSize = 11.sp) },
+                    icon = { Icon(Icons.Outlined.ReceiptLong, contentDescription = stringResource(R.string.nav_orders)) },
+                    label = { Text(stringResource(R.string.nav_orders), fontSize = 11.sp) },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = colorScheme.primary,
                         selectedTextColor = colorScheme.primary,
@@ -109,8 +110,8 @@ fun OrdersScreen(
                 NavigationBarItem(
                     selected = false,
                     onClick = onProfileClick,
-                    icon = { Icon(Icons.Outlined.Person, contentDescription = "Profile") },
-                    label = { Text("Profile", fontSize = 11.sp) },
+                    icon = { Icon(Icons.Outlined.Person, contentDescription = stringResource(R.string.nav_profile)) },
+                    label = { Text(stringResource(R.string.nav_profile), fontSize = 11.sp) },
                     colors = NavigationBarItemDefaults.colors(
                         unselectedIconColor = colorScheme.onSurfaceVariant,
                         unselectedTextColor = colorScheme.onSurfaceVariant
@@ -171,8 +172,8 @@ fun OrdersScreen(
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text("\uD83D\uDCCB", fontSize = 48.sp)
                                 Spacer(modifier = Modifier.height(12.dp))
-                                Text("No orders found", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onBackground)
-                                Text("Your orders will appear here", fontSize = 13.sp, color = colorScheme.onSurfaceVariant)
+                                Text(stringResource(R.string.orders_no_orders), fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onBackground)
+                                Text(stringResource(R.string.orders_appear_here), fontSize = 13.sp, color = colorScheme.onSurfaceVariant)
                             }
                         }
                     } else {
@@ -241,7 +242,7 @@ fun OrderCard(
                     color = order.statusColor().copy(alpha = 0.12f)
                 ) {
                     Text(
-                        "${order.statusEmoji()} ${order.statusLabel()}",
+                        "${order.statusEmoji()} ${order.localizedStatus(stringResource(R.string.status_pending), stringResource(R.string.status_confirmed), stringResource(R.string.status_preparing), stringResource(R.string.status_out_for_delivery), stringResource(R.string.status_delivered), stringResource(R.string.status_cancelled))}",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = order.statusColor(),
@@ -263,7 +264,7 @@ fun OrderCard(
             val itemsPreview = order.items.take(2).joinToString(", ") { "${it.name} x${it.quantity}" }
             val moreCount = order.items.size - 2
             Text(
-                if (moreCount > 0) "$itemsPreview +$moreCount more" else itemsPreview,
+                if (moreCount > 0) "$itemsPreview ${stringResource(R.string.orders_more, moreCount)}" else itemsPreview,
                 fontSize = 13.sp,
                 color = colorScheme.onBackground,
                 maxLines = 1,
@@ -278,7 +279,7 @@ fun OrderCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    "${order.items.sumOf { it.quantity }} items",
+                    stringResource(R.string.items_count, order.items.sumOf { it.quantity }),
                     fontSize = 12.sp,
                     color = colorScheme.onSurfaceVariant
                 )

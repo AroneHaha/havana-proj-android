@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.havana.data.cart.CartManager
 import com.example.havana.data.model.*
 import com.example.havana.data.remote.ApiClient
+import com.example.havana.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -34,14 +35,14 @@ class CheckoutViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun placeOrder(customerName: String, phone: String, notes: String) {
-        if (customerName.isBlank()) { _checkoutState.value = CheckoutState.Error("Please enter your full name"); return }
-        if (phone.isBlank()) { _checkoutState.value = CheckoutState.Error("Please enter your contact number"); return }
+        if (customerName.isBlank()) { _checkoutState.value = CheckoutState.Error(getApplication<Application>().getString(R.string.checkout_error_name)); return }
+        if (phone.isBlank()) { _checkoutState.value = CheckoutState.Error(getApplication<Application>().getString(R.string.checkout_error_phone)); return }
         val cleanPhone = phone.replace("+965", "").replace(" ", "").trim()
-        if (cleanPhone.length != 8 || !cleanPhone.first().toString().matches(Regex("[5689]"))) { _checkoutState.value = CheckoutState.Error("Enter a valid Kuwait phone number"); return }
+        if (cleanPhone.length != 8 || !cleanPhone.first().toString().matches(Regex("[5689]"))) { _checkoutState.value = CheckoutState.Error(getApplication<Application>().getString(R.string.checkout_error_phone_invalid)); return }
         val address = _deliveryAddress.value
-        if (address == null || address.fullAddress.isBlank()) { _checkoutState.value = CheckoutState.Error("Please select a delivery address on the map"); return }
+        if (address == null || address.fullAddress.isBlank()) { _checkoutState.value = CheckoutState.Error(getApplication<Application>().getString(R.string.checkout_error_address)); return }
         val items = cartItems.value
-        if (items.isEmpty()) { _checkoutState.value = CheckoutState.Error("Your cart is empty"); return }
+        if (items.isEmpty()) { _checkoutState.value = CheckoutState.Error(getApplication<Application>().getString(R.string.checkout_error_cart_empty)); return }
         _checkoutState.value = CheckoutState.Loading
         val subtotal = items.sumOf { it.price * it.quantity }
         val deliveryFee = 1.500

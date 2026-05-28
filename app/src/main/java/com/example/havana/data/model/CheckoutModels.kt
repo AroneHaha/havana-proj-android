@@ -106,6 +106,26 @@ fun Order.statusLabel(): String {
     }
 }
 
+/** Localized version of statusLabel that accepts pre-resolved string resources. */
+fun Order.localizedStatus(
+    pending: String,
+    confirmed: String,
+    preparing: String,
+    outForDelivery: String,
+    delivered: String,
+    cancelled: String,
+): String {
+    return when (status) {
+        "pending" -> pending
+        "confirmed" -> confirmed
+        "preparing" -> preparing
+        "out_for_delivery" -> outForDelivery
+        "delivered" -> delivered
+        "cancelled" -> cancelled
+        else -> status.replace("_", " ").replaceFirstChar { it.uppercase() }
+    }
+}
+
 fun Order.statusEmoji(): String {
     return when (status) {
         "pending" -> "⏳"

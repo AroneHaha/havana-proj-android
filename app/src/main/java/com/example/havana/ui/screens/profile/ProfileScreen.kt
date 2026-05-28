@@ -29,11 +29,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.havana.R
+import com.example.havana.data.locale.LocaleHelper
 import com.example.havana.data.model.DeliveryAddress
 import com.example.havana.data.model.EditableField
 import com.example.havana.data.model.EditProfileState
 import com.example.havana.data.model.ProfileState
 import com.example.havana.data.model.UserProfile
+import com.example.havana.data.session.SessionManager
 import com.example.havana.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -99,8 +101,8 @@ fun ProfileScreen(
                 NavigationBarItem(
                     selected = false,
                     onClick = onHomeClick,
-                    icon = { Icon(Icons.Outlined.Home, contentDescription = "Home") },
-                    label = { Text("Home", fontSize = 11.sp) },
+                    icon = { Icon(Icons.Outlined.Home, contentDescription = stringResource(R.string.nav_home)) },
+                    label = { Text(stringResource(R.string.nav_home), fontSize = 11.sp) },
                     colors = NavigationBarItemDefaults.colors(
                         unselectedIconColor = colorScheme.onSurfaceVariant,
                         unselectedTextColor = colorScheme.onSurfaceVariant,
@@ -109,8 +111,8 @@ fun ProfileScreen(
                 NavigationBarItem(
                     selected = false,
                     onClick = onCartClick,
-                    icon = { Icon(Icons.Outlined.ShoppingCart, contentDescription = "Cart") },
-                    label = { Text("Cart", fontSize = 11.sp) },
+                    icon = { Icon(Icons.Outlined.ShoppingCart, contentDescription = stringResource(R.string.nav_cart)) },
+                    label = { Text(stringResource(R.string.nav_cart), fontSize = 11.sp) },
                     colors = NavigationBarItemDefaults.colors(
                         unselectedIconColor = colorScheme.onSurfaceVariant,
                         unselectedTextColor = colorScheme.onSurfaceVariant,
@@ -119,8 +121,8 @@ fun ProfileScreen(
                 NavigationBarItem(
                     selected = false,
                     onClick = onOrdersClick,
-                    icon = { Icon(Icons.Outlined.ReceiptLong, contentDescription = "Orders") },
-                    label = { Text("Orders", fontSize = 11.sp) },
+                    icon = { Icon(Icons.Outlined.ReceiptLong, contentDescription = stringResource(R.string.nav_orders)) },
+                    label = { Text(stringResource(R.string.nav_orders), fontSize = 11.sp) },
                     colors = NavigationBarItemDefaults.colors(
                         unselectedIconColor = colorScheme.onSurfaceVariant,
                         unselectedTextColor = colorScheme.onSurfaceVariant,
@@ -129,8 +131,8 @@ fun ProfileScreen(
                 NavigationBarItem(
                     selected = true,
                     onClick = { },
-                    icon = { Icon(Icons.Outlined.Person, contentDescription = "Profile") },
-                    label = { Text("Profile", fontSize = 11.sp) },
+                    icon = { Icon(Icons.Outlined.Person, contentDescription = stringResource(R.string.nav_profile)) },
+                    label = { Text(stringResource(R.string.nav_profile), fontSize = 11.sp) },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = colorScheme.primary,
                         selectedTextColor = colorScheme.primary,
@@ -167,7 +169,11 @@ fun ProfileScreen(
                         viewModel.updateProfile(firstName, lastName, phone, address)
                     },
                     onDarkModeToggle = { viewModel.toggleDarkMode(it) },
-                    onArabicToggle = { viewModel.toggleArabic(it) },
+                    onArabicToggle = { enabled ->
+                        viewModel.toggleArabic(enabled)
+                        val context = LocalContext.current
+                        LocaleHelper.setArabic(context as android.app.Activity, enabled)
+                    },
                     onLogout = {
                         viewModel.logout()
                         onLogoutClick()
@@ -438,7 +444,7 @@ private fun ProfileContent(
 
                     // Arabic/English Toggle
                     PreferenceRow(
-                        label = if (isArabic) "\u0627\u0644\u0639\u0631\u0628\u064A\u0629 / English" else stringResource(R.string.profile_language),
+                        label = if (isArabic) stringResource(R.string.profile_language_label_arabic) else stringResource(R.string.profile_language),
                         subtitle = if (isArabic)
                             stringResource(R.string.profile_language_arabic)
                         else

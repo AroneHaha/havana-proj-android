@@ -7,6 +7,7 @@ import com.example.havana.data.model.*
 import com.example.havana.data.remote.ApiClient
 import com.example.havana.data.remote.AuthApiService
 import com.example.havana.data.session.SessionManager
+import com.example.havana.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,7 +29,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
     fun login(email: String, password: String) {
         if (email.isBlank() || password.isBlank()) {
-            _authState.value = AuthState.Error("Please fill in all fields")
+            _authState.value = AuthState.Error(getApplication<Application>().getString(R.string.login_error_empty_fields))
             return
         }
 
@@ -79,7 +80,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                 SessionManager.saveSession(mockUser, mockToken)
                 _authState.value = AuthState.Success(user = mockUser, token = mockToken)
             } else {
-                _authState.value = AuthState.Error("Invalid email or password")
+                _authState.value = AuthState.Error(getApplication<Application>().getString(R.string.login_error_invalid_credentials))
             }
         }
     }

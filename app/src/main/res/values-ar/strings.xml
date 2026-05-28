@@ -1,0 +1,272 @@
+<resources>
+    <string name="app_name">هافانا</string>
+
+    <!-- ===================== NAVIGATION BAR ===================== -->
+    <string name="nav_home">الرئيسية</string>
+    <string name="nav_cart">السلة</string>
+    <string name="nav_orders">الطلبات</string>
+    <string name="nav_profile">الملف الشخصي</string>
+
+    <!-- ===================== COMMON ===================== -->
+    <string name="back">رجوع</string>
+    <string name="retry">إعادة المحاولة</string>
+    <string name="cancel">إلغاء</string>
+    <string name="save">حفظ</string>
+    <string name="edit">تعديل</string>
+    <string name="remove">إزالة</string>
+    <string name="subtotal">المجموع الفرعي</string>
+    <string name="delivery_fee">رسوم التوصيل</string>
+    <string name="grand_total">المجموع الكلي</string>
+    <string name="total">الإجمالي</string>
+    <string name="items_count">%d عناصر</string>
+    <string name="or">أو</string>
+    <string name="error">خطأ</string>
+    <string name="loading">جارٍ التحميل…</string>
+
+    <!-- ===================== LOGIN ===================== -->
+    <string name="login_brand">هافانا</string>
+    <string name="login_tagline">بوتيك الزهور الفاخرة</string>
+    <string name="login_welcome">مرحباً بعودتك</string>
+    <string name="login_subtitle">سجّل الدخول إلى حسابك</string>
+    <string name="login_email_label">البريد الإلكتروني</string>
+    <string name="login_email_placeholder">you@example.com</string>
+    <string name="login_password_label">كلمة المرور</string>
+    <string name="login_password_placeholder">أدخل كلمة المرور</string>
+    <string name="login_forgot_password">نسيت كلمة المرور؟</string>
+    <string name="login_button">تسجيل الدخول</string>
+    <string name="login_no_account">ليس لديك حساب؟ </string>
+    <string name="login_signup_link">إنشاء حساب</string>
+    <string name="login_switch_light">التبديل إلى الوضع الفاتح</string>
+    <string name="login_switch_dark">التبديل إلى الوضع الداكن</string>
+    <string name="login_hide_password">إخفاء كلمة المرور</string>
+    <string name="login_show_password">إظهار كلمة المرور</string>
+    <string name="login_error_empty_fields">يرجى ملء جميع الحقول</string>
+    <string name="login_error_invalid_credentials">البريد الإلكتروني أو كلمة المرور غير صحيحة</string>
+
+    <!-- ===================== SIGNUP ===================== -->
+    <string name="signup_brand">هافانا</string>
+    <string name="signup_tagline">زهور وهدايا فاخرة</string>
+    <string name="signup_title">إنشاء حساب</string>
+    <string name="signup_subtitle">انضم إلينا وابدأ بطلب أجمل الزهور</string>
+    <string name="signup_name_label">الاسم الكامل</string>
+    <string name="signup_email_label">البريد الإلكتروني</string>
+    <string name="signup_phone_label">رقم الهاتف</string>
+    <string name="signup_password_label">كلمة المرور</string>
+    <string name="signup_confirm_password_label">تأكيد كلمة المرور</string>
+    <string name="signup_button">إنشاء حساب</string>
+    <string name="signup_success">تم إنشاء الحساب! جارٍ التحويل لتسجيل الدخول…</string>
+    <string name="signup_has_account">لديك حساب بالفعل؟ </string>
+    <string name="signup_signin_link">تسجيل الدخول</string>
+    <string name="signup_hide_password">إخفاء كلمة المرور</string>
+    <string name="signup_show_password">إظهار كلمة المرور</string>
+    <string name="signup_error_name">يرجى إدخال اسمك الكامل</string>
+    <string name="signup_error_email">يرجى إدخال بريد إلكتروني صالح</string>
+    <string name="signup_error_password_length">يجب أن تكون كلمة المرور 6 أحرف على الأقل</string>
+    <string name="signup_error_password_mismatch">كلمتا المرور غير متطابقتين</string>
+    <string name="signup_error_phone">يرجى إدخال رقم الهاتف</string>
+    <string name="signup_error_phone_invalid">أدخل رقم هاتف كويتي صالح (مثال: +965 5XXX XXXX)</string>
+
+    <!-- ===================== HOME ===================== -->
+    <string name="home_brand">هافانا</string>
+    <string name="home_tagline">زهور وهدايا فاخرة</string>
+    <string name="home_search_placeholder">ابحث عن زهور، هدايا…</string>
+    <string name="home_shop_by_occasion">تسوّق حسب المناسبة</string>
+    <string name="home_featured">مميّز</string>
+    <string name="home_top_selling">الأكثر مبيعاً</string>
+    <string name="home_all_products">جميع المنتجات</string>
+    <string name="home_search_results">نتائج البحث</string>
+    <string name="home_no_products">لم يتم العثور على منتجات</string>
+    <string name="home_out_of_stock">غير متوفر</string>
+    <string name="home_featured_badge">مميّز</string>
+    <string name="home_top_badge">الأعلى</string>
+
+    <!-- Occasions -->
+    <string name="occasion_birthday">عيد ميلاد</string>
+    <string name="occasion_weddings">أعراس</string>
+    <string name="occasion_anniversary">ذكرى سنوية</string>
+    <string name="occasion_graduation">تخرّج</string>
+    <string name="occasion_mothers_day">عيد الأم</string>
+    <string name="occasion_love">حب</string>
+    <string name="occasion_eid">عيد</string>
+    <string name="occasion_sympathy">تعازي</string>
+
+    <!-- ===================== CART ===================== -->
+    <string name="cart_title">سلّتي</string>
+    <string name="cart_remove_title">إزالة عنصر</string>
+    <string name="cart_remove_message">إزالة \"%s\" من سلتك؟</string>
+    <string name="cart_total_items">الإجمالي (%d عناصر)</string>
+    <string name="cart_proceed_checkout">المتابعة إلى الدفع</string>
+    <string name="cart_empty">سلتك فارغة</string>
+    <string name="cart_empty_subtitle">تصفّح مجموعتنا وأضف بعض الزهور الجميلة!</string>
+    <string name="cart_browse_products">تصفّح المنتجات</string>
+    <string name="cart_each">للواحد</string>
+
+    <!-- ===================== CHECKOUT ===================== -->
+    <string name="checkout_title">الدفع</string>
+    <string name="checkout_order_summary">ملخص الطلب</string>
+    <string name="checkout_delivery_address">عنوان التوصيل</string>
+    <string name="checkout_pick_address_warning">يرجى اختيار موقع التوصيل على الخريطة أدناه، ثم املأ تفاصيل عنوانك</string>
+    <string name="checkout_change_location">تغيير الموقع على الخريطة</string>
+    <string name="checkout_pick_location">اختيار الموقع على الخريطة</string>
+    <string name="checkout_address_details">تفاصيل العنوان</string>
+    <string name="checkout_block">قطعة</string>
+    <string name="checkout_street">شارع</string>
+    <string name="checkout_building">مبنى / منزل</string>
+    <string name="checkout_floor">طابق</string>
+    <string name="checkout_apartment">شقة / مكتب</string>
+    <string name="checkout_contact_info">معلومات الاتصال</string>
+    <string name="checkout_full_name">الاسم الكامل *</string>
+    <string name="checkout_contact_number">رقم الاتصال * (+965)</string>
+    <string name="checkout_order_notes_label">ملاحظات الطلب (اختياري)</string>
+    <string name="checkout_order_notes_placeholder">مثال: رن الجرس، اترك عند الباب</string>
+    <string name="checkout_payment_method">طريقة الدفع</string>
+    <string name="checkout_cash_on_delivery">الدفع عند الاستلام</string>
+    <string name="checkout_pay_when_arrives">ادفع عند وصول طلبك</string>
+    <string name="checkout_place_order">تأكيد الطلب  •  الدفع عند الاستلام</string>
+    <string name="checkout_error_name">يرجى إدخال اسمك الكامل</string>
+    <string name="checkout_error_phone">يرجى إدخال رقم الاتصال</string>
+    <string name="checkout_error_phone_invalid">أدخل رقم هاتف كويتي صالح</string>
+    <string name="checkout_error_address">يرجى اختيار عنوان التوصيل على الخريطة</string>
+    <string name="checkout_error_cart_empty">سلتك فارغة</string>
+
+    <!-- ===================== MAP PICKER ===================== -->
+    <string name="map_picker_title">اختيار موقع التوصيل</string>
+    <string name="map_search_placeholder">ابحث عن منطقة في الكويت…</string>
+    <string name="map_go">ذهاب</string>
+    <string name="map_delivery_address">عنوان التوصيل</string>
+    <string name="map_confirm_address">تأكيد العنوان</string>
+    <string name="map_tap_hint">اضغط على الخريطة أو ابحث لاختيار موقع التوصيل</string>
+
+    <!-- ===================== ORDERS ===================== -->
+    <string name="orders_title">طلباتي</string>
+    <string name="orders_filter_all">الكل</string>
+    <string name="orders_filter_pending">قيد الانتظار</string>
+    <string name="orders_filter_confirmed">مؤكد</string>
+    <string name="orders_filter_preparing">قيد التحضير</string>
+    <string name="orders_filter_delivery">توصيل</string>
+    <string name="orders_filter_done">مكتمل</string>
+    <string name="orders_filter_cancelled">ملغي</string>
+    <string name="orders_no_orders">لم يتم العثور على طلبات</string>
+    <string name="orders_appear_here">ستظهر طلباتك هنا</string>
+    <string name="orders_more">+%d أخرى</string>
+
+    <!-- ===================== ORDER DETAILS ===================== -->
+    <string name="order_not_found">الطلب غير موجود</string>
+    <string name="order_progress">تقدّم الطلب</string>
+    <string name="order_placed">تم تقديم الطلب</string>
+    <string name="order_confirmed">مؤكد</string>
+    <string name="order_preparing">قيد التحضير</string>
+    <string name="order_out_for_delivery">في الطريق للتوصيل</string>
+    <string name="order_delivered">تم التوصيل</string>
+    <string name="order_cancelled_status">تم إلغاء هذا الطلب</string>
+    <string name="order_confirm_delivery">تأكيد الاستلام</string>
+    <string name="order_items">العناصر</string>
+    <string name="order_tap_to_rate">اضغط على عنصر للتقييم</string>
+    <string name="order_delivery_address">عنوان التوصيل</string>
+    <string name="order_contact_info">معلومات الاتصال</string>
+    <string name="order_ordered_on">تم الطلب في %s</string>
+    <string name="order_block">قطعة</string>
+    <string name="order_street">شارع</string>
+    <string name="order_building">مبنى</string>
+    <string name="order_floor">طابق</string>
+    <string name="order_apartment">شقة</string>
+    <string name="order_name">الاسم</string>
+    <string name="order_phone">الهاتف</string>
+    <string name="order_notes">ملاحظات</string>
+    <string name="order_payment">الدفع</string>
+    <string name="order_cash_on_delivery">الدفع عند الاستلام</string>
+
+    <!-- Status labels -->
+    <string name="status_pending">قيد الانتظار</string>
+    <string name="status_confirmed">مؤكد</string>
+    <string name="status_preparing">قيد التحضير</string>
+    <string name="status_out_for_delivery">في الطريق للتوصيل</string>
+    <string name="status_delivered">تم التوصيل</string>
+    <string name="status_cancelled">ملغي</string>
+
+    <!-- Review -->
+    <string name="review_rate_item">قيّم هذا المنتج</string>
+    <string name="review_tap_to_rate">اضغط للتقييم:</string>
+    <string name="review_poor">سيء</string>
+    <string name="review_fair">مقبول</string>
+    <string name="review_good">جيد</string>
+    <string name="review_very_good">جيد جداً</string>
+    <string name="review_excellent">ممتاز</string>
+    <string name="review_your_review">تقييمك</string>
+    <string name="review_placeholder">أخبرنا برأيك في هذا المنتج…</string>
+    <string name="review_char_count">%d / 500</string>
+    <string name="review_error_both">يرجى اختيار تقييم وكتابة مراجعة</string>
+    <string name="review_error_rating">يرجى اختيار تقييم</string>
+    <string name="review_error_comment">يرجى كتابة تعليق المراجعة</string>
+    <string name="review_submit">إرسال التقييم</string>
+    <string name="review_reviewed">تم التقييم</string>
+    <string name="review_rate_button">قيّم هذا المنتج</string>
+
+    <!-- ===================== ORDER CONFIRMATION ===================== -->
+    <string name="confirmation_title">تم تأكيد الطلب!</string>
+    <string name="confirmation_thank_you">شكراً لطلبك</string>
+    <string name="confirmation_order_number">رقم الطلب</string>
+    <string name="confirmation_placed_on">تم التقديم في %s</string>
+    <string name="confirmation_order_items">عناصر الطلب</string>
+    <string name="confirmation_receipt">إيصال</string>
+    <string name="confirmation_delivery_address">عنوان التوصيل</string>
+    <string name="confirmation_customer_info">معلومات العميل</string>
+    <string name="confirmation_view_orders">عرض طلباتي</string>
+    <string name="confirmation_continue_shopping">متابعة التسوّق</string>
+
+    <!-- ===================== PRODUCT DETAILS ===================== -->
+    <string name="product_quantity">الكمية</string>
+    <string name="product_add_to_cart">أضف إلى السلة</string>
+    <string name="product_added">تمت الإضافة</string>
+    <string name="product_checkout">الدفع</string>
+    <string name="product_front_view">عرض أمامي</string>
+    <string name="product_detail_view">عرض تفصيلي</string>
+    <string name="product_arrangement">ترتيب</string>
+    <string name="product_description">الوصف</string>
+    <string name="product_reviews_ratings">التقييمات والمراجعات</string>
+    <string name="product_reviews_count">(%d مراجعات)</string>
+    <string name="product_in_stock">متوفر</string>
+    <string name="product_out_of_stock">غير متوفر</string>
+
+    <!-- ===================== PROFILE ===================== -->
+    <string name="profile_title">ملفّي الشخصي</string>
+    <string name="profile_back">رجوع</string>
+    <string name="profile_retry">إعادة المحاولة</string>
+    <string name="profile_edit">تعديل</string>
+    <string name="profile_save">حفظ</string>
+    <string name="profile_cancel">إلغاء</string>
+    <string name="profile_verified">موثّق</string>
+    <string name="profile_section_personal">المعلومات الشخصية</string>
+    <string name="profile_section_address">عنوان التوصيل</string>
+    <string name="profile_section_preferences">التفضيلات</string>
+    <string name="profile_full_name">الاسم الكامل</string>
+    <string name="profile_first_name">الاسم الأول</string>
+    <string name="profile_last_name">اسم العائلة</string>
+    <string name="profile_email">البريد الإلكتروني</string>
+    <string name="profile_contact">رقم الاتصال</string>
+    <string name="profile_phone_hint">مثال: +965 5XXX XXXX</string>
+    <string name="profile_address">عنوان التوصيل</string>
+    <string name="profile_address_hint">أدخل عنوان التوصيل الكامل</string>
+    <string name="profile_address_not_set">لم يتم تعيين عنوان</string>
+    <string name="profile_dark_mode">المظهر</string>
+    <string name="profile_dark_mode_desc">اختر مظهر فاتح أو داكن أو النظام</string>
+    <string name="profile_language">اللغة</string>
+    <string name="profile_language_desc">التبديل إلى الإنجليزية</string>
+    <string name="profile_language_arabic">التبديل إلى العربية</string>
+    <string name="profile_logout">تسجيل الخروج</string>
+    <string name="profile_error_not_logged_in">غير مسجّل الدخول</string>
+    <string name="profile_error_load">فشل تحميل الملف الشخصي</string>
+    <string name="profile_error_update">فشل تحديث الملف الشخصي</string>
+
+    <!-- ===================== MISCELLANEOUS ===================== -->
+    <string name="qty">الكمية</string>
+    <string name="delivery_location">موقع التوصيل</string>
+    <string name="lat_lon">خط عرض: %1$s، خط طول: %2$s</string>
+    <string name="guest_user">مستخدم ضيف</string>
+    <string name="map_selected_location">الموقع المحدد</string>
+    <string name="profile_language_label_arabic">العربية / الإنجليزية</string>
+
+    <!-- ===================== LANGUAGE TOGGLE ===================== -->
+    <string name="lang_toggle_en">EN</string>
+    <string name="lang_toggle_ar">عربي</string>
+</resources>

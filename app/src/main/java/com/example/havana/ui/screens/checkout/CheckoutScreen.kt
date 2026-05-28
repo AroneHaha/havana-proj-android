@@ -14,11 +14,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.havana.R
 import com.example.havana.data.mock.MockData
 import com.example.havana.data.model.CartItem
 import com.example.havana.data.model.CheckoutState
@@ -83,7 +85,7 @@ fun CheckoutScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "Checkout",
+                        stringResource(R.string.checkout_title),
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         color = colorScheme.onBackground
@@ -91,7 +93,7 @@ fun CheckoutScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = colorScheme.primary)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = colorScheme.primary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background)
@@ -112,7 +114,7 @@ fun CheckoutScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text("Total", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
+                            Text(stringResource(R.string.total), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
                             Text("KD ${String.format("%.3f", total)}", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
                         }
                         Spacer(modifier = Modifier.height(10.dp))
@@ -141,7 +143,7 @@ fun CheckoutScreen(
                             if (checkoutState is CheckoutState.Loading) {
                                 CircularProgressIndicator(color = colorScheme.onPrimary, modifier = Modifier.size(22.dp), strokeWidth = 2.5.dp)
                             } else {
-                                Text("Place Order  \u2022  Cash on Delivery", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onPrimary)
+                                Text(stringResource(R.string.checkout_place_order), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onPrimary)
                             }
                         }
                     }
@@ -183,7 +185,7 @@ fun CheckoutScreen(
             }
 
             item {
-                Text("Order Summary", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
+                Text(stringResource(R.string.checkout_order_summary), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
             }
 
             items(cartItems) { item ->
@@ -198,19 +200,19 @@ fun CheckoutScreen(
                 ) {
                     Column(modifier = Modifier.padding(14.dp)) {
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Subtotal", fontSize = 13.sp, color = colorScheme.onSurfaceVariant)
+                            Text(stringResource(R.string.subtotal), fontSize = 13.sp, color = colorScheme.onSurfaceVariant)
                             Text("KD ${String.format("%.3f", subtotal)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground)
                         }
                         Spacer(modifier = Modifier.height(4.dp))
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Delivery Fee", fontSize = 13.sp, color = colorScheme.onSurfaceVariant)
+                            Text(stringResource(R.string.delivery_fee), fontSize = 13.sp, color = colorScheme.onSurfaceVariant)
                             Text("KD ${String.format("%.3f", deliveryFee)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground)
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                         HorizontalDivider(color = colorScheme.outline)
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Total", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
+                            Text(stringResource(R.string.total), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
                             Text("KD ${String.format("%.3f", total)}", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
                         }
                     }
@@ -218,7 +220,7 @@ fun CheckoutScreen(
             }
 
             item {
-                Text("Delivery Address", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
+                Text(stringResource(R.string.checkout_delivery_address), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
             }
 
             item {
@@ -244,7 +246,7 @@ fun CheckoutScreen(
                                     lineHeight = 19.sp
                                 )
                                 Text(
-                                    "Lat: ${String.format("%.4f", deliveryAddress!!.latitude)}, Lon: ${String.format("%.4f", deliveryAddress!!.longitude)}",
+                                    stringResource(R.string.lat_lon, String.format("%.4f", deliveryAddress!!.latitude), String.format("%.4f", deliveryAddress!!.longitude)),
                                     fontSize = 10.sp,
                                     color = colorScheme.onSurfaceVariant
                                 )
@@ -266,7 +268,7 @@ fun CheckoutScreen(
                             Icon(Icons.Default.Warning, contentDescription = null, tint = Warning, modifier = Modifier.size(20.dp))
                             Spacer(modifier = Modifier.width(10.dp))
                             Text(
-                                "Please pick your delivery location on the map below, then fill in your address details",
+                                stringResource(R.string.checkout_pick_address_warning),
                                 fontSize = 12.sp,
                                 color = if (isDark) GoldLight else Color(0xFF92400E)
                             )
@@ -286,36 +288,36 @@ fun CheckoutScreen(
                     Icon(Icons.Default.LocationOn, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        if (deliveryAddress != null) "Change Location on Map" else "Pick Location on Map",
+                        if (deliveryAddress != null) stringResource(R.string.checkout_change_location) else stringResource(R.string.checkout_pick_location),
                         fontWeight = FontWeight.SemiBold
                     )
                 }
             }
 
             item {
-                Text("Address Details", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
+                Text(stringResource(R.string.checkout_address_details), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
             }
 
             // Address fields
-            item { CheckoutField("Block", block, { block = it }, checkoutState, colorScheme) }
-            item { CheckoutField("Street", street, { street = it }, checkoutState, colorScheme) }
-            item { CheckoutField("Building / House", building, { building = it }, checkoutState, colorScheme) }
-            item { CheckoutField("Floor", floor, { floor = it }, checkoutState, colorScheme) }
-            item { CheckoutField("Apartment / Office", apartment, { apartment = it }, checkoutState, colorScheme) }
+            item { CheckoutField(stringResource(R.string.checkout_block), block, { block = it }, checkoutState, colorScheme) }
+            item { CheckoutField(stringResource(R.string.checkout_street), street, { street = it }, checkoutState, colorScheme) }
+            item { CheckoutField(stringResource(R.string.checkout_building), building, { building = it }, checkoutState, colorScheme) }
+            item { CheckoutField(stringResource(R.string.checkout_floor), floor, { floor = it }, checkoutState, colorScheme) }
+            item { CheckoutField(stringResource(R.string.checkout_apartment), apartment, { apartment = it }, checkoutState, colorScheme) }
 
             item {
-                Text("Contact Information", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
+                Text(stringResource(R.string.checkout_contact_info), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
             }
 
-            item { CheckoutField("Full Name *", customerName, { customerName = it }, checkoutState, colorScheme) }
-            item { CheckoutField("Contact Number * (+965)", phone, { phone = it }, checkoutState, colorScheme) }
+            item { CheckoutField(stringResource(R.string.checkout_full_name), customerName, { customerName = it }, checkoutState, colorScheme) }
+            item { CheckoutField(stringResource(R.string.checkout_contact_number), phone, { phone = it }, checkoutState, colorScheme) }
 
             item {
                 OutlinedTextField(
                     value = notes,
                     onValueChange = { notes = it },
-                    label = { Text("Order Notes (optional)") },
-                    placeholder = { Text("e.g. Ring doorbell, leave at gate") },
+                    label = { Text(stringResource(R.string.checkout_order_notes_label)) },
+                    placeholder = { Text(stringResource(R.string.checkout_order_notes_placeholder)) },
                     minLines = 2,
                     maxLines = 3,
                     modifier = Modifier.fillMaxWidth(),
@@ -330,7 +332,7 @@ fun CheckoutScreen(
             }
 
             item {
-                Text("Payment Method", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
+                Text(stringResource(R.string.checkout_payment_method), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
             }
 
             item {
@@ -348,8 +350,8 @@ fun CheckoutScreen(
                         Text("\uD83D\uDCB5", fontSize = 22.sp)
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
-                            Text("Cash on Delivery", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onBackground)
-                            Text("Pay when your order arrives", fontSize = 12.sp, color = colorScheme.onSurfaceVariant)
+                            Text(stringResource(R.string.checkout_cash_on_delivery), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onBackground)
+                            Text(stringResource(R.string.checkout_pay_when_arrives), fontSize = 12.sp, color = colorScheme.onSurfaceVariant)
                         }
                     }
                 }
@@ -411,7 +413,7 @@ fun CheckoutItemCard(item: CartItem) {
             Spacer(modifier = Modifier.width(10.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(item.name, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onBackground, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text("Qty: ${item.quantity} x KD ${String.format("%.3f", item.price)}", fontSize = 12.sp, color = colorScheme.onSurfaceVariant)
+                Text("${stringResource(R.string.qty)}: ${item.quantity} x KD ${String.format("%.3f", item.price)}", fontSize = 12.sp, color = colorScheme.onSurfaceVariant)
             }
             Text("KD ${String.format("%.3f", item.price * item.quantity)}", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
         }

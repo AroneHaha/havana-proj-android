@@ -17,18 +17,20 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.havana.R
 import com.example.havana.data.mock.MockData
 import com.example.havana.data.model.Order
 import com.example.havana.data.model.OrderItem
 import com.example.havana.data.model.Review
 import com.example.havana.data.model.statusColor
-import com.example.havana.data.model.statusLabel
+import com.example.havana.data.model.localizedStatus
 import com.example.havana.data.model.statusEmoji
 import com.example.havana.data.repository.OrderRepository
 import com.example.havana.data.session.SessionManager
@@ -55,7 +57,7 @@ fun OrderDetailsScreen(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Text("Order not found", color = colorScheme.onSurfaceVariant)
+            Text(stringResource(R.string.order_not_found), color = colorScheme.onSurfaceVariant)
         }
         return
     }
@@ -86,7 +88,7 @@ fun OrderDetailsScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = colorScheme.primary)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = colorScheme.primary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.background)
@@ -120,7 +122,14 @@ fun OrderDetailsScreen(
                             color = displayOrder.statusColor().copy(alpha = 0.12f)
                         ) {
                             Text(
-                                displayOrder.statusLabel(),
+                                displayOrder.localizedStatus(
+                                    stringResource(R.string.status_pending),
+                                    stringResource(R.string.status_confirmed),
+                                    stringResource(R.string.status_preparing),
+                                    stringResource(R.string.status_out_for_delivery),
+                                    stringResource(R.string.status_delivered),
+                                    stringResource(R.string.status_cancelled),
+                                ),
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = displayOrder.statusColor(),
@@ -129,7 +138,7 @@ fun OrderDetailsScreen(
                         }
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
-                            "Ordered on ${displayOrder.createdAt}",
+                            stringResource(R.string.order_ordered_on, displayOrder.createdAt),
                             fontSize = 12.sp,
                             color = colorScheme.onSurfaceVariant
                         )
@@ -148,7 +157,7 @@ fun OrderDetailsScreen(
                             .fillMaxWidth()
                             .padding(16.dp)
                     ) {
-                        Text("Order Progress", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
+                        Text(stringResource(R.string.order_progress), fontSize = 14.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
                         Spacer(modifier = Modifier.height(12.dp))
 
                         val statuses = listOf("pending", "confirmed", "preparing", "out_for_delivery", "delivered")
@@ -189,11 +198,11 @@ fun OrderDetailsScreen(
 
                                 Text(
                                     when (status) {
-                                        "pending" -> "Order Placed"
-                                        "confirmed" -> "Confirmed"
-                                        "preparing" -> "Preparing"
-                                        "out_for_delivery" -> "Out for Delivery"
-                                        "delivered" -> "Delivered"
+                                        "pending" -> stringResource(R.string.order_placed)
+                                        "confirmed" -> stringResource(R.string.order_confirmed)
+                                        "preparing" -> stringResource(R.string.order_preparing)
+                                        "out_for_delivery" -> stringResource(R.string.order_out_for_delivery)
+                                        "delivered" -> stringResource(R.string.order_delivered)
                                         else -> status
                                     },
                                     fontSize = 13.sp,
@@ -224,7 +233,7 @@ fun OrderDetailsScreen(
                         if (isCancelled) {
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                "This order was cancelled",
+                                stringResource(R.string.order_cancelled_status),
                                 fontSize = 13.sp,
                                 color = Error,
                                 fontWeight = FontWeight.Medium
@@ -255,7 +264,7 @@ fun OrderDetailsScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            "Confirm Delivery",
+                            stringResource(R.string.order_confirm_delivery),
                             fontSize = 15.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = Color.White
@@ -270,10 +279,10 @@ fun OrderDetailsScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("Items", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
+                    Text(stringResource(R.string.order_items), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
                     if (displayOrder.status == "delivered") {
                         Text(
-                            "Tap an item to rate",
+                            stringResource(R.string.order_tap_to_rate),
                             fontSize = 12.sp,
                             color = colorScheme.secondary,
                             fontWeight = FontWeight.Medium
@@ -305,19 +314,19 @@ fun OrderDetailsScreen(
                 ) {
                     Column(modifier = Modifier.padding(14.dp)) {
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Subtotal", fontSize = 13.sp, color = colorScheme.onSurfaceVariant)
+                            Text(stringResource(R.string.subtotal), fontSize = 13.sp, color = colorScheme.onSurfaceVariant)
                             Text("KD ${String.format("%.3f", displayOrder.subtotal)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground)
                         }
                         Spacer(modifier = Modifier.height(4.dp))
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Delivery Fee", fontSize = 13.sp, color = colorScheme.onSurfaceVariant)
+                            Text(stringResource(R.string.delivery_fee), fontSize = 13.sp, color = colorScheme.onSurfaceVariant)
                             Text("KD ${String.format("%.3f", displayOrder.deliveryFee)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground)
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                         HorizontalDivider(color = dividerColor)
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Total", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
+                            Text(stringResource(R.string.total), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
                             Text("KD ${String.format("%.3f", displayOrder.total)}", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
                         }
                     }
@@ -325,7 +334,7 @@ fun OrderDetailsScreen(
             }
 
             item {
-                Text("Delivery Address", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
+                Text(stringResource(R.string.order_delivery_address), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
             }
 
             item {
@@ -371,29 +380,29 @@ fun OrderDetailsScreen(
                         }
 
                         if (addr.block.isNotBlank()) {
-                            InfoRow("Block", addr.block)
+                            InfoRow(stringResource(R.string.order_block), addr.block)
                             Spacer(modifier = Modifier.height(4.dp))
                         }
                         if (addr.street.isNotBlank()) {
-                            InfoRow("Street", addr.street)
+                            InfoRow(stringResource(R.string.order_street), addr.street)
                             Spacer(modifier = Modifier.height(4.dp))
                         }
                         if (addr.building.isNotBlank()) {
-                            InfoRow("Building", addr.building)
+                            InfoRow(stringResource(R.string.order_building), addr.building)
                             Spacer(modifier = Modifier.height(4.dp))
                         }
                         if (addr.floor.isNotBlank()) {
-                            InfoRow("Floor", addr.floor)
+                            InfoRow(stringResource(R.string.order_floor), addr.floor)
                             Spacer(modifier = Modifier.height(4.dp))
                         }
                         if (addr.apartment.isNotBlank()) {
-                            InfoRow("Apartment", addr.apartment)
+                            InfoRow(stringResource(R.string.order_apartment), addr.apartment)
                             Spacer(modifier = Modifier.height(4.dp))
                         }
 
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
-                            "Lat: ${String.format("%.6f", displayOrder.deliveryAddress.latitude)}, Lon: ${String.format("%.6f", displayOrder.deliveryAddress.longitude)}",
+                            stringResource(R.string.lat_lon, String.format("%.6f", displayOrder.deliveryAddress.latitude), String.format("%.6f", displayOrder.deliveryAddress.longitude)),
                             fontSize = 10.sp,
                             color = colorScheme.onSurfaceVariant
                         )
@@ -402,7 +411,7 @@ fun OrderDetailsScreen(
             }
 
             item {
-                Text("Contact Information", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
+                Text(stringResource(R.string.order_contact_info), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
             }
 
             item {
@@ -412,15 +421,15 @@ fun OrderDetailsScreen(
                     elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
                 ) {
                     Column(modifier = Modifier.padding(14.dp)) {
-                        InfoRow("Name", displayOrder.customerName)
+                        InfoRow(stringResource(R.string.order_name), displayOrder.customerName)
                         Spacer(modifier = Modifier.height(6.dp))
-                        InfoRow("Phone", displayOrder.phone)
+                        InfoRow(stringResource(R.string.order_phone), displayOrder.phone)
                         if (displayOrder.notes.isNotBlank()) {
                             Spacer(modifier = Modifier.height(6.dp))
-                            InfoRow("Notes", displayOrder.notes)
+                            InfoRow(stringResource(R.string.order_notes), displayOrder.notes)
                         }
                         Spacer(modifier = Modifier.height(6.dp))
-                        InfoRow("Payment", "Cash on Delivery")
+                        InfoRow(stringResource(R.string.order_payment), stringResource(R.string.order_cash_on_delivery))
                     }
                 }
             }
@@ -444,7 +453,7 @@ fun OrderDetailsScreen(
                     .padding(horizontal = 20.dp, vertical = 8.dp)
             ) {
                 Text(
-                    "Rate This Item",
+                    stringResource(R.string.review_rate_item),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = colorScheme.onBackground
@@ -463,7 +472,7 @@ fun OrderDetailsScreen(
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Text(
-                    "Tap to rate:",
+                    stringResource(R.string.review_tap_to_rate),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
                     color = colorScheme.onBackground
@@ -492,11 +501,11 @@ fun OrderDetailsScreen(
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         when (selectedRating) {
-                            1 -> "Poor"
-                            2 -> "Fair"
-                            3 -> "Good"
-                            4 -> "Very Good"
-                            5 -> "Excellent"
+                            1 -> stringResource(R.string.review_poor)
+                            2 -> stringResource(R.string.review_fair)
+                            3 -> stringResource(R.string.review_good)
+                            4 -> stringResource(R.string.review_very_good)
+                            5 -> stringResource(R.string.review_excellent)
                             else -> ""
                         },
                         fontSize = 13.sp,
@@ -512,8 +521,8 @@ fun OrderDetailsScreen(
                     onValueChange = {
                         if (it.length <= 500) reviewText = it
                     },
-                    label = { Text("Your Review") },
-                    placeholder = { Text("Tell us what you think about this product...") },
+                    label = { Text(stringResource(R.string.review_your_review)) },
+                    placeholder = { Text(stringResource(R.string.review_placeholder)) },
                     minLines = 4,
                     maxLines = 6,
                     modifier = Modifier.fillMaxWidth(),
@@ -529,7 +538,7 @@ fun OrderDetailsScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    "${reviewText.length} / 500",
+                    stringResource(R.string.review_char_count, reviewText.length),
                     fontSize = 11.sp,
                     color = colorScheme.onSurfaceVariant,
                     modifier = Modifier.fillMaxWidth(),
@@ -539,11 +548,11 @@ fun OrderDetailsScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 if (selectedRating == 0 && reviewText.isBlank()) {
-                    Text("Please select a rating and write a review", fontSize = 12.sp, color = Error)
+                    Text(stringResource(R.string.review_error_both), fontSize = 12.sp, color = Error)
                 } else if (selectedRating == 0) {
-                    Text("Please select a rating", fontSize = 12.sp, color = Error)
+                    Text(stringResource(R.string.review_error_rating), fontSize = 12.sp, color = Error)
                 } else if (reviewText.isBlank()) {
-                    Text("Please write a review comment", fontSize = 12.sp, color = Error)
+                    Text(stringResource(R.string.review_error_comment), fontSize = 12.sp, color = Error)
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -552,7 +561,7 @@ fun OrderDetailsScreen(
                     onClick = {
                         if (selectedRating > 0 && reviewText.isNotBlank() && reviewingItem != null) {
                             val user = SessionManager.currentUser
-                            val userName = user?.let { "${it.firstName} ${it.lastName}" } ?: "Guest User"
+                            val userName = user?.let { "${it.firstName} ${it.lastName}" } ?: stringResource(R.string.guest_user)
                             val userId = user?.id ?: "guest"
 
                             viewModel.submitReview(
@@ -582,7 +591,7 @@ fun OrderDetailsScreen(
                             strokeWidth = 2.5.dp
                         )
                     } else {
-                        Text("Submit Review", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onPrimary)
+                        Text(stringResource(R.string.review_submit), fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onPrimary)
                     }
                 }
 
@@ -625,7 +634,7 @@ fun OrderDetailItemCard(
                 Spacer(modifier = Modifier.width(10.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(item.name, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onBackground, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Text("Qty: ${item.quantity} x KD ${String.format("%.3f", item.price)}", fontSize = 12.sp, color = colorScheme.onSurfaceVariant)
+                    Text("${stringResource(R.string.qty)}: ${item.quantity} x KD ${String.format("%.3f", item.price)}", fontSize = 12.sp, color = colorScheme.onSurfaceVariant)
                 }
                 Text("KD ${String.format("%.3f", item.price * item.quantity)}", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
             }
@@ -658,7 +667,7 @@ fun OrderDetailItemCard(
                         modifier = Modifier.weight(1f)
                     )
                     Text(
-                        "Reviewed",
+                        stringResource(R.string.review_reviewed),
                         fontSize = 10.sp,
                         color = Success,
                         fontWeight = FontWeight.Medium
@@ -678,7 +687,7 @@ fun OrderDetailItemCard(
                 ) {
                     Icon(Icons.Filled.Star, contentDescription = null, tint = colorScheme.secondary, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text("Rate This Item", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(R.string.review_rate_button), fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                 }
             }
         }
