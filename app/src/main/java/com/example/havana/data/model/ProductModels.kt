@@ -6,24 +6,52 @@ data class Product(
     val name: String,
     val description: String,
     val price: Double,
+    @SerializedName("sale_price")
+    val salePrice: Double? = null,
+    @SerializedName("effective_price")
+    val effectivePrice: Double? = null,
+    @SerializedName("is_on_sale")
+    val isOnSale: Boolean = false,
     val image: String? = null,
-    val category: String,
+    @SerializedName("category_id")
+    val categoryId: String? = null,
+    val category: Category? = null,
     val rating: Float = 0f,
-    @SerializedName("review_count")
+    @SerializedName("reviews_count")
     val reviewCount: Int = 0,
     @SerializedName("is_featured")
     val isFeatured: Boolean = false,
-    @SerializedName("is_top_selling")
-    val isTopSelling: Boolean = false,
+    @SerializedName("is_best_seller")
+    val isBestSeller: Boolean = false,
+    @SerializedName("is_new")
+    val isNew: Boolean = false,
     @SerializedName("in_stock")
     val inStock: Boolean = true,
+    val stock: Int = 0,
     val images: List<String> = emptyList(),
-)
+) {
+    /** Computed: effective display price (sale price if on sale, otherwise regular price) */
+    val displayPrice: Double get() = if (isOnSale && salePrice != null) salePrice else price
+
+    /** Computed: backward-compatible field for filtering */
+    val isTopSelling: Boolean get() = isBestSeller
+
+    /** Computed: category name for display/filtering (from nested category or categoryId) */
+    val categoryName: String get() = category?.name ?: ""
+}
 
 data class Category(
     val id: String,
     val name: String,
-    val emoji: String,
+    val emoji: String = "",
+    @SerializedName("name_en")
+    val nameEn: String = "",
+    @SerializedName("name_ar")
+    val nameAr: String = "",
+    val slug: String = "",
+    val image: String? = null,
+    @SerializedName("products_count")
+    val productsCount: Int = 0,
 )
 
 sealed class ProductListState {
@@ -52,12 +80,55 @@ data class Review(
     val avatar: String? = null,
 )
 
+data class ReviewRequest(
+    @SerializedName("product_id")
+    val productId: String,
+    val rating: Int,
+    val title: String? = null,
+    val comment: String? = null,
+)
+
 sealed class ReviewState {
     data object Idle : ReviewState()
     data object Loading : ReviewState()
     data class Success(val reviews: List<Review>) : ReviewState()
     data class Error(val message: String) : ReviewState()
 }
+
+/**
+ * Wrapper for the paginated products response from the backend.
+ * GET /api/products returns: { data: [...], meta: { current_page, total, ... } }
+ */
+data class ProductsResponse(
+    val data: List<Product>,
+    val meta: PaginatedMeta? = null,
+)
+
+data class PaginatedMeta(
+    @SerializedName("current_page")
+    val currentPage: Int = 1,
+    @SerializedName("last_page")
+    val lastPage: Int = 1,
+    @SerializedName("per_page")
+    val perPage: Int = 15,
+    val total: Int = 0,
+)
+
+/**
+ * Wrapper for the categories response from the backend.
+ * GET /api/categories returns: { data: [...] }
+ */
+data class CategoriesResponse(
+    val data: List<Category>,
+)
+
+/**
+ * Wrapper for the single product response from the backend.
+ * GET /api/products/{id} returns: { data: { ... } }
+ */
+data class ProductDataResponse(
+    val data: Product,
+)
 
 data class CartItem(
     @SerializedName("product_id")
@@ -66,5 +137,5 @@ data class CartItem(
     val price: Double,
     val quantity: Int,
     val image: String? = null,
-    val category: String,
+    val category: String = "",
 )

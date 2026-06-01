@@ -1,6 +1,5 @@
 package com.example.havana.data.repository
 
-import com.example.havana.data.mock.MockData
 import com.example.havana.data.model.Order
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -9,11 +8,11 @@ import kotlinx.coroutines.flow.update
 
 /**
  * Single source of truth for orders across the app.
- * Replaces the global mutable `mockOrdersList` from MainActivity.
+ * Orders are fetched from the API via ViewModels and set here.
  */
 object OrderRepository {
 
-    private val _orders = MutableStateFlow<List<Order>>(MockData.orders)
+    private val _orders = MutableStateFlow<List<Order>>(emptyList())
     val orders: StateFlow<List<Order>> = _orders.asStateFlow()
 
     fun getOrderById(orderId: String): Order? {

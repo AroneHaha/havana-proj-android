@@ -6,6 +6,9 @@ import com.example.havana.data.model.DeliveryAddress
 import com.example.havana.data.model.HavanaUser
 import com.example.havana.data.model.UserProfile
 import com.google.gson.Gson
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 object SessionManager {
 
@@ -15,6 +18,7 @@ object SessionManager {
     private const val KEY_USER_JSON = "user_json"
     private const val KEY_DARK_MODE = "dark_mode"
     private const val KEY_LANGUAGE_ARABIC = "language_arabic"
+    private const val KEY_REFRESH_TOKEN = "refresh_token"
 
     private var _currentUser: HavanaUser? = null
     private var _token: String? = null
@@ -30,7 +34,13 @@ object SessionManager {
     val isArabic: Boolean get() = _isArabic
     val isLoggedIn: Boolean get() = _currentUser != null && _token != null
 
-    private const val KEY_REFRESH_TOKEN = "refresh_token"
+    // ── Global auth state observer ──────────────────────────────────────
+    // Emits true when logged in, false when logged out.
+    // MainActivity observes this to force-navigate to login when the
+    // session is cleared mid-app (e.g. TokenAuthenticator on refresh failure).
+
+    private val _authStateFlow = MutableStateFlow(isLoggedIn)
+    val authStateFlow: StateFlow<Boolean> = _authStateFlow.asStateFlow()
 
     fun initialize(context: Context) {
         prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -60,6 +70,9 @@ object SessionManager {
                 }
             }
         }
+
+        // Emit initial auth state
+        _authStateFlow.value = isLoggedIn
     }
 
     fun saveRefreshToken(refreshToken: String?) {
@@ -86,6 +99,8 @@ object SessionManager {
             putString(KEY_USER_JSON, gson.toJson(user))
             apply()
         }
+        // Notify observers
+        _authStateFlow.value = true
     }
 
     fun clearSession() {
@@ -99,6 +114,8 @@ object SessionManager {
             remove(KEY_REFRESH_TOKEN)
             apply()
         }
+        // Notify observers — this triggers MainActivity to navigate to login
+        _authStateFlow.value = false
     }
 
     fun updateUser(user: HavanaUser) {

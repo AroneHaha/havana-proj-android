@@ -27,7 +27,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.res.stringResource
 import com.example.havana.R
 import com.example.havana.data.model.Product
-import com.example.havana.data.model.Review
 import com.example.havana.data.model.ReviewState
 import com.example.havana.ui.theme.*
 
@@ -293,7 +292,7 @@ fun ProductDetailsScreen(
                             color = colorScheme.primary.copy(alpha = 0.1f)
                         ) {
                             Text(
-                                p.category,
+                                p.categoryName,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = colorScheme.primary,
@@ -544,12 +543,13 @@ fun ReviewCard(review: Review) {
 }
 
 private fun Product.categoryEmoji(): String {
-    return when (category.lowercase()) {
-        "roses" -> "\uD83C\uDF39"
-        "bouquets" -> "\uD83D\uDC90"
-        "arrangements" -> "\uD83C\uDF3A"
-        "gifts" -> "\uD83C\uDF81"
-        "plants" -> "\uD83E\uDEB4"
+    val cat = categoryName.lowercase()
+    return when {
+        cat.contains("rose") -> "\uD83C\uDF39"
+        cat.contains("bouquet") -> "\uD83D\uDC90"
+        cat.contains("arrangement") -> "\uD83C\uDF3A"
+        cat.contains("gift") -> "\uD83C\uDF81"
+        cat.contains("plant") -> "\uD83E\uDEB4"
         else -> "\uD83C\uDF38"
     }
 }

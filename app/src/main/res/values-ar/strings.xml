@@ -54,14 +54,14 @@
     <string name="signup_password_label">كلمة المرور</string>
     <string name="signup_confirm_password_label">تأكيد كلمة المرور</string>
     <string name="signup_button">إنشاء حساب</string>
-    <string name="signup_success">تم إنشاء الحساب! جارٍ التحويل لتسجيل الدخول…</string>
+    <string name="signup_success">تم إنشاء الحساب بنجاح!</string>
     <string name="signup_has_account">لديك حساب بالفعل؟ </string>
     <string name="signup_signin_link">تسجيل الدخول</string>
     <string name="signup_hide_password">إخفاء كلمة المرور</string>
     <string name="signup_show_password">إظهار كلمة المرور</string>
     <string name="signup_error_name">يرجى إدخال اسمك الكامل</string>
     <string name="signup_error_email">يرجى إدخال بريد إلكتروني صالح</string>
-    <string name="signup_error_password_length">يجب أن تكون كلمة المرور 6 أحرف على الأقل</string>
+    <string name="signup_error_password_length">يجب أن تكون كلمة المرور 8 أحرف على الأقل</string>
     <string name="signup_error_password_mismatch">كلمتا المرور غير متطابقتين</string>
     <string name="signup_error_phone">يرجى إدخال رقم الهاتف</string>
     <string name="signup_error_phone_invalid">أدخل رقم هاتف كويتي صالح (مثال: +965 5XXX XXXX)</string>

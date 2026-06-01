@@ -62,12 +62,12 @@ fun SignupScreen(
     val isDark = ThemeManager.isDarkMode
     val colorScheme = MaterialTheme.colorScheme
 
-    // Handle success -> show success briefly then redirect to login
+    // Handle success -> show success briefly then go to home (session is already saved)
     LaunchedEffect(signupState) {
         if (signupState is AuthState.Success) {
-            kotlinx.coroutines.delay(1500)
+            kotlinx.coroutines.delay(1000)
             viewModel.resetState()
-            onNavigateToLogin()
+            onSignupSuccess()
         }
     }
 

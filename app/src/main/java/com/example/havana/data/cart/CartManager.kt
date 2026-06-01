@@ -79,6 +79,11 @@ object CartManager {
         persist()
     }
 
+    fun setCartItems(items: List<CartItem>) {
+        _cartItems.value = items
+        persist()
+    }
+
     private fun persist() {
         val json = gson.toJson(_cartItems.value)
         prefs?.edit()?.putString(KEY_CART_ITEMS, json)?.apply()

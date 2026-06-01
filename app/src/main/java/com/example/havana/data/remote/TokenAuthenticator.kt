@@ -9,10 +9,15 @@ import okhttp3.Route
 
 /**
  * OkHttp Authenticator that handles 401 Unauthorized responses.
+ *
  * When the server returns 401, it attempts to refresh the access token
  * using the stored refresh token. If refresh succeeds, the original
  * request is retried with the new token. If refresh fails, the session
  * is cleared and the user is effectively logged out.
+ *
+ * IMPORTANT: The /auth/refresh endpoint returns { token, refresh_token }
+ * with NO user object. We keep the existing HavanaUser in SessionManager
+ * and only update the tokens.
  */
 class TokenAuthenticator : Authenticator {
 
@@ -39,23 +44,11 @@ class TokenAuthenticator : Authenticator {
                 refreshApi.refreshToken("Bearer $refreshToken")
             }
 
-            // Save the new tokens
-            SessionManager.saveSession(
-                SessionManager.currentUser?.let { user ->
-                    // Update user from refresh response if available
-                    com.example.havana.data.model.HavanaUser(
-                        id = refreshResponse.user.id,
-                        email = refreshResponse.user.email,
-                        firstName = refreshResponse.user.firstName,
-                        lastName = refreshResponse.user.lastName,
-                        role = refreshResponse.user.role,
-                        emailVerified = refreshResponse.user.emailVerifiedAt != null,
-                        phone = user.phone,
-                        deliveryAddress = user.deliveryAddress,
-                    )
-                } ?: return null,
-                refreshResponse.token
-            )
+            // Update tokens in SessionManager — keep the existing user, only swap tokens
+            val existingUser = SessionManager.currentUser
+            if (existingUser != null) {
+                SessionManager.saveSession(existingUser, refreshResponse.token)
+            }
             SessionManager.saveRefreshToken(refreshResponse.refreshToken)
 
             // Retry the original request with the new token

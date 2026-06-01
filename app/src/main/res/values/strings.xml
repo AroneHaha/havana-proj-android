@@ -54,14 +54,14 @@
     <string name="signup_password_label">Password</string>
     <string name="signup_confirm_password_label">Confirm Password</string>
     <string name="signup_button">Create Account</string>
-    <string name="signup_success">Account created! Redirecting to login…</string>
+    <string name="signup_success">Account created successfully!</string>
     <string name="signup_has_account">Already have an account? </string>
     <string name="signup_signin_link">Sign In</string>
     <string name="signup_hide_password">Hide password</string>
     <string name="signup_show_password">Show password</string>
     <string name="signup_error_name">Please enter your full name</string>
     <string name="signup_error_email">Please enter a valid email address</string>
-    <string name="signup_error_password_length">Password must be at least 6 characters</string>
+    <string name="signup_error_password_length">Password must be at least 8 characters</string>
     <string name="signup_error_password_mismatch">Passwords do not match</string>
     <string name="signup_error_phone">Please enter your phone number</string>
     <string name="signup_error_phone_invalid">Enter a valid Kuwait phone number (e.g. +965 5XXX XXXX)</string>

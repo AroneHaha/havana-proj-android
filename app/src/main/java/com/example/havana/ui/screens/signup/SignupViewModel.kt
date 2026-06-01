@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.havana.data.model.AuthState
 import com.example.havana.data.model.HavanaUser
 import com.example.havana.data.model.SignupRequest
-import com.example.havana.data.model.SignupResponse
 import com.example.havana.data.model.UserDto
 import com.example.havana.data.remote.ApiClient
 import com.example.havana.data.remote.ApiResult
@@ -44,7 +43,7 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
             return
         }
 
-        if (password.length < 6) {
+        if (password.length < 8) {
             _signupState.value = AuthState.Error(getApplication<Application>().getString(R.string.signup_error_password_length))
             return
         }
@@ -67,46 +66,34 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
 
         _signupState.value = AuthState.Loading
 
+        val nameParts = name.trim().split("\\s+".toRegex(), limit = 2)
+        val firstName = nameParts.first()
+        val lastName = nameParts.getOrElse(1) { "" }
+
         viewModelScope.launch {
-            val request = SignupRequest(name, email, password, confirmPassword, phone)
+            val request = SignupRequest(
+                firstName = firstName,
+                lastName = lastName,
+                email = email,
+                password = password,
+                passwordConfirmation = confirmPassword,
+                phone = phone,
+            )
             when (val result = safeApiCall { authApi.register(request) }) {
                 is ApiResult.Success -> {
                     val user = mapToHavanaUser(result.data.user)
                     SessionManager.saveSession(user, result.data.token)
+                    SessionManager.saveRefreshToken(result.data.refreshToken)
                     _signupState.value = AuthState.Success(user, result.data.token)
                 }
                 is ApiResult.ServerError -> {
-                    // Server responded with error — show it (email taken, validation, etc.)
                     _signupState.value = AuthState.Error(result.message)
                 }
                 is ApiResult.NetworkError -> {
-                    // Server unreachable — fall back to mock signup during development
-                    tryMockSignup(name, email, phone)
+                    _signupState.value = AuthState.Error(result.error)
                 }
             }
         }
-    }
-
-    private suspend fun tryMockSignup(
-        name: String,
-        email: String,
-        phone: String
-    ) {
-        kotlinx.coroutines.delay(800)
-
-        val nameParts = name.trim().split(" ", limit = 2)
-        val mockUser = HavanaUser(
-            id = "user-${System.currentTimeMillis()}",
-            email = email,
-            firstName = nameParts.first(),
-            lastName = nameParts.getOrElse(1) { "" },
-            role = "customer",
-            emailVerified = false,
-            phone = phone,
-        )
-        val mockToken = "mock-signup-token-${System.currentTimeMillis()}"
-        SessionManager.saveSession(mockUser, mockToken)
-        _signupState.value = AuthState.Success(mockUser, mockToken)
     }
 
     private fun mapToHavanaUser(dto: UserDto): HavanaUser {

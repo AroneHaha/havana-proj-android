@@ -67,13 +67,29 @@ fun HavanaApp() {
     // Track login state to detect logout and force a fresh LoginViewModel
     var loginKey by remember { mutableStateOf(0) }
 
+    // ── Global auth observer ──────────────────────────────────────────
+    // When SessionManager clears the session (e.g. TokenAuthenticator on
+    // refresh failure), this LaunchedEffect forces navigation to login.
+    // Without this, the user stays on whatever screen they were on with
+    // no way to recover — a "stuck" state.
+    val isLoggedIn by SessionManager.authStateFlow.collectAsState()
+    LaunchedEffect(isLoggedIn) {
+        if (!isLoggedIn && currentScreen != "login" && currentScreen != "signup") {
+            loginKey++
+            currentScreen = "login"
+        }
+    }
+
     when (currentScreen) {
         "login" -> LoginScreen(
             key = loginKey,
             onLoginSuccess = { currentScreen = "home" },
             onNavigateToSignup = { currentScreen = "signup" },
         )
-        "signup" -> SignupScreen(onNavigateToLogin = { currentScreen = "login" })
+        "signup" -> SignupScreen(
+            onNavigateToLogin = { currentScreen = "login" },
+            onSignupSuccess = { currentScreen = "home" },
+        )
         "home" -> HomeScreen(onProductClick = { productId -> selectedProductId = productId; currentScreen = "productDetails" }, onCartClick = { currentScreen = "cart" }, onOrdersClick = { currentScreen = "orders" }, onProfileClick = { currentScreen = "profile" })
         "productDetails" -> ProductDetailsScreen(productId = selectedProductId ?: "", onBackClick = { currentScreen = "home" }, onCartClick = { currentScreen = "cart" }, onCheckoutClick = { currentScreen = "checkout" })
         "cart" -> CartScreen(onBackClick = { currentScreen = "home" }, onCheckoutClick = { currentScreen = "checkout" }, onHomeClick = { currentScreen = "home" }, onProfileClick = { currentScreen = "profile" })

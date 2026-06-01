@@ -6,7 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.example.havana.R
 import com.example.havana.data.model.*
 import com.example.havana.data.remote.ApiClient
+import com.example.havana.data.remote.ApiResult
 import com.example.havana.data.remote.AuthApiService
+import com.example.havana.data.remote.ProfileApiService
+import com.example.havana.data.remote.safeApiCall
 import com.example.havana.data.session.SessionManager
 import com.example.havana.ui.theme.ThemeManager
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,8 +19,8 @@ import kotlinx.coroutines.launch
 
 class ProfileViewModel(application: Application) : AndroidViewModel(application) {
 
-// TODO: Create ProfileApiService when backend is ready
-// private val profileApi = ApiClient.retrofit.create(ProfileApiService::class.java)
+    private val profileApi = ApiClient.retrofit.create(ProfileApiService::class.java)
+    private val authApi = ApiClient.retrofit.create(AuthApiService::class.java)
 
     private val _profileState = MutableStateFlow<ProfileState>(ProfileState.Idle)
     val profileState: StateFlow<ProfileState> = _profileState.asStateFlow()
@@ -41,19 +44,34 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
     fun loadProfile() {
         _profileState.value = ProfileState.Loading
         viewModelScope.launch {
-            try {
-// TODO: Try API first
-// val profile = profileApi.getProfile("Bearer ${SessionManager.token}")
-// _profileState.value = ProfileState.Success(profile)
+            val token = SessionManager.token
+            if (token == null) {
+                _profileState.value = ProfileState.Success(SessionManager.getMockProfile())
+                return@launch
+            }
 
-                val profile = SessionManager.getUserProfile()
-                if (profile != null) {
-                    _profileState.value = ProfileState.Success(profile)
-                } else {
-                    _profileState.value = ProfileState.Success(SessionManager.getMockProfile())
+            when (val result = safeApiCall { profileApi.getProfile("Bearer $token") }) {
+                is ApiResult.Success -> {
+                    _profileState.value = ProfileState.Success(result.data)
                 }
-            } catch (_: Exception) {
-                _profileState.value = ProfileState.Error(getApplication<Application>().getString(R.string.profile_error_load))
+                is ApiResult.ServerError -> {
+                    // Server error — fall back to local session data
+                    val local = SessionManager.getUserProfile()
+                    if (local != null) {
+                        _profileState.value = ProfileState.Success(local)
+                    } else {
+                        _profileState.value = ProfileState.Error(result.message)
+                    }
+                }
+                is ApiResult.NetworkError -> {
+                    // Server unreachable — use local session data
+                    val local = SessionManager.getUserProfile()
+                    if (local != null) {
+                        _profileState.value = ProfileState.Success(local)
+                    } else {
+                        _profileState.value = ProfileState.Success(SessionManager.getMockProfile())
+                    }
+                }
             }
         }
     }
@@ -68,22 +86,62 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
 
         _editState.value = EditProfileState.Saving
         viewModelScope.launch {
-            try {
+            val token = SessionManager.token
+            val request = UpdateProfileRequest(firstName, lastName, phone, deliveryAddress)
 
-// TODO: Call API
-// val request = UpdateProfileRequest(firstName, lastName, phone, deliveryAddress)
-// val response = profileApi.updateProfile("Bearer ${SessionManager.token}", request)
-// _editState.value = EditProfileState.Success(response.user)
-
-                kotlinx.coroutines.delay(600)
-
+            if (token != null) {
+                when (val result = safeApiCall { profileApi.updateProfile("Bearer $token", request) }) {
+                    is ApiResult.Success -> {
+                        val updatedProfile = result.data.user
+                        // Also update the local session
+                        val currentUser = SessionManager.currentUser
+                        if (currentUser != null) {
+                            SessionManager.updateUser(
+                                currentUser.copy(
+                                    firstName = updatedProfile.firstName,
+                                    lastName = updatedProfile.lastName,
+                                    phone = updatedProfile.phone,
+                                    deliveryAddress = updatedProfile.deliveryAddress,
+                                )
+                            )
+                        }
+                        _profileState.value = ProfileState.Success(updatedProfile)
+                        _editState.value = EditProfileState.Success(updatedProfile)
+                    }
+                    is ApiResult.ServerError -> {
+                        _editState.value = EditProfileState.Error(result.message)
+                    }
+                    is ApiResult.NetworkError -> {
+                        // Server unreachable — update locally only
+                        val updatedProfile = currentProfile.copy(
+                            firstName = firstName,
+                            lastName = lastName,
+                            phone = phone,
+                            deliveryAddress = deliveryAddress,
+                        )
+                        val currentUser = SessionManager.currentUser
+                        if (currentUser != null) {
+                            SessionManager.updateUser(
+                                currentUser.copy(
+                                    firstName = firstName,
+                                    lastName = lastName,
+                                    phone = phone,
+                                    deliveryAddress = deliveryAddress,
+                                )
+                            )
+                        }
+                        _profileState.value = ProfileState.Success(updatedProfile)
+                        _editState.value = EditProfileState.Success(updatedProfile)
+                    }
+                }
+            } else {
+                // No token (mock mode) — update locally
                 val updatedProfile = currentProfile.copy(
                     firstName = firstName,
                     lastName = lastName,
                     phone = phone,
                     deliveryAddress = deliveryAddress,
                 )
-
                 val currentUser = SessionManager.currentUser
                 if (currentUser != null) {
                     SessionManager.updateUser(
@@ -95,11 +153,8 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
                         )
                     )
                 }
-
                 _profileState.value = ProfileState.Success(updatedProfile)
                 _editState.value = EditProfileState.Success(updatedProfile)
-            } catch (_: Exception) {
-                _editState.value = EditProfileState.Error(getApplication<Application>().getString(R.string.profile_error_update))
             }
         }
     }
@@ -124,8 +179,6 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         _isArabic.value = enabled
         SessionManager.setArabic(enabled)
     }
-
-    private val authApi = ApiClient.retrofit.create(AuthApiService::class.java)
 
     fun logout() {
         viewModelScope.launch {

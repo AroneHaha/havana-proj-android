@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.havana.R
-import com.example.havana.data.mock.MockData
+
 import com.example.havana.data.model.CartItem
 import com.example.havana.ui.theme.*
 
@@ -184,7 +184,7 @@ fun CartItemCard(item: CartItem, onIncrease: () -> Unit, onDecrease: () -> Unit,
             Box(
                 modifier = Modifier.size(80.dp).background(colorScheme.surfaceVariant, RoundedCornerShape(10.dp)),
                 contentAlignment = Alignment.Center
-            ) { Text(MockData.categoryEmoji(item.category), fontSize = 32.sp) }
+            ) { Text(categoryEmoji(item.category), fontSize = 32.sp) }
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(item.name, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onBackground, maxLines = 2, overflow = TextOverflow.Ellipsis)
@@ -206,4 +206,13 @@ fun CartItemCard(item: CartItem, onIncrease: () -> Unit, onDecrease: () -> Unit,
             }
         }
     }
+}
+
+private fun categoryEmoji(category: String): String = when {
+    category.lowercase().contains("rose") -> "\uD83C\uDF39"
+    category.lowercase().contains("bouquet") -> "\uD83D\uDC90"
+    category.lowercase().contains("arrangement") -> "\uD83C\uDF3A"
+    category.lowercase().contains("gift") -> "\uD83C\uDF81"
+    category.lowercase().contains("plant") -> "\uD83E\uDEB4"
+    else -> "\uD83C\uDF38"
 }

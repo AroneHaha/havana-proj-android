@@ -3,12 +3,10 @@ package com.example.havana.ui.screens.productdetails
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.havana.data.mock.MockData
 import com.example.havana.data.model.*
 import com.example.havana.data.remote.ApiClient
 import com.example.havana.data.remote.ApiResult
 import com.example.havana.data.remote.safeApiCall
-import com.example.havana.data.session.SessionManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -37,31 +35,12 @@ class ProductDetailsViewModel(application: Application) : AndroidViewModel(appli
         _addedToCart.value = false
         viewModelScope.launch {
             when (val result = safeApiCall { detailsApi.getProduct(productId) }) {
-                is ApiResult.Success -> _productState.value = result.data
-                is ApiResult.ServerError -> {
-                    // Server responded with error — show it, don't silently use mock
-                    _productState.value = MockData.getProductById(productId)
-                }
-                is ApiResult.NetworkError -> {
-                    // Server unreachable — fall back to mock during development
-                    _productState.value = MockData.getProductById(productId)
-                }
-            }
-        }
-        loadReviews(productId)
-    }
-
-    private fun loadReviews(productId: String) {
-        _reviewState.value = ReviewState.Loading
-        viewModelScope.launch {
-            when (val result = safeApiCall { detailsApi.getReviews(productId) }) {
-                is ApiResult.Success -> _reviewState.value = ReviewState.Success(result.data)
+                is ApiResult.Success -> _productState.value = result.data.data
                 is ApiResult.ServerError -> {
                     _reviewState.value = ReviewState.Error(result.message)
                 }
                 is ApiResult.NetworkError -> {
-                    // Server unreachable — fall back to mock during development
-                    _reviewState.value = ReviewState.Success(MockData.reviews)
+                    _reviewState.value = ReviewState.Error(result.error)
                 }
             }
         }
@@ -89,7 +68,7 @@ class ProductDetailsViewModel(application: Application) : AndroidViewModel(appli
                 name = product.name,
                 price = product.price,
                 quantity = _quantity.value,
-                category = product.category
+                category = product.categoryName
             )
         )
         _addedToCart.value = true

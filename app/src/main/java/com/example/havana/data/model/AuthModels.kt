@@ -50,16 +50,42 @@ sealed class AuthState {
 
 // SIGN UP
 
+/**
+ * Registration request body — matches Laravel AuthController@register.
+ *
+ * Backend expects: first_name, last_name, email, password, password_confirmation, phone
+ * The full name entered by the user is split into first_name / last_name
+ * in the ViewModel before constructing this object.
+ */
 data class SignupRequest(
-    val name: String,
+    @SerializedName("first_name")
+    val firstName: String,
+    @SerializedName("last_name")
+    val lastName: String,
     val email: String,
     val password: String,
-    @SerializedName("confirm_password")
-    val confirmPassword: String,
+    @SerializedName("password_confirmation")
+    val passwordConfirmation: String,
     val phone: String
 )
 
+/**
+ * Registration response — backend returns the same shape as login:
+ * { user: UserDto, token, refresh_token }
+ */
 data class SignupResponse(
+    val user: UserDto,
     val token: String,
-    val user: UserDto
+    @SerializedName("refresh_token")
+    val refreshToken: String? = null
+)
+
+/**
+ * Token refresh response — backend /auth/refresh returns only new tokens, NO user.
+ * { token, refresh_token }
+ */
+data class RefreshTokenResponse(
+    val token: String,
+    @SerializedName("refresh_token")
+    val refreshToken: String? = null
 )

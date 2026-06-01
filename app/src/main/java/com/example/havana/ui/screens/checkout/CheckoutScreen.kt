@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.havana.R
-import com.example.havana.data.mock.MockData
+
 import com.example.havana.data.model.CartItem
 import com.example.havana.data.model.CheckoutState
 import com.example.havana.data.model.DeliveryAddress
@@ -409,7 +409,7 @@ fun CheckoutItemCard(item: CartItem) {
                     .background(colorScheme.surfaceVariant, RoundedCornerShape(8.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(MockData.categoryEmoji(item.category), fontSize = 20.sp)
+                Text(categoryEmoji(item.category), fontSize = 20.sp)
             }
             Spacer(modifier = Modifier.width(10.dp))
             Column(modifier = Modifier.weight(1f)) {
@@ -419,4 +419,13 @@ fun CheckoutItemCard(item: CartItem) {
             Text("KD ${String.format("%.3f", item.price * item.quantity)}", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
         }
     }
+}
+
+private fun categoryEmoji(category: String): String = when {
+    category.lowercase().contains("rose") -> "\uD83C\uDF39"
+    category.lowercase().contains("bouquet") -> "\uD83D\uDC90"
+    category.lowercase().contains("arrangement") -> "\uD83C\uDF3A"
+    category.lowercase().contains("gift") -> "\uD83C\uDF81"
+    category.lowercase().contains("plant") -> "\uD83E\uDEB4"
+    else -> "\uD83C\uDF38"
 }

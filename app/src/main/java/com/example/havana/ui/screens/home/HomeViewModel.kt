@@ -3,7 +3,6 @@ package com.example.havana.ui.screens.home
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.havana.data.mock.MockData
 import com.example.havana.data.model.Category
 import com.example.havana.data.model.CategoryState
 import com.example.havana.data.model.Product
@@ -46,16 +45,16 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             when (val result = safeApiCall { productApi.getCategories() }) {
                 is ApiResult.Success -> {
+                    val categories = result.data.data
                     _categoryState.value = CategoryState.Success(
-                        listOf(Category("all", "All", "\uD83C\uDF38")) + result.data
+                        listOf(Category("all", "All", "\uD83C\uDF38")) + categories
                     )
                 }
                 is ApiResult.ServerError -> {
                     _categoryState.value = CategoryState.Error(result.message)
                 }
                 is ApiResult.NetworkError -> {
-                    // Server unreachable — fall back to mock data during development
-                    _categoryState.value = CategoryState.Success(MockData.categories)
+                    _categoryState.value = CategoryState.Error(result.error)
                 }
             }
         }
@@ -66,16 +65,15 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             when (val result = safeApiCall { productApi.getProducts() }) {
                 is ApiResult.Success -> {
-                    allProducts = result.data
-                    _productState.value = ProductListState.Success(result.data)
+                    val products = result.data.data
+                    allProducts = products
+                    _productState.value = ProductListState.Success(products)
                 }
                 is ApiResult.ServerError -> {
                     _productState.value = ProductListState.Error(result.message)
                 }
                 is ApiResult.NetworkError -> {
-                    // Server unreachable — fall back to mock data during development
-                    allProducts = MockData.products
-                    _productState.value = ProductListState.Success(allProducts)
+                    _productState.value = ProductListState.Error(result.error)
                 }
             }
         }
@@ -100,7 +98,9 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                     product.name.lowercase().contains(query) ||
                     product.description.lowercase().contains(query)
 
-            val matchesCategory = category == "All" || product.category.equals(category, ignoreCase = true)
+            val matchesCategory = category == "All" ||
+                    product.categoryName.equals(category, ignoreCase = true) ||
+                    product.categoryId == category
 
             matchesSearch && matchesCategory
         }

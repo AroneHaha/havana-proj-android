@@ -447,12 +447,27 @@ fun FeaturedProductCard(
                     overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    "KD ${String.format("%.3f", product.price)}",
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = colorScheme.primary
-                )
+                if (product.isOnSale && product.salePrice != null) {
+                    Text(
+                        "KD ${String.format("%.3f", product.price)}",
+                        fontSize = 11.sp,
+                        color = colorScheme.onSurfaceVariant,
+                        textDecoration = androidx.compose.ui.text.style.TextDecoration.LineThrough
+                    )
+                    Text(
+                        "KD ${String.format("%.3f", product.salePrice)}",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.primary
+                    )
+                } else {
+                    Text(
+                        "KD ${String.format("%.3f", product.price)}",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.primary
+                    )
+                }
                 Spacer(modifier = Modifier.height(2.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("\u2605", fontSize = 12.sp, color = colorScheme.secondary)
@@ -519,12 +534,27 @@ fun TopSellingCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                Text(
-                    "KD ${String.format("%.3f", product.price)}",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = colorScheme.primary
-                )
+                if (product.isOnSale && product.salePrice != null) {
+                    Text(
+                        "KD ${String.format("%.3f", product.price)}",
+                        fontSize = 10.sp,
+                        color = colorScheme.onSurfaceVariant,
+                        textDecoration = androidx.compose.ui.text.style.TextDecoration.LineThrough
+                    )
+                    Text(
+                        "KD ${String.format("%.3f", product.salePrice)}",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.primary
+                    )
+                } else {
+                    Text(
+                        "KD ${String.format("%.3f", product.price)}",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colorScheme.primary
+                    )
+                }
             }
         }
     }
@@ -574,12 +604,29 @@ fun ProductCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        "KD ${String.format("%.3f", product.price)}",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = colorScheme.primary
-                    )
+                    if (product.isOnSale && product.salePrice != null) {
+                        Column {
+                            Text(
+                                "KD ${String.format("%.3f", product.price)}",
+                                fontSize = 10.sp,
+                                color = colorScheme.onSurfaceVariant,
+                                textDecoration = androidx.compose.ui.text.style.TextDecoration.LineThrough
+                            )
+                            Text(
+                                "KD ${String.format("%.3f", product.salePrice)}",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = colorScheme.primary
+                            )
+                        }
+                    } else {
+                        Text(
+                            "KD ${String.format("%.3f", product.price)}",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = colorScheme.primary
+                        )
+                    }
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text("\u2605", fontSize = 10.sp, color = colorScheme.secondary)
                         Text(
@@ -603,12 +650,13 @@ fun ProductCard(
 }
 
 private fun Product.categoryEmoji(): String {
-    return when (category.lowercase()) {
-        "roses" -> "\uD83C\uDF39"
-        "bouquets" -> "\uD83D\uDC90"
-        "arrangements" -> "\uD83C\uDF3A"
-        "gifts" -> "\uD83C\uDF81"
-        "plants" -> "\uD83E\uDEB4"
+    val cat = categoryName.lowercase()
+    return when {
+        cat.contains("rose") -> "\uD83C\uDF39"
+        cat.contains("bouquet") -> "\uD83D\uDC90"
+        cat.contains("arrangement") -> "\uD83C\uDF3A"
+        cat.contains("gift") -> "\uD83C\uDF81"
+        cat.contains("plant") -> "\uD83E\uDEB4"
         else -> "\uD83C\uDF38"
     }
 }
