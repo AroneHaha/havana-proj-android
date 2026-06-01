@@ -3,7 +3,6 @@ package com.example.havana.ui.screens.orders
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.havana.data.model.ReviewRequest
 import com.example.havana.data.remote.ApiClient
 import com.example.havana.data.remote.ApiResult
 import com.example.havana.data.remote.ReviewApiService
@@ -13,6 +12,7 @@ import com.example.havana.data.session.SessionManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import com.example.havana.data.model.Review
 import kotlinx.coroutines.launch
 
 class OrderDetailsViewModel(application: Application) : AndroidViewModel(application) {
@@ -28,8 +28,7 @@ class OrderDetailsViewModel(application: Application) : AndroidViewModel(applica
     private val _reviewError = MutableStateFlow<String?>(null)
     val reviewError: StateFlow<String?> = _reviewError.asStateFlow()
 
-    fun submitReview(productId: String, rating: Int, comment: String) {
-        val user = SessionManager.currentUser ?: return
+    fun submitReview(productId: String, rating: Int, comment: String, userId: String, userName: String) {
         _isSubmittingReview.value = true
         _reviewError.value = null
 

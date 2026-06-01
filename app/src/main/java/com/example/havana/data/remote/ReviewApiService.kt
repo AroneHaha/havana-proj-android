@@ -1,6 +1,5 @@
 package com.example.havana.data.remote
 
-import com.example.havana.data.model.ReviewRequest
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
