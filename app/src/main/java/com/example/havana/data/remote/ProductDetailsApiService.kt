@@ -3,6 +3,8 @@ package com.example.havana.data.remote
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
+import com.example.havana.data.model.ProductDataResponse
+import com.example.havana.data.model.Review
 
 interface ProductDetailsApiService {
 

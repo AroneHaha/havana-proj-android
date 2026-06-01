@@ -7,6 +7,8 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
+import com.google.gson.Gson
+
 
 object ApiClient {
 
@@ -67,14 +69,16 @@ object ApiClient {
                     .writeTimeout(15, TimeUnit.SECONDS)
                     .build()
             )
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(lenientGson))
             .build()
+
+    private val lenientGson = Gson().newBuilder().setLenient().create()
 
     val retrofit: Retrofit
         get() = Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(lenientGson))
             .build()
 
     fun <T> createService(serviceClass: Class<T>): T {

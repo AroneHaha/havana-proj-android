@@ -29,6 +29,7 @@ import com.example.havana.R
 import com.example.havana.data.model.Product
 import com.example.havana.data.model.ReviewState
 import com.example.havana.ui.theme.*
+import com.example.havana.data.model.Review
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

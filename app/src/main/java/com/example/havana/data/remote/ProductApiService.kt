@@ -5,6 +5,8 @@ import com.example.havana.data.model.ProductsResponse
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
+import com.example.havana.data.model.ProductDataResponse
+import com.example.havana.data.model.CategoriesResponse
 
 interface ProductApiService {
 

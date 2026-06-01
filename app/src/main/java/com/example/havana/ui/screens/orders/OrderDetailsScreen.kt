@@ -34,6 +34,7 @@ import com.example.havana.data.model.statusEmoji
 import com.example.havana.data.repository.OrderRepository
 import com.example.havana.data.session.SessionManager
 import com.example.havana.ui.theme.*
+import com.example.havana.data.model.Review
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
