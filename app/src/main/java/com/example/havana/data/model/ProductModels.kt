@@ -70,12 +70,10 @@ sealed class CategoryState {
 
 data class Review(
     val id: String,
-    @SerializedName("user_id")
-    val userId: String,
-    @SerializedName("user_name")
-    val userName: String,
-    val rating: Float,
-    val comment: String,
+    val userId: String,      // ✅ has it
+    val userName: String,    // ✅ has it
+    val rating: Float,       // Float — screen does .toInt()
+    val comment: String,     // ✅ has it
     val date: String,
     val avatar: String? = null,
 )

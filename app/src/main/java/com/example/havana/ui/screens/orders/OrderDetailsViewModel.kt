@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import com.example.havana.data.model.Review
+import com.example.havana.data.model.ReviewRequest  // ← ADD THIS
 import kotlinx.coroutines.launch
 
 class OrderDetailsViewModel(application: Application) : AndroidViewModel(application) {
