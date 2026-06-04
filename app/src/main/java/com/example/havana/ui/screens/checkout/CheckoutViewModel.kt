@@ -9,11 +9,12 @@ import com.example.havana.data.remote.ApiClient
 import com.example.havana.data.remote.ApiResult
 import com.example.havana.data.remote.safeApiCall
 import com.example.havana.R
-import kotlinx.coroutines.delay
+import com.example.havana.data.AppConstants
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+
 
 class CheckoutViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -47,7 +48,7 @@ class CheckoutViewModel(application: Application) : AndroidViewModel(application
         if (items.isEmpty()) { _checkoutState.value = CheckoutState.Error(getApplication<Application>().getString(R.string.checkout_error_cart_empty)); return }
         _checkoutState.value = CheckoutState.Loading
         val subtotal = items.sumOf { it.price * it.quantity }
-        val deliveryFee = 1.500
+        val deliveryFee = AppConstants.DELIVERY_FEE
         val total = subtotal + deliveryFee
         val fullOrder = Order(
             id = "order-${System.currentTimeMillis()}",
@@ -72,7 +73,8 @@ class CheckoutViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch {
             when (val result = safeApiCall { checkoutApi.placeOrder(orderRequest) }) {
                 is ApiResult.Success -> {
-                    val response = result.data
+                    // Backend returns { data: { id, order_number, status, ... } }
+                    val response = result.data.data
                     _lastPlacedOrder.value = fullOrder.copy(id = response.id, orderNumber = response.orderNumber, status = response.status, createdAt = response.createdAt)
                     _checkoutState.value = CheckoutState.Success(response)
                     CartManager.clearCart()
@@ -81,13 +83,8 @@ class CheckoutViewModel(application: Application) : AndroidViewModel(application
                     _checkoutState.value = CheckoutState.Error(result.message)
                 }
                 is ApiResult.NetworkError -> {
-                    // Server unreachable — fall back to mock order during development
-                    delay(1000)
-                    val mockOrderNumber = "HAV-${(1000..9999).random()}"
-                    val mockOrderResponse = OrderResponse(id = fullOrder.id, orderNumber = mockOrderNumber, status = "confirmed", total = total, createdAt = "2026-05-23")
-                    _lastPlacedOrder.value = fullOrder.copy(orderNumber = mockOrderNumber, createdAt = mockOrderResponse.createdAt)
-                    _checkoutState.value = CheckoutState.Success(mockOrderResponse)
-                    CartManager.clearCart()
+                    // Server unreachable — show error, NO mock order
+                    _checkoutState.value = CheckoutState.Error(result.error)
                 }
             }
         }

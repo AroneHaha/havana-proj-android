@@ -37,17 +37,17 @@ class OrdersViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch {
             when (val result = safeApiCall { orderApi.getOrders() }) {
                 is ApiResult.Success -> {
-                    allOrders = result.data
-                    OrderRepository.setOrders(result.data)
-                    _orderListState.value = OrderListState.Success(result.data)
+                    // Backend returns { data: [...], meta: {...} }
+                    allOrders = result.data.data
+                    OrderRepository.setOrders(allOrders)
+                    _orderListState.value = OrderListState.Success(allOrders)
                 }
                 is ApiResult.ServerError -> {
                     _orderListState.value = OrderListState.Error(result.message)
                 }
                 is ApiResult.NetworkError -> {
-                    // Server unreachable — fall back to OrderRepository (mock) during development
-                    allOrders = OrderRepository.orders.value
-                    _orderListState.value = OrderListState.Success(allOrders)
+                    // Server unreachable — show error, NOT mock data
+                    _orderListState.value = OrderListState.Error(result.error)
                 }
             }
         }

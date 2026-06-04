@@ -35,6 +35,7 @@ import com.example.havana.data.repository.OrderRepository
 import com.example.havana.data.session.SessionManager
 import com.example.havana.ui.theme.*
 import com.example.havana.data.model.Review
+import androidx.compose.runtime.LaunchedEffect
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,9 +45,18 @@ fun OrderDetailsScreen(
     onConfirmDelivery: (String) -> Unit = {},
     viewModel: OrderDetailsViewModel = viewModel(),
 ) {
-    val order by OrderRepository.orders.collectAsState()
-    val resolvedOrder = remember(orderId, order) { order.find { it.id == orderId } }
+    val order by viewModel.orderState.collectAsState()
+    val orderLoading by viewModel.orderLoading.collectAsState()
+    val orderError by viewModel.orderError.collectAsState()
 
+    // Fetch order from API on screen open
+    LaunchedEffect(orderId) {
+        if (orderId != null) {
+            viewModel.loadOrder(orderId)
+        }
+    }
+
+    val resolvedOrder = order
     val isDark = ThemeManager.isDarkMode
     val colorScheme = MaterialTheme.colorScheme
     val cardColor = if (isDark) CardDark else CardLight

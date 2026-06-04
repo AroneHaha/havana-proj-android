@@ -24,6 +24,11 @@ class ProductDetailsViewModel(application: Application) : AndroidViewModel(appli
     private val _reviewState = MutableStateFlow<ReviewState>(ReviewState.Idle)
     val reviewState: StateFlow<ReviewState> = _reviewState.asStateFlow()
 
+    private val _errorState = MutableStateFlow("")
+    val errorState: StateFlow<String> = _errorState.asStateFlow()
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
     private val _quantity = MutableStateFlow(1)
     val quantity: StateFlow<Int> = _quantity.asStateFlow()
 
@@ -31,18 +36,27 @@ class ProductDetailsViewModel(application: Application) : AndroidViewModel(appli
     val addedToCart: StateFlow<Boolean> = _addedToCart.asStateFlow()
 
     fun loadProduct(productId: String) {
+        _productState.value = null
         _quantity.value = 1
         _addedToCart.value = false
+        _errorState.value = ""
+        _isLoading.value = true
         viewModelScope.launch {
             when (val result = safeApiCall { detailsApi.getProduct(productId) }) {
-                is ApiResult.Success -> _productState.value = result.data.data
+                is ApiResult.Success -> {
+                    _productState.value = result.data.data
+                    _errorState.value = ""
+                }
                 is ApiResult.ServerError -> {
-                    _reviewState.value = ReviewState.Error(result.message)
+                    _errorState.value = result.message
+                    _productState.value = null
                 }
                 is ApiResult.NetworkError -> {
-                    _reviewState.value = ReviewState.Error(result.error)
+                    _errorState.value = result.error
+                    _productState.value = null
                 }
             }
+            _isLoading.value = false
         }
     }
 
@@ -65,10 +79,10 @@ class ProductDetailsViewModel(application: Application) : AndroidViewModel(appli
         com.example.havana.data.cart.CartManager.addToCart(
             com.example.havana.data.model.CartItem(
                 productId = product.id,
-                name = product.name,
+                name = product.name ?: "Product",
                 price = product.price,
                 quantity = _quantity.value,
-                category = product.categoryName
+                category = product.categoryName ?: "Flowers"
             )
         )
         _addedToCart.value = true

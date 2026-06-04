@@ -46,13 +46,33 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             val token = SessionManager.token
             if (token == null) {
-                _profileState.value = ProfileState.Success(SessionManager.getMockProfile())
+                // No token — use local session data if available, otherwise error
+                val local = SessionManager.getUserProfile()
+                if (local != null) {
+                    _profileState.value = ProfileState.Success(local)
+                } else {
+                    _profileState.value = ProfileState.Error("Please log in to view your profile.")
+                }
                 return@launch
             }
 
-            when (val result = safeApiCall { profileApi.getProfile("Bearer $token") }) {
+            when (val result = safeApiCall { profileApi.getProfile() }) {
                 is ApiResult.Success -> {
-                    _profileState.value = ProfileState.Success(result.data)
+                    // Backend returns { user: UserProfile }
+                    val profile = result.data.user
+                    // Update local session with fresh server data
+                    val currentUser = SessionManager.currentUser
+                    if (currentUser != null) {
+                        SessionManager.updateUser(
+                            currentUser.copy(
+                                firstName = profile.firstName,
+                                lastName = profile.lastName,
+                                phone = profile.phone,
+                                deliveryAddress = profile.deliveryAddress,
+                            )
+                        )
+                    }
+                    _profileState.value = ProfileState.Success(profile)
                 }
                 is ApiResult.ServerError -> {
                     // Server error — fall back to local session data
@@ -64,12 +84,12 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
                     }
                 }
                 is ApiResult.NetworkError -> {
-                    // Server unreachable — use local session data
+                    // Server unreachable — fall back to local session data
                     val local = SessionManager.getUserProfile()
                     if (local != null) {
                         _profileState.value = ProfileState.Success(local)
                     } else {
-                        _profileState.value = ProfileState.Success(SessionManager.getMockProfile())
+                        _profileState.value = ProfileState.Error(result.error)
                     }
                 }
             }
@@ -90,9 +110,10 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
             val request = UpdateProfileRequest(firstName, lastName, phone, deliveryAddress)
 
             if (token != null) {
-                when (val result = safeApiCall { profileApi.updateProfile("Bearer $token", request) }) {
+                when (val result = safeApiCall { profileApi.updateProfile(request) }) {
                     is ApiResult.Success -> {
-                        val updatedProfile = result.data.user
+                        // Backend returns { data: { user: UserProfile, message? } }
+                        val updatedProfile = result.data.data.user
                         // Also update the local session
                         val currentUser = SessionManager.currentUser
                         if (currentUser != null) {
@@ -135,7 +156,7 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
                     }
                 }
             } else {
-                // No token (mock mode) — update locally
+                // No token — update locally only
                 val updatedProfile = currentProfile.copy(
                     firstName = firstName,
                     lastName = lastName,

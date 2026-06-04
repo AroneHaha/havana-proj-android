@@ -47,13 +47,13 @@ fun OrdersScreen(
     val navBarColor = if (isDark) NavBarDark else NavBarLight
 
     val filters = listOf(
-        "all" to stringResource(R.string.orders_filter_all),
-        "pending" to stringResource(R.string.orders_filter_pending),
-        "confirmed" to stringResource(R.string.orders_filter_confirmed),
-        "preparing" to stringResource(R.string.orders_filter_preparing),
+        "all"              to stringResource(R.string.orders_filter_all),
+        "pending"          to stringResource(R.string.orders_filter_pending),
+        "confirmed"        to stringResource(R.string.orders_filter_confirmed),
+        "preparing"        to stringResource(R.string.orders_filter_preparing),
         "out_for_delivery" to stringResource(R.string.orders_filter_delivery),
-        "delivered" to stringResource(R.string.orders_filter_done),
-        "cancelled" to stringResource(R.string.orders_filter_cancelled),
+        "delivered"        to stringResource(R.string.orders_filter_done),
+        "cancelled"        to stringResource(R.string.orders_filter_cancelled),
     )
 
     Scaffold(

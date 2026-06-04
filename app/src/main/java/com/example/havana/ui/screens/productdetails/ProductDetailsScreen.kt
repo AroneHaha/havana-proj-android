@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -25,11 +26,31 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.res.stringResource
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.havana.R
 import com.example.havana.data.model.Product
 import com.example.havana.data.model.ReviewState
 import com.example.havana.ui.theme.*
 import com.example.havana.data.model.Review
+import com.example.havana.data.CategoryHelper
+
+private fun safeStr(value: String?): String {
+    return if (value.isNullOrBlank()) "" else value
+}
+
+private fun fmtPrice(amount: Double): String {
+    return "KD ${String.format("%.3f", amount)}"
+}
+
+private fun fmtPriceShort(amount: Double): String {
+    val f = when {
+        amount >= 100.0 -> String.format("%.0f", amount)
+        amount >= 10.0 -> String.format("%.1f", amount)
+        else -> String.format("%.3f", amount)
+    }
+    return "KD $f"
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,6 +69,8 @@ fun ProductDetailsScreen(
     val reviewState by viewModel.reviewState.collectAsState()
     val quantity by viewModel.quantity.collectAsState()
     val addedToCart by viewModel.addedToCart.collectAsState()
+    val errorMessage by viewModel.errorState.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
 
     val isDark = ThemeManager.isDarkMode
     val colorScheme = MaterialTheme.colorScheme
@@ -181,7 +204,7 @@ fun ProductDetailsScreen(
                                     .height(48.dp)
                             ) {
                                 Text(
-                                    "${stringResource(R.string.product_checkout)}  \u2022  ${formatKdPrice(p.price * quantity)}",
+                                    "${stringResource(R.string.product_checkout)}  \u2022  ${fmtPriceShort(p.price * quantity)}",
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     color = colorScheme.onPrimary,
@@ -195,7 +218,47 @@ fun ProductDetailsScreen(
         },
         containerColor = colorScheme.background
     ) { paddingValues ->
-        if (product == null) {
+        if (isLoading && product == null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = colorScheme.primary)
+            }
+        } else if (product == null && errorMessage.isNotEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(32.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        "Something went wrong",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Error
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        errorMessage,
+                        fontSize = 14.sp,
+                        color = colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    OutlinedButton(onClick = onBackClick) {
+                        Text(stringResource(R.string.back), fontSize = 14.sp)
+                    }
+                }
+            }
+        } else if (product == null) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -207,14 +270,19 @@ fun ProductDetailsScreen(
         } else {
             val p = product!!
 
+            val nameText = safeStr(p.name).ifEmpty { "Product" }
+            val descText = safeStr(p.description).ifEmpty { "No description available." }
+            val catText = safeStr(p.categoryName).ifEmpty { "Flowers" }
+            val imagesList: List<String> = (p.images ?: emptyList()).map { safeStr(it) }.filter { it.isNotEmpty() }
+            val hasImages = imagesList.isNotEmpty()
+
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
-                // ===== IMAGE CAROUSEL =====
                 item {
-                    val imageCount = if (p.images.isNotEmpty()) p.images.size else 3
+                    val imageCount = if (hasImages) imagesList.size else 3
                     val pagerState = rememberPagerState(pageCount = { imageCount })
 
                     Box(
@@ -226,41 +294,56 @@ fun ProductDetailsScreen(
                             state = pagerState,
                             modifier = Modifier.fillMaxSize()
                         ) { page ->
-                            val pageEmoji = p.categoryEmoji()
-                            val bgColors = listOf(
-                                colorScheme.primary.copy(alpha = 0.06f),
-                                colorScheme.secondary.copy(alpha = 0.08f),
-                                colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                            )
-                            val labels = listOf(
-                                stringResource(R.string.product_front_view),
-                                stringResource(R.string.product_detail_view),
-                                stringResource(R.string.product_arrangement)
-                            )
-
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .background(bgColors[page % bgColors.size]),
+                                    .background(colorScheme.surfaceVariant.copy(alpha = 0.3f)),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text(
-                                        pageEmoji,
-                                        fontSize = 72.sp
+                                if (hasImages && page < imagesList.size) {
+                                    AsyncImage(
+                                        model = ImageRequest.Builder(androidx.compose.ui.platform.LocalContext.current)
+                                            .data(imagesList[page])
+                                            .crossfade(true)
+                                            .build(),
+                                        contentDescription = nameText,
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentScale = ContentScale.Crop,
                                     )
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    Text(
-                                        labels[page % labels.size],
-                                        fontSize = 12.sp,
-                                        color = colorScheme.onSurfaceVariant,
-                                        fontWeight = FontWeight.Medium
+                                } else {
+                                    val bgColors = listOf(
+                                        colorScheme.primary.copy(alpha = 0.06f),
+                                        colorScheme.secondary.copy(alpha = 0.08f),
+                                        colorScheme.surfaceVariant.copy(alpha = 0.5f)
                                     )
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .background(bgColors[page % bgColors.size])
+                                    )
+                                    val pageEmoji = CategoryHelper.emojiFor(catText)
+                                    val labels = listOf(
+                                        stringResource(R.string.product_front_view),
+                                        stringResource(R.string.product_detail_view),
+                                        stringResource(R.string.product_arrangement)
+                                    )
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text(
+                                            pageEmoji,
+                                            fontSize = 72.sp
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Text(
+                                            labels[page % labels.size],
+                                            fontSize = 12.sp,
+                                            color = colorScheme.onSurfaceVariant,
+                                            fontWeight = FontWeight.Medium
+                                        )
+                                    }
                                 }
                             }
                         }
 
-                        // Page indicator dots
                         Row(
                             modifier = Modifier
                                 .align(Alignment.BottomCenter)
@@ -281,7 +364,6 @@ fun ProductDetailsScreen(
                     }
                 }
 
-                // ===== PRODUCT INFO =====
                 item {
                     Column(
                         modifier = Modifier
@@ -293,7 +375,7 @@ fun ProductDetailsScreen(
                             color = colorScheme.primary.copy(alpha = 0.1f)
                         ) {
                             Text(
-                                p.categoryName,
+                                catText,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = colorScheme.primary,
@@ -304,7 +386,7 @@ fun ProductDetailsScreen(
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Text(
-                            p.name,
+                            nameText,
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold,
                             color = colorScheme.onBackground
@@ -318,7 +400,7 @@ fun ProductDetailsScreen(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                "KD ${String.format("%.3f", p.price)}",
+                                fmtPrice(p.price),
                                 fontSize = 22.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = colorScheme.primary
@@ -363,7 +445,7 @@ fun ProductDetailsScreen(
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
-                            p.description,
+                            descText,
                             fontSize = 14.sp,
                             color = colorScheme.onSurfaceVariant,
                             lineHeight = 22.sp
@@ -371,7 +453,6 @@ fun ProductDetailsScreen(
                     }
                 }
 
-                // ===== DIVIDER =====
                 item {
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 16.dp),
@@ -379,7 +460,6 @@ fun ProductDetailsScreen(
                     )
                 }
 
-                // ===== REVIEWS SECTION HEADER (read-only) =====
                 item {
                     Row(
                         modifier = Modifier
@@ -420,7 +500,6 @@ fun ProductDetailsScreen(
                     }
                 }
 
-                // ===== REVIEW LIST (read-only) =====
                 when (reviewState) {
                     is ReviewState.Loading -> {
                         item {
@@ -458,19 +537,15 @@ fun ProductDetailsScreen(
     }
 }
 
-private fun formatKdPrice(amount: Double): String {
-    return when {
-        amount >= 100.0 -> "KD ${String.format("%.0f", amount)}"
-        amount >= 10.0 -> "KD ${String.format("%.1f", amount)}"
-        else -> "KD ${String.format("%.3f", amount)}"
-    }
-}
-
 @Composable
 fun ReviewCard(review: Review) {
     val colorScheme = MaterialTheme.colorScheme
     val cardColor = if (ThemeManager.isDarkMode) CardDark else CardLight
     val isDark = ThemeManager.isDarkMode
+
+    val rName = safeStr(review.userName).ifEmpty { "Anonymous" }
+    val rComment = safeStr(review.comment).ifEmpty { "No comment." }
+    val rDate = safeStr(review.date)
 
     Card(
         modifier = Modifier
@@ -496,7 +571,7 @@ fun ReviewCard(review: Review) {
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Text(
-                            review.userName.firstOrNull()?.uppercase() ?: "?",
+                            rName.firstOrNull()?.uppercase() ?: "?",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             color = colorScheme.primary
@@ -508,13 +583,13 @@ fun ReviewCard(review: Review) {
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        review.userName,
+                        rName,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = colorScheme.onBackground
                     )
                     Text(
-                        review.date,
+                        rDate,
                         fontSize = 11.sp,
                         color = colorScheme.onSurfaceVariant
                     )
@@ -534,23 +609,11 @@ fun ReviewCard(review: Review) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                review.comment,
+                rComment,
                 fontSize = 13.sp,
                 color = colorScheme.onSurfaceVariant,
                 lineHeight = 20.sp
             )
         }
-    }
-}
-
-private fun Product.categoryEmoji(): String {
-    val cat = categoryName.lowercase()
-    return when {
-        cat.contains("rose") -> "\uD83C\uDF39"
-        cat.contains("bouquet") -> "\uD83D\uDC90"
-        cat.contains("arrangement") -> "\uD83C\uDF3A"
-        cat.contains("gift") -> "\uD83C\uDF81"
-        cat.contains("plant") -> "\uD83E\uDEB4"
-        else -> "\uD83C\uDF38"
     }
 }

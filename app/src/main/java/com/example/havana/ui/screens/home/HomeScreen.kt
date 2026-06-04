@@ -21,12 +21,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.havana.R
 import com.example.havana.data.model.Category
 import com.example.havana.data.model.CategoryState
@@ -412,6 +416,9 @@ fun FeaturedProductCard(
         colors = CardDefaults.cardColors(containerColor = cardColor)
     ) {
         Column {
+            val context = LocalContext.current
+            val featuredImageUrl = product.images?.firstOrNull() ?: product.image
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -419,7 +426,19 @@ fun FeaturedProductCard(
                     .background(colorScheme.primary.copy(alpha = 0.08f)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(product.categoryEmoji(), fontSize = 40.sp)
+                if (featuredImageUrl != null) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(context)
+                            .data(featuredImageUrl)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = product.name,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    Text(product.categoryEmoji(), fontSize = 40.sp)
+                }
                 Surface(
                     modifier = Modifier
                         .align(Alignment.TopStart)
@@ -500,6 +519,9 @@ fun TopSellingCard(
         colors = CardDefaults.cardColors(containerColor = cardColor)
     ) {
         Column {
+            val context = LocalContext.current
+            val topImageUrl = product.images?.firstOrNull() ?: product.image
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -507,7 +529,19 @@ fun TopSellingCard(
                     .background(colorScheme.secondary.copy(alpha = 0.08f)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(product.categoryEmoji(), fontSize = 32.sp)
+                if (topImageUrl != null) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(context)
+                            .data(topImageUrl)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = product.name,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    Text(product.categoryEmoji(), fontSize = 32.sp)
+                }
                 Surface(
                     modifier = Modifier
                         .align(Alignment.TopStart)
@@ -578,6 +612,9 @@ fun ProductCard(
         colors = CardDefaults.cardColors(containerColor = cardColor)
     ) {
         Column {
+            val context = LocalContext.current
+            val cardImageUrl = product.images?.firstOrNull() ?: product.image
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -585,7 +622,19 @@ fun ProductCard(
                     .background(colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
-                Text(product.categoryEmoji(), fontSize = 36.sp)
+                if (cardImageUrl != null) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(context)
+                            .data(cardImageUrl)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = product.name,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    Text(product.categoryEmoji(), fontSize = 36.sp)
+                }
             }
 
             Column(modifier = Modifier.padding(10.dp)) {

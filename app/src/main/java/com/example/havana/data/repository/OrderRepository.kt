@@ -7,8 +7,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 /**
- * Single source of truth for orders across the app.
- * Orders are fetched from the API via ViewModels and set here.
+ * Local cache for orders — populated by ViewModels from API responses.
+ *
+ * This is NOT a mock data source. Orders are fetched from the backend
+ * via ViewModels (OrdersViewModel, OrderDetailsViewModel) and stored
+ * here so that other screens (OrderDetailsScreen, OrderConfirmationScreen)
+ * can access recently-fetched orders without re-fetching.
+ *
+ * Flow: API → ViewModel → OrderRepository.setOrders() → Screen reads from here
  */
 object OrderRepository {
 

@@ -10,6 +10,7 @@ import com.example.havana.data.model.ProductListState
 import com.example.havana.data.remote.ApiClient
 import com.example.havana.data.remote.ApiResult
 import com.example.havana.data.remote.safeApiCall
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -37,7 +38,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         loadCategories()
-        loadProducts()
+        loadProductsWithRetry(retriesRemaining = 3)
     }
 
     private fun loadCategories() {
@@ -55,6 +56,30 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 }
                 is ApiResult.NetworkError -> {
                     _categoryState.value = CategoryState.Error(result.error)
+                }
+            }
+        }
+    }
+
+    private fun loadProductsWithRetry(retriesRemaining: Int) {
+        _productState.value = ProductListState.Loading
+        viewModelScope.launch {
+            when (val result = safeApiCall { productApi.getProducts() }) {
+                is ApiResult.Success -> {
+                    val products = result.data.data
+                    allProducts = products
+                    _productState.value = ProductListState.Success(products)
+                }
+                is ApiResult.ServerError -> {
+                    _productState.value = ProductListState.Error(result.message)
+                }
+                is ApiResult.NetworkError -> {
+                    if (retriesRemaining > 0) {
+                        delay(1000)
+                        loadProductsWithRetry(retriesRemaining - 1)
+                    } else {
+                        _productState.value = ProductListState.Error(result.error)
+                    }
                 }
             }
         }

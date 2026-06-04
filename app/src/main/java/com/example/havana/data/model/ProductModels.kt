@@ -2,10 +2,10 @@ package com.example.havana.data.model
 import com.google.gson.annotations.SerializedName
 
 data class Product(
-    val id: String,
-    val name: String,
-    val description: String,
-    val price: Double,
+    val id: String = "",
+    val name: String = "",
+    val description: String = "",
+    val price: Double = 0.0,
     @SerializedName("sale_price")
     val salePrice: Double? = null,
     @SerializedName("effective_price")
@@ -28,21 +28,16 @@ data class Product(
     @SerializedName("in_stock")
     val inStock: Boolean = true,
     val stock: Int = 0,
-    val images: List<String> = emptyList(),
+    val images: List<String>? = emptyList(),
 ) {
-    /** Computed: effective display price (sale price if on sale, otherwise regular price) */
     val displayPrice: Double get() = if (isOnSale && salePrice != null) salePrice else price
-
-    /** Computed: backward-compatible field for filtering */
     val isTopSelling: Boolean get() = isBestSeller
-
-    /** Computed: category name for display/filtering (from nested category or categoryId) */
     val categoryName: String get() = category?.name ?: ""
 }
 
 data class Category(
-    val id: String,
-    val name: String,
+    val id: String = "",
+    val name: String = "",
     val emoji: String = "",
     @SerializedName("name_en")
     val nameEn: String = "",
@@ -69,12 +64,12 @@ sealed class CategoryState {
 }
 
 data class Review(
-    val id: String,
-    val userId: String,      // ✅ has it
-    val userName: String,    // ✅ has it
-    val rating: Float,       // Float — screen does .toInt()
-    val comment: String,     // ✅ has it
-    val date: String,
+    val id: String = "",
+    val userId: String = "",
+    val userName: String = "",
+    val rating: Float = 0f,
+    val comment: String = "",
+    val date: String = "",
     val avatar: String? = null,
 )
 
@@ -93,10 +88,6 @@ sealed class ReviewState {
     data class Error(val message: String) : ReviewState()
 }
 
-/**
- * Wrapper for the paginated products response from the backend.
- * GET /api/products returns: { data: [...], meta: { current_page, total, ... } }
- */
 data class ProductsResponse(
     val data: List<Product>,
     val meta: PaginatedMeta? = null,
@@ -112,18 +103,10 @@ data class PaginatedMeta(
     val total: Int = 0,
 )
 
-/**
- * Wrapper for the categories response from the backend.
- * GET /api/categories returns: { data: [...] }
- */
 data class CategoriesResponse(
     val data: List<Category>,
 )
 
-/**
- * Wrapper for the single product response from the backend.
- * GET /api/products/{id} returns: { data: { ... } }
- */
 data class ProductDataResponse(
     val data: Product,
 )

@@ -153,25 +153,5 @@ object SessionManager {
         )
     }
 
-    fun getMockProfile(): UserProfile {
-        return UserProfile(
-            id = "demo-1",
-            firstName = "Fatima",
-            lastName = "Al-Sabah",
-            email = "admin@gmail.com",
-            phone = "+965 5123 4567",
-            deliveryAddress = DeliveryAddress(
-                fullAddress = "Salmiya, Salem Al Mubarak St, Block 12, Building 8, Floor 3, Hawalli Governorate, Kuwait",
-                area = "Salmiya",
-                block = "12",
-                street = "Salem Al Mubarak St",
-                building = "8",
-                floor = "3",
-                latitude = 29.3375,
-                longitude = 48.0833
-            ),
-            role = "customer",
-            emailVerified = true,
-        )
-    }
+
 }

@@ -50,6 +50,13 @@ data class OrderResponse(
     val createdAt: String,
 )
 
+// ── Generic wrapper for backend responses: { data: {...} } ─────────────────
+
+data class DataResponse<T>(
+    @SerializedName("data")
+    val data: T
+)
+
 sealed class CheckoutState {
     data object Idle : CheckoutState()
     data object Loading : CheckoutState()
@@ -119,7 +126,6 @@ fun Order.statusLabel(): String {
     }
 }
 
-/** Localized version of statusLabel that accepts pre-resolved string resources. */
 fun Order.localizedStatus(
     pending: String,
     confirmed: String,
