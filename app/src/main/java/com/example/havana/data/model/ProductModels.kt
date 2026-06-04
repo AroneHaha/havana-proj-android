@@ -120,3 +120,30 @@ data class CartItem(
     val image: String? = null,
     val category: String = "",
 )
+
+data class AddToCartRequest(
+    @SerializedName("product_id")
+    val productId: String,
+    val quantity: Int,
+)
+
+data class WrappedServerCartItem(
+    val data: ServerCartItem,
+    val message: String,
+)
+
+data class ServerCartItem(
+    val id: String,
+    @SerializedName("product_id")
+    val productId: String,
+    val quantity: Int,
+    val subtotal: Double,
+    val product: Product,
+)
+
+data class CartResponse(
+    val items: List<ServerCartItem>,
+    @SerializedName("items_count")
+    val itemsCount: Int,
+    val subtotal: Double,
+)

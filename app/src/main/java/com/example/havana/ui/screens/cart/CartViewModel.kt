@@ -4,6 +4,8 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.havana.data.cart.CartManager
+import com.example.havana.data.model.AddToCartRequest
+import com.example.havana.data.model.CartItem
 import com.example.havana.data.remote.ApiClient
 import com.example.havana.data.remote.ApiResult
 import com.example.havana.data.remote.safeApiCall
@@ -11,6 +13,7 @@ import com.example.havana.data.session.SessionManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class CartViewModel(application: Application) : AndroidViewModel(application) {
@@ -45,7 +48,17 @@ class CartViewModel(application: Application) : AndroidViewModel(application) {
             _syncState.value = CartSyncState.Syncing
             when (val result = safeApiCall { cartApi.getCart() }) {
                 is ApiResult.Success -> {
-                    val serverItems = result.data
+                    val serverResponse = result.data
+                    val serverItems = serverResponse.items.map { sci ->
+                        CartItem(
+                            productId = sci.productId,
+                            name = sci.product.name,
+                            price = sci.product.displayPrice,
+                            quantity = sci.quantity,
+                            image = sci.product.image,
+                            category = sci.product.categoryName,
+                        )
+                    }
                     val localItems = CartManager.cartItems.value
                     val serverProductIds = serverItems.map { it.productId }.toSet()
                     val merged = serverItems + localItems.filter { it.productId !in serverProductIds }
@@ -67,7 +80,6 @@ class CartViewModel(application: Application) : AndroidViewModel(application) {
         val item = items.find { it.productId == productId } ?: return
         val newQty = item.quantity + 1
         CartManager.updateQuantity(productId, newQty)
-        pushUpdateToServer(productId, newQty)
     }
 
     fun decreaseQuantity(productId: String) {
@@ -75,16 +87,10 @@ class CartViewModel(application: Application) : AndroidViewModel(application) {
         val item = items.find { it.productId == productId } ?: return
         val newQty = item.quantity - 1
         CartManager.updateQuantity(productId, newQty)
-        if (newQty > 0) {
-            pushUpdateToServer(productId, newQty)
-        } else {
-            pushRemoveToServer(productId)
-        }
     }
 
     fun removeItem(productId: String) {
         CartManager.removeFromCart(productId)
-        pushRemoveToServer(productId)
     }
 
     fun clearCart() {
@@ -92,30 +98,11 @@ class CartViewModel(application: Application) : AndroidViewModel(application) {
         pushClearToServer()
     }
 
-    private fun pushUpdateToServer(productId: String, quantity: Int) {
-        if (SessionManager.token == null) return
-        viewModelScope.launch {
-            try {
-                safeApiCall { cartApi.updateQuantity(productId, mapOf("quantity" to quantity)) }
-            } catch (_: Exception) { }
-        }
-    }
-
-    private fun pushRemoveToServer(productId: String) {
-        if (SessionManager.token == null) return
-        viewModelScope.launch {
-            try {
-                safeApiCall { cartApi.removeFromCart(productId) }
-            } catch (_: Exception) { }
-        }
-    }
-
     private fun pushClearToServer() {
-        if (SessionManager.token == null) return
         viewModelScope.launch {
             try {
                 safeApiCall { cartApi.clearCart() }
-            } catch (_: Exception) { }
+            } catch (_: Exception) { /* best-effort sync */ }
         }
     }
 }

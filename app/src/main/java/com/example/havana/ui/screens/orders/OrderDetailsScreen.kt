@@ -325,20 +325,18 @@ fun OrderDetailsScreen(
                     Column(modifier = Modifier.padding(14.dp)) {
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                             Text(stringResource(R.string.subtotal), fontSize = 13.sp, color = colorScheme.onSurfaceVariant)
-                            Text("KD ${String.format("%.3f", displayOrder.subtotal)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground)
-                        }
+                            Text("KWD ${String.format("%.3f", displayOrder.subtotal)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground)                        }
                         Spacer(modifier = Modifier.height(4.dp))
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                             Text(stringResource(R.string.delivery_fee), fontSize = 13.sp, color = colorScheme.onSurfaceVariant)
-                            Text("KD ${String.format("%.3f", displayOrder.deliveryFee)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground)
+                            Text("KWD ${String.format("%.3f", displayOrder.shippingCost)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground)
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                         HorizontalDivider(color = dividerColor)
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                             Text(stringResource(R.string.total), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
-                            Text("KD ${String.format("%.3f", displayOrder.total)}", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
-                        }
+                            Text("KWD ${String.format("%.3f", displayOrder.total)}", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)                        }
                     }
                 }
             }
@@ -641,7 +639,7 @@ fun OrderDetailItemCard(
                         .background(colorScheme.surfaceVariant, RoundedCornerShape(8.dp)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(categoryEmoji(item.category), fontSize = 20.sp)
+                    Text("\uD83C\uDF38", fontSize = 20.sp)
                 }
                 Spacer(modifier = Modifier.width(10.dp))
                 Column(modifier = Modifier.weight(1f)) {

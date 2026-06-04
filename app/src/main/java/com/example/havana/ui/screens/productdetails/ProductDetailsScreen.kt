@@ -40,7 +40,7 @@ private fun safeStr(value: String?): String {
 }
 
 private fun fmtPrice(amount: Double): String {
-    return "KD ${String.format("%.3f", amount)}"
+    return "KWD ${String.format("%.3f", amount)}"
 }
 
 private fun fmtPriceShort(amount: Double): String {
@@ -49,7 +49,7 @@ private fun fmtPriceShort(amount: Double): String {
         amount >= 10.0 -> String.format("%.1f", amount)
         else -> String.format("%.3f", amount)
     }
-    return "KD $f"
+    return "KWD $f"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -321,7 +321,7 @@ fun ProductDetailsScreen(
                                             .fillMaxSize()
                                             .background(bgColors[page % bgColors.size])
                                     )
-                                    val pageEmoji = CategoryHelper.emojiFor(catText)
+                                    val pageEmoji = CategoryHelper.getEmoji(p.categoryName)
                                     val labels = listOf(
                                         stringResource(R.string.product_front_view),
                                         stringResource(R.string.product_detail_view),

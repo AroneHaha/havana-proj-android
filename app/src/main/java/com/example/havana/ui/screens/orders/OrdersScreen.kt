@@ -12,6 +12,7 @@ import androidx.compose.material.icons.outlined.ReceiptLong
 import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,8 +39,10 @@ fun OrdersScreen(
     onProfileClick: () -> Unit = {},
 ) {
     val viewModel: OrdersViewModel = viewModel()
+    LaunchedEffect(Unit) { viewModel.loadOrders() }
     val orderListState by viewModel.orderListState.collectAsState()
     val selectedFilter by viewModel.selectedFilter.collectAsState()
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
 
     val isDark = ThemeManager.isDarkMode
     val colorScheme = MaterialTheme.colorScheme
@@ -47,13 +50,13 @@ fun OrdersScreen(
     val navBarColor = if (isDark) NavBarDark else NavBarLight
 
     val filters = listOf(
-        "all"              to stringResource(R.string.orders_filter_all),
-        "pending"          to stringResource(R.string.orders_filter_pending),
-        "confirmed"        to stringResource(R.string.orders_filter_confirmed),
-        "preparing"        to stringResource(R.string.orders_filter_preparing),
+        "all" to stringResource(R.string.orders_filter_all),
+        "pending" to stringResource(R.string.orders_filter_pending),
+        "confirmed" to stringResource(R.string.orders_filter_confirmed),
+        "preparing" to stringResource(R.string.orders_filter_preparing),
         "out_for_delivery" to stringResource(R.string.orders_filter_delivery),
-        "delivered"        to stringResource(R.string.orders_filter_done),
-        "cancelled"        to stringResource(R.string.orders_filter_cancelled),
+        "delivered" to stringResource(R.string.orders_filter_done),
+        "cancelled" to stringResource(R.string.orders_filter_cancelled),
     )
 
     Scaffold(
@@ -154,52 +157,58 @@ fun OrdersScreen(
                 }
             }
 
-            when (orderListState) {
-                is OrderListState.Loading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(color = colorScheme.primary)
-                    }
-                }
-                is OrderListState.Success -> {
-                    val orders = (orderListState as OrderListState.Success).orders
-                    if (orders.isEmpty()) {
+            PullToRefreshBox(
+                isRefreshing = isRefreshing,
+                onRefresh = { viewModel.refreshOrders() },
+                modifier = Modifier.fillMaxSize()
+            ) {
+                when (orderListState) {
+                    is OrderListState.Loading -> {
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text("\uD83D\uDCCB", fontSize = 48.sp)
-                                Spacer(modifier = Modifier.height(12.dp))
-                                Text(stringResource(R.string.orders_no_orders), fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onBackground)
-                                Text(stringResource(R.string.orders_appear_here), fontSize = 13.sp, color = colorScheme.onSurfaceVariant)
+                            CircularProgressIndicator(color = colorScheme.primary)
+                        }
+                    }
+                    is OrderListState.Success -> {
+                        val orders = (orderListState as OrderListState.Success).orders
+                        if (orders.isEmpty()) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text("\uD83D\uDCCB", fontSize = 48.sp)
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    Text(stringResource(R.string.orders_no_orders), fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onBackground)
+                                    Text(stringResource(R.string.orders_appear_here), fontSize = 13.sp, color = colorScheme.onSurfaceVariant)
+                                }
+                            }
+                        } else {
+                            LazyColumn(
+                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                items(orders) { order ->
+                                    OrderCard(
+                                        order = order,
+                                        onClick = { onOrderClick(order.id) }
+                                    )
+                                }
                             }
                         }
-                    } else {
-                        LazyColumn(
-                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                    }
+                    is OrderListState.Error -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
                         ) {
-                            items(orders) { order ->
-                                OrderCard(
-                                    order = order,
-                                    onClick = { onOrderClick(order.id) }
-                                )
-                            }
+                            Text((orderListState as OrderListState.Error).message, color = Error)
                         }
                     }
+                    else -> {}
                 }
-                is OrderListState.Error -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text((orderListState as OrderListState.Error).message, color = Error)
-                    }
-                }
-                else -> {}
             }
         }
     }
@@ -285,7 +294,7 @@ fun OrderCard(
                     color = colorScheme.onSurfaceVariant
                 )
                 Text(
-                    "KD ${String.format("%.3f", order.total)}",
+                    "KWD ${String.format("%.3f", order.total)}",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = colorScheme.primary

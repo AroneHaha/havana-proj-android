@@ -21,7 +21,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.havana.R
-
+import com.example.havana.data.AppConstants
+import com.example.havana.data.CategoryHelper
 import com.example.havana.data.model.CartItem
 import com.example.havana.data.model.CheckoutState
 import com.example.havana.data.model.DeliveryAddress
@@ -68,7 +69,7 @@ fun CheckoutScreen(
     var apartment by remember { mutableStateOf("") }
 
     val subtotal = cartItems.sumOf { it.price * it.quantity }
-    val deliveryFee = 1.500
+    val deliveryFee = AppConstants.DELIVERY_FEE
     val total = subtotal + deliveryFee
 
     LaunchedEffect(checkoutState) {
@@ -116,7 +117,7 @@ fun CheckoutScreen(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(stringResource(R.string.total), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
-                            Text("KD ${String.format("%.3f", total)}", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
+                            Text("${total} ${AppConstants.CURRENCY_SUFFIX}", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
                         }
                         Spacer(modifier = Modifier.height(10.dp))
                         Button(
@@ -202,19 +203,19 @@ fun CheckoutScreen(
                     Column(modifier = Modifier.padding(14.dp)) {
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                             Text(stringResource(R.string.subtotal), fontSize = 13.sp, color = colorScheme.onSurfaceVariant)
-                            Text("KD ${String.format("%.3f", subtotal)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground)
+                            Text("${String.format("%.3f", subtotal)} ${AppConstants.CURRENCY_SUFFIX}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground)
                         }
                         Spacer(modifier = Modifier.height(4.dp))
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                             Text(stringResource(R.string.delivery_fee), fontSize = 13.sp, color = colorScheme.onSurfaceVariant)
-                            Text("KD ${String.format("%.3f", deliveryFee)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground)
+                            Text("${String.format("%.3f", deliveryFee)} ${AppConstants.CURRENCY_SUFFIX}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground)
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                         HorizontalDivider(color = colorScheme.outline)
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                             Text(stringResource(R.string.total), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
-                            Text("KD ${String.format("%.3f", total)}", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
+                            Text("${String.format("%.3f", total)} ${AppConstants.CURRENCY_SUFFIX}", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
                         }
                     }
                 }
@@ -409,23 +410,14 @@ fun CheckoutItemCard(item: CartItem) {
                     .background(colorScheme.surfaceVariant, RoundedCornerShape(8.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(categoryEmoji(item.category), fontSize = 20.sp)
+                Text(CategoryHelper.getEmoji(item.category), fontSize = 20.sp)
             }
             Spacer(modifier = Modifier.width(10.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(item.name, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onBackground, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text("${stringResource(R.string.qty)}: ${item.quantity} x KD ${String.format("%.3f", item.price)}", fontSize = 12.sp, color = colorScheme.onSurfaceVariant)
+                Text("${stringResource(R.string.qty)}: ${item.quantity} x ${String.format("%.3f", item.price)} ${AppConstants.CURRENCY_SUFFIX}", fontSize = 12.sp, color = colorScheme.onSurfaceVariant)
             }
-            Text("KD ${String.format("%.3f", item.price * item.quantity)}", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
+            Text("${String.format("%.3f", item.price * item.quantity)} ${AppConstants.CURRENCY_SUFFIX}", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
         }
     }
-}
-
-private fun categoryEmoji(category: String): String = when {
-    category.lowercase().contains("rose") -> "\uD83C\uDF39"
-    category.lowercase().contains("bouquet") -> "\uD83D\uDC90"
-    category.lowercase().contains("arrangement") -> "\uD83C\uDF3A"
-    category.lowercase().contains("gift") -> "\uD83C\uDF81"
-    category.lowercase().contains("plant") -> "\uD83E\uDEB4"
-    else -> "\uD83C\uDF38"
 }

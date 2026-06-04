@@ -17,27 +17,18 @@ data class DeliveryAddress(
 )
 
 data class OrderRequest(
-    @SerializedName("customer_name")
-    val customerName: String,
-    val phone: String,
-    @SerializedName("delivery_address")
-    val deliveryAddress: DeliveryAddress,
-    val notes: String,
+    @SerializedName("shipping_address")
+    val shippingAddress: String,
+    @SerializedName("shipping_phone")
+    val shippingPhone: String,
+    val notes: String? = null,
     @SerializedName("payment_method")
-    val paymentMethod: String = "cod",
-    val items: List<OrderItemRequest>,
-    val subtotal: Double,
-    @SerializedName("delivery_fee")
-    val deliveryFee: Double,
-    val total: Double,
+    val paymentMethod: String = "cash_on_delivery",
 )
 
-data class OrderItemRequest(
-    @SerializedName("product_id")
-    val productId: String,
-    val name: String,
-    val price: Double,
-    val quantity: Int,
+data class CheckoutApiResponse(
+    val data: OrderResponse,
+    val message: String,
 )
 
 data class OrderResponse(
@@ -45,16 +36,16 @@ data class OrderResponse(
     @SerializedName("order_number")
     val orderNumber: String,
     val status: String,
+    val subtotal: Double = 0.0,
+    @SerializedName("shipping_cost")
+    val shippingCost: Double = 0.0,
     val total: Double,
+    @SerializedName("shipping_address")
+    val shippingAddress: String = "",
+    @SerializedName("shipping_phone")
+    val shippingPhone: String = "",
     @SerializedName("created_at")
     val createdAt: String,
-)
-
-// ── Generic wrapper for backend responses: { data: {...} } ─────────────────
-
-data class DataResponse<T>(
-    @SerializedName("data")
-    val data: T
 )
 
 sealed class CheckoutState {
@@ -64,35 +55,66 @@ sealed class CheckoutState {
     data class Error(val message: String) : CheckoutState()
 }
 
+/**
+ * Order model — matches backend OrderResource exactly.
+ * Fields use @SerializedName to map backend snake_case to Kotlin camelCase.
+ */
 data class Order(
     val id: String,
     @SerializedName("order_number")
     val orderNumber: String,
     @SerializedName("customer_name")
-    val customerName: String,
-    val phone: String,
-    @SerializedName("delivery_address")
-    val deliveryAddress: DeliveryAddress,
-    val notes: String,
+    val customerName: String = "",
+    @SerializedName("shipping_phone")
+    val phone: String = "",
+    @SerializedName("shipping_address")
+    val shippingAddress: String = "",
+    val notes: String = "",
     @SerializedName("payment_method")
-    val paymentMethod: String,
-    val items: List<OrderItem>,
-    val subtotal: Double,
-    @SerializedName("delivery_fee")
-    val deliveryFee: Double,
+    val paymentMethod: String = "",
+    val items: List<OrderItem> = emptyList(),
+    val subtotal: Double = 0.0,
+    @SerializedName("shipping_cost")
+    val shippingCost: Double = 0.0,
+    val discount: Double = 0.0,
     val total: Double,
+    @SerializedName("payment_status")
+    val paymentStatus: String = "",
     val status: String,
     @SerializedName("created_at")
     val createdAt: String,
-)
+    @SerializedName("updated_at")
+    val updatedAt: String = "",
+) {
+    /** Backward-compatible: address as DeliveryAddress object */
+    val deliveryAddress: DeliveryAddress get() = DeliveryAddress(fullAddress = shippingAddress)
 
+    /** Backward-compatible: use shipping_cost */
+    val deliveryFee: Double get() = shippingCost
+}
+
+/**
+ * Order item — matches backend OrderItemResource exactly.
+ */
 data class OrderItem(
+    val id: String = "",
     @SerializedName("product_id")
     val productId: String,
-    val name: String,
-    val price: Double,
-    val quantity: Int,
-    val category: String,
+    @SerializedName("product_name")
+    val name: String = "",
+    @SerializedName("product_image")
+    val image: String? = null,
+    val price: Double = 0.0,
+    val quantity: Int = 0,
+)
+
+data class OrdersListResponse(
+    val data: List<Order>,
+    val meta: PaginatedMeta? = null,
+)
+
+data class OrderDetailResponse(
+    val data: Order,
 )
 
 sealed class OrderListState {
@@ -147,12 +169,12 @@ fun Order.localizedStatus(
 
 fun Order.statusEmoji(): String {
     return when (status) {
-        "pending" -> "⏳"
-        "confirmed" -> "✅"
-        "preparing" -> "📦"
-        "out_for_delivery" -> "🚚"
-        "delivered" -> "🎉"
-        "cancelled" -> "❌"
-        else -> "📋"
+        "pending" -> "\u23F3"
+        "confirmed" -> "\u2705"
+        "preparing" -> "\uD83D\uDCE6"
+        "out_for_delivery" -> "\uD83D\uDE9A"
+        "delivered" -> "\uD83C\uDF89"
+        "cancelled" -> "\u274C"
+        else -> "\uD83D\uDCCB"
     }
 }

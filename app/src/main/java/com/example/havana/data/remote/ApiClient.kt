@@ -9,24 +9,10 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 import com.google.gson.Gson
 
-
 object ApiClient {
 
-    /**
-     * Backend base URL.
-     *
-     * For production builds, change this to your live server:
-     *   "https://api.havana.com/api/"
-     *
-     * For emulator development, use:
-     *   "http://10.0.2.2:8000/api/"
-     *
-     * For physical device on same network as your local server:
-     *   "http://192.168.x.x:8000/api/"
-     */
     var BASE_URL: String = "http://10.0.2.2:8000/api/"
 
-    /** Enable/disable verbose HTTP logging. Set to false for production. */
     var enableLogging: Boolean = true
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
@@ -39,6 +25,7 @@ object ApiClient {
         SessionManager.token?.let { token ->
             requestBuilder.addHeader("Authorization", "Bearer $token")
         }
+        requestBuilder.addHeader("Accept", "application/json")
         chain.proceed(requestBuilder.build())
     }
 
@@ -53,17 +40,19 @@ object ApiClient {
         .writeTimeout(30, TimeUnit.SECONDS)
         .build()
 
-    /**
-     * Separate Retrofit instance for token refresh calls.
-     * Uses a plain OkHttpClient without the authenticator to prevent
-     * infinite retry loops when the refresh token itself is expired.
-     */
     val refreshRetrofit: Retrofit
         get() = Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(
                 OkHttpClient.Builder()
                     .addInterceptor(loggingInterceptor)
+                    .addInterceptor(Interceptor { chain ->
+                        chain.proceed(
+                            chain.request().newBuilder()
+                                .addHeader("Accept", "application/json")
+                                .build()
+                        )
+                    })
                     .connectTimeout(15, TimeUnit.SECONDS)
                     .readTimeout(15, TimeUnit.SECONDS)
                     .writeTimeout(15, TimeUnit.SECONDS)

@@ -89,3 +89,25 @@ data class RefreshTokenResponse(
     @SerializedName("refresh_token")
     val refreshToken: String? = null
 )
+data class MessageResponse(
+    @SerializedName("message") val message: String
+)
+
+
+
+data class ChangePasswordRequest(
+    @SerializedName("current_password") val currentPassword: String,
+    val password: String,
+    @SerializedName("password_confirmation") val passwordConfirmation: String
+)
+
+data class ForgotPasswordRequest(
+    val email: String
+)
+
+data class ResetPasswordRequest(
+    val token: String,
+    val email: String,
+    val password: String,
+    @SerializedName("password_confirmation") val passwordConfirmation: String
+)
