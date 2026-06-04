@@ -88,7 +88,10 @@ fun HavanaApp() {
         )
         "signup" -> SignupScreen(
             onNavigateToLogin = { currentScreen = "login" },
-            onSignupSuccess = { currentScreen = "home" },
+            onSignupSuccess = {
+                loginKey++
+                currentScreen = "login"
+            },
         )
         "home" -> HomeScreen(onProductClick = { productId -> selectedProductId = productId; currentScreen = "productDetails" }, onCartClick = { currentScreen = "cart" }, onOrdersClick = { currentScreen = "orders" }, onProfileClick = { currentScreen = "profile" })
         "productDetails" -> ProductDetailsScreen(productId = selectedProductId ?: "", onBackClick = { currentScreen = "home" }, onCartClick = { currentScreen = "cart" }, onCheckoutClick = { currentScreen = "checkout" })
@@ -104,6 +107,7 @@ fun HavanaApp() {
             onCartClick = { currentScreen = "cart" },
             onOrdersClick = { currentScreen = "orders" },
             onLogoutClick = {
+                SessionManager.clearSession()
                 loginKey++  // Force a fresh LoginViewModel on next login screen
                 currentScreen = "login"
             },

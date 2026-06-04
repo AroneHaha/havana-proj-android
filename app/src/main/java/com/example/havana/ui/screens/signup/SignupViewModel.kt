@@ -82,6 +82,8 @@ class SignupViewModel(application: Application) : AndroidViewModel(application) 
             when (val result = safeApiCall { authApi.register(request) }) {
                 is ApiResult.Success -> {
                     val user = mapToHavanaUser(result.data.user)
+                    // Clear any old session first (e.g. admin), then save new session
+                    SessionManager.clearSession()
                     SessionManager.saveSession(user, result.data.token)
                     SessionManager.saveRefreshToken(result.data.refreshToken)
                     _signupState.value = AuthState.Success(user, result.data.token)
