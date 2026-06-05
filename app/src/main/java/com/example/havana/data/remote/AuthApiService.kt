@@ -17,13 +17,10 @@ interface AuthApiService {
     @POST("auth/register")
     suspend fun register(@Body request: SignupRequest): SignupResponse
 
-    /**
-     * Refresh the access token using a valid refresh token.
-     * Backend returns { token, refresh_token } — no user object.
-     */
+
     @POST("auth/refresh")
     suspend fun refreshToken(@Header("Authorization") bearerToken: String): RefreshTokenResponse
 
     @POST("auth/logout")
-    suspend fun logout(@Header("Authorization") bearerToken: String)
+    suspend fun logout()
 }

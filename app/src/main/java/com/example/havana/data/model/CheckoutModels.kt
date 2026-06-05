@@ -17,22 +17,28 @@ data class DeliveryAddress(
 )
 
 // ═══════════════════════════════════════════════════════════════════
-// Checkout request/response — matches Laravel CheckoutController@store
+// Checkout request/response — matches web checkout-service.ts exactly
+// Web payload: { items, customer: { name, email, phone, address }, notes, payment_method }
 // ═══════════════════════════════════════════════════════════════════
 
 /**
  * Request body sent to POST /api/checkout.
+ * Matches web checkout-service.ts CheckoutPayload format exactly.
  * Backend validates stock and prices server-side.
  */
 data class CheckoutRequest(
-    @SerializedName("shipping_address")
-    val shippingAddress: String,
-    @SerializedName("shipping_phone")
-    val shippingPhone: String,
-    val notes: String = "",
+    val items: List<CheckoutItemRequest>,
+    val customer: CheckoutCustomerRequest,
+    val notes: String? = null,
     @SerializedName("payment_method")
-    val paymentMethod: String = "cash_on_delivery",
-    val items: List<CheckoutItemRequest>
+    val paymentMethod: String = "cash_on_delivery"
+)
+
+data class CheckoutCustomerRequest(
+    val name: String,
+    val email: String? = null,
+    val phone: String,
+    val address: String
 )
 
 data class CheckoutItemRequest(
@@ -42,8 +48,10 @@ data class CheckoutItemRequest(
 )
 
 /**
- * Wrapper for backend response: { data: OrderResource, message: "..." }
+ * Backend response wrapper: { data: OrderResource, message: "..." }
  * respondCreated() wraps in { data: {...}, message: "..." }
+ * OrderResource includes: id, order_id, order_number, status, subtotal,
+ * shipping_cost, total, items, created_at, etc.
  */
 data class CheckoutApiResponse(
     val data: CheckoutOrderData,
@@ -51,10 +59,12 @@ data class CheckoutApiResponse(
 )
 
 /**
- * Matches Laravel OrderResource::toArray() output.
+ * Matches Laravel OrderResource::toArray() output (the web reads this too).
  */
 data class CheckoutOrderData(
     val id: String,
+    @SerializedName("order_id")
+    val orderId: String,
     @SerializedName("order_number")
     val orderNumber: String,
     val status: String,
@@ -192,12 +202,12 @@ fun Order.localizedStatus(
 
 fun Order.statusEmoji(): String {
     return when (status) {
-        "pending" -> "⏳"
-        "confirmed" -> "✅"
-        "preparing" -> "📦"
-        "out_for_delivery" -> "🚚"
-        "delivered" -> "🎉"
-        "cancelled" -> "❌"
-        else -> "📋"
+        "pending" -> "\u23F3"
+        "confirmed" -> "\u2705"
+        "preparing" -> "\uD83D\uDCE6"
+        "out_for_delivery" -> "\uD83D\uDE9A"
+        "delivered" -> "\uD83C\uDF89"
+        "cancelled" -> "\u274C"
+        else -> "\uD83D\uDCCB"
     }
 }

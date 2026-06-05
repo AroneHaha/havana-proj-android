@@ -46,33 +46,18 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             val token = SessionManager.token
             if (token == null) {
-                // No token — use local session data if available, otherwise error
                 val local = SessionManager.getUserProfile()
                 if (local != null) {
                     _profileState.value = ProfileState.Success(local)
                 } else {
-                    _profileState.value = ProfileState.Error("Please log in to view your profile.")
+                    _profileState.value = ProfileState.Error("Not logged in.")
                 }
                 return@launch
             }
 
             when (val result = safeApiCall { profileApi.getProfile() }) {
                 is ApiResult.Success -> {
-                    // Backend returns { user: UserProfile }
-                    val profile = result.data.user
-                    // Update local session with fresh server data
-                    val currentUser = SessionManager.currentUser
-                    if (currentUser != null) {
-                        SessionManager.updateUser(
-                            currentUser.copy(
-                                firstName = profile.firstName,
-                                lastName = profile.lastName,
-                                phone = profile.phone,
-                                deliveryAddress = profile.deliveryAddress,
-                            )
-                        )
-                    }
-                    _profileState.value = ProfileState.Success(profile)
+                    _profileState.value = ProfileState.Success(result.data)
                 }
                 is ApiResult.ServerError -> {
                     // Server error — fall back to local session data
@@ -84,12 +69,12 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
                     }
                 }
                 is ApiResult.NetworkError -> {
-                    // Server unreachable — fall back to local session data
+                    // Server unreachable — use local session data
                     val local = SessionManager.getUserProfile()
                     if (local != null) {
                         _profileState.value = ProfileState.Success(local)
                     } else {
-                        _profileState.value = ProfileState.Error(result.error)
+                        _profileState.value = ProfileState.Error("Unable to load profile.")
                     }
                 }
             }
@@ -112,8 +97,7 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
             if (token != null) {
                 when (val result = safeApiCall { profileApi.updateProfile(request) }) {
                     is ApiResult.Success -> {
-                        // Backend returns { data: { user: UserProfile, message? } }
-                        val updatedProfile = result.data.data.user
+                        val updatedProfile = result.data.user
                         // Also update the local session
                         val currentUser = SessionManager.currentUser
                         if (currentUser != null) {
@@ -206,11 +190,11 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
             try {
                 val token = SessionManager.token
                 if (token != null) {
-                    authApi.logout("Bearer $token")
+                    authApi.logout()
                 }
             } catch (_: Exception) {
+                // Server logout failed — still clear local session
             }
-            com.example.havana.data.cart.CartManager.clearCartOnLogout(getApplication())
             SessionManager.clearSession()
         }
     }

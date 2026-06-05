@@ -4,15 +4,13 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.havana.data.cart.CartManager
-import com.example.havana.data.model.AddToCartRequest
-import com.example.havana.data.model.CartItem
 import com.example.havana.data.remote.ApiClient
 import com.example.havana.data.remote.ApiResult
 import com.example.havana.data.remote.safeApiCall
-import com.example.havana.data.session.SessionManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class CartViewModel(application: Application) : AndroidViewModel(application) {
@@ -33,6 +31,7 @@ class CartViewModel(application: Application) : AndroidViewModel(application) {
     val syncState: StateFlow<CartSyncState> = _syncState.asStateFlow()
 
     init {
+        // Observe cart changes and recompute totals
         viewModelScope.launch {
             cartItems.collect { items ->
                 _total.value = items.sumOf { it.price * it.quantity }
@@ -41,15 +40,20 @@ class CartViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    /**
+     * Pull server cart on login. If server has items, merge with local.
+     * Call this after successful login.
+     */
     fun syncFromServer() {
-        val token = SessionManager.token ?: return
         viewModelScope.launch {
             _syncState.value = CartSyncState.Syncing
-            when (val result = safeApiCall { cartApi.getCart("Bearer $token") }) {
+            when (val result = safeApiCall { cartApi.getCart() }) {
                 is ApiResult.Success -> {
-                    val serverItems = result.data.items
+                    // Merge: server items take precedence, local-only items are kept
+                    val serverItems = result.data
                     val localItems = CartManager.cartItems.value
                     val serverProductIds = serverItems.map { it.productId }.toSet()
+                    // Keep local items not on server, add all server items
                     val merged = serverItems + localItems.filter { it.productId !in serverProductIds }
                     CartManager.setCartItems(merged)
                     _syncState.value = CartSyncState.Synced
@@ -58,6 +62,7 @@ class CartViewModel(application: Application) : AndroidViewModel(application) {
                     _syncState.value = CartSyncState.Idle
                 }
                 is ApiResult.NetworkError -> {
+                    // Offline — keep local cart as-is
                     _syncState.value = CartSyncState.Idle
                 }
             }
@@ -95,29 +100,26 @@ class CartViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun pushUpdateToServer(productId: String, quantity: Int) {
-        val token = SessionManager.token ?: return
         viewModelScope.launch {
             try {
-                safeApiCall { cartApi.updateQuantity("Bearer $token", productId, mapOf("quantity" to quantity)) }
-            } catch (_: Exception) {}
+                safeApiCall { cartApi.updateQuantity(productId, mapOf("quantity" to quantity)) }
+            } catch (_: Exception) { /* best-effort sync */ }
         }
     }
 
     private fun pushRemoveToServer(productId: String) {
-        val token = SessionManager.token ?: return
         viewModelScope.launch {
             try {
-                safeApiCall { cartApi.removeFromCart("Bearer $token", productId) }
-            } catch (_: Exception) {}
+                safeApiCall { cartApi.removeFromCart(productId) }
+            } catch (_: Exception) { /* best-effort sync */ }
         }
     }
 
     private fun pushClearToServer() {
-        val token = SessionManager.token ?: return
         viewModelScope.launch {
             try {
-                safeApiCall { cartApi.clearCart("Bearer $token") }
-            } catch (_: Exception) {}
+                safeApiCall { cartApi.clearCart() }
+            } catch (_: Exception) { /* best-effort sync */ }
         }
     }
 }

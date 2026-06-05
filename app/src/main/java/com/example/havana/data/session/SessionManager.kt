@@ -152,6 +152,4 @@ object SessionManager {
             emailVerified = user.emailVerified,
         )
     }
-
-
 }

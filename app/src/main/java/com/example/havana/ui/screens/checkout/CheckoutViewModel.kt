@@ -50,25 +50,29 @@ class CheckoutViewModel(application: Application) : AndroidViewModel(application
         val deliveryFee = 1.500
         val total = subtotal + deliveryFee
 
-        // Build full address string for backend (concatenate fullAddress + details)
+        // Build full address string (same as web: customer.address = one string)
         val addressParts = mutableListOf(address.fullAddress)
         if (address.block.isNotBlank()) addressParts.add("Block ${address.block}")
         if (address.street.isNotBlank()) addressParts.add("Street ${address.street}")
         if (address.building.isNotBlank()) addressParts.add("Building ${address.building}")
         if (address.floor.isNotBlank()) addressParts.add("Floor ${address.floor}")
         if (address.apartment.isNotBlank()) addressParts.add("Apt ${address.apartment}")
-        val fullShippingAddress = addressParts.joinToString(", ")
+        val fullAddress = addressParts.joinToString(", ")
 
-        // Build the request matching Laravel CheckoutController@store validation
+        // ── Build request matching web checkout-service.ts CheckoutPayload EXACTLY ──
+        // Web sends: { items, customer: { name, email, phone, address }, notes, payment_method }
         val checkoutRequest = CheckoutRequest(
-            shippingAddress = fullShippingAddress,
-            shippingPhone = phone,
-            notes = notes.ifBlank { "" },
-            paymentMethod = "cash_on_delivery",
-            items = items.map { CheckoutItemRequest(it.productId, it.quantity) }
+            items = items.map { CheckoutItemRequest(it.productId, it.quantity) },
+            customer = CheckoutCustomerRequest(
+                name = customerName,
+                phone = phone,
+                address = fullAddress
+            ),
+            notes = notes.ifBlank { null },
+            paymentMethod = "cash_on_delivery"
         )
 
-        // Build local Order for UI (used by OrderConfirmationScreen)
+        // Build local Order for UI display (OrderConfirmationScreen)
         val fullOrder = Order(
             id = "order-${System.currentTimeMillis()}",
             orderNumber = "",
