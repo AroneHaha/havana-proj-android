@@ -90,9 +90,9 @@ object SessionManager {
         get() = prefs?.getString(KEY_REFRESH_TOKEN, null)
 
     fun saveSession(user: HavanaUser, token: String) {
+        // Clear any previous session data before saving new one
         _currentUser = user
         _token = token
-        // Persist to SharedPreferences
         prefs?.edit()?.apply {
             putString(KEY_AUTH_TOKEN, token)
             putString(KEY_USER_ID, user.id)
@@ -152,4 +152,5 @@ object SessionManager {
             emailVerified = user.emailVerified,
         )
     }
+
 }

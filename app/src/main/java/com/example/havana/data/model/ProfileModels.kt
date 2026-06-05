@@ -26,6 +26,14 @@ data class UpdateProfileRequest(
     val deliveryAddress: DeliveryAddress?,
 )
 
+/**
+ * GET /auth/me returns { user: UserProfile } directly (no "data" wrapper).
+ * Backend uses response()->json(), NOT respondWithData().
+ */
+data class ProfileMeResponse(
+    val user: UserProfile,
+)
+
 data class UpdateProfileResponse(
     val user: UserProfile,
     val message: String? = null,
@@ -50,4 +58,3 @@ enum class EditableField {
     CONTACT_NUMBER,
     DELIVERY_ADDRESS,
 }
-

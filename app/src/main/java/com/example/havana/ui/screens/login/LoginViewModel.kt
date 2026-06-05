@@ -35,6 +35,9 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
             when (val result = safeApiCall { apiService.login(LoginRequest(email, password)) }) {
                 is ApiResult.Success -> {
+                    // Clear any previous session before saving new one
+                    SessionManager.clearSession()
+
                     val apiUser = HavanaUser(
                         id = result.data.user.id,
                         email = result.data.user.email,
@@ -45,7 +48,6 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                     )
                     SessionManager.saveSession(apiUser, result.data.token)
                     SessionManager.saveRefreshToken(result.data.refreshToken)
-                    com.example.havana.data.cart.CartManager.switchUser(getApplication())
                     _authState.value = AuthState.Success(user = apiUser, token = result.data.token)
                 }
                 is ApiResult.ServerError -> {

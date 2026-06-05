@@ -21,6 +21,7 @@ interface AuthApiService {
     @POST("auth/refresh")
     suspend fun refreshToken(@Header("Authorization") bearerToken: String): RefreshTokenResponse
 
+
     @POST("auth/logout")
     suspend fun logout()
 }
