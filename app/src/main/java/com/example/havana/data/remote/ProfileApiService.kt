@@ -8,11 +8,20 @@ import retrofit2.http.PUT
 
 interface ProfileApiService {
 
-    @GET("profile")
-    suspend fun getProfile(): UserProfile
+    @GET("auth/me")
+    suspend fun getProfile(): ProfileMeResponse
 
-    @PUT("profile")
+    @PUT("auth/profile")
     suspend fun updateProfile(
         @Body request: UpdateProfileRequest,
-    ): com.example.havana.data.model.UpdateProfileResponse
+    ): UpdateProfileDirectResponse
 }
+
+data class ProfileMeResponse(
+    val user: UserProfile,
+)
+
+data class UpdateProfileDirectResponse(
+    val user: UserProfile,
+    val message: String? = null,
+)

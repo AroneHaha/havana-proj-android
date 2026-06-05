@@ -57,10 +57,9 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
 
             when (val result = safeApiCall { profileApi.getProfile() }) {
                 is ApiResult.Success -> {
-                    _profileState.value = ProfileState.Success(result.data)
+                    _profileState.value = ProfileState.Success(result.data.user)
                 }
                 is ApiResult.ServerError -> {
-                    // Server error — fall back to local session data
                     val local = SessionManager.getUserProfile()
                     if (local != null) {
                         _profileState.value = ProfileState.Success(local)
@@ -69,7 +68,6 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
                     }
                 }
                 is ApiResult.NetworkError -> {
-                    // Server unreachable — use local session data
                     val local = SessionManager.getUserProfile()
                     if (local != null) {
                         _profileState.value = ProfileState.Success(local)
@@ -98,7 +96,6 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
                 when (val result = safeApiCall { profileApi.updateProfile(request) }) {
                     is ApiResult.Success -> {
                         val updatedProfile = result.data.user
-                        // Also update the local session
                         val currentUser = SessionManager.currentUser
                         if (currentUser != null) {
                             SessionManager.updateUser(
@@ -117,7 +114,6 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
                         _editState.value = EditProfileState.Error(result.message)
                     }
                     is ApiResult.NetworkError -> {
-                        // Server unreachable — update locally only
                         val updatedProfile = currentProfile.copy(
                             firstName = firstName,
                             lastName = lastName,
@@ -140,7 +136,6 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
                     }
                 }
             } else {
-                // No token — update locally only
                 val updatedProfile = currentProfile.copy(
                     firstName = firstName,
                     lastName = lastName,
@@ -174,7 +169,6 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         _editState.value = EditProfileState.Idle
     }
 
-    /** Toggle dark mode via the centralized [ThemeManager]. */
     fun toggleDarkMode(enabled: Boolean) {
         _isDarkMode.value = enabled
         ThemeManager.setDarkMode(enabled)
@@ -193,7 +187,6 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
                     authApi.logout()
                 }
             } catch (_: Exception) {
-                // Server logout failed — still clear local session
             }
             SessionManager.clearSession()
         }
