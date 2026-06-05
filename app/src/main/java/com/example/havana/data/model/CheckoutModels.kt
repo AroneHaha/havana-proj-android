@@ -98,8 +98,56 @@ data class CheckoutOrderItemData(
 )
 
 // ═══════════════════════════════════════════════════════════════════
-// Local Order model — used for UI display (OrderConfirmationScreen etc.)
+// Order model — matches backend OrderResource output for GET /api/orders
+// Used by OrdersScreen, OrderConfirmationScreen, OrdersViewModel.
 // ═══════════════════════════════════════════════════════════════════
+
+/**
+ * Order model that matches Laravel OrderResource::toArray() exactly.
+ * All @SerializedName values correspond to the JSON keys in OrderResource.
+ */
+data class Order(
+    val id: String,
+    @SerializedName("order_id")
+    val orderId: String = "",
+    @SerializedName("order_number")
+    val orderNumber: String,
+    val status: String,
+    val subtotal: Double,
+    @SerializedName("shipping_cost")
+    val shippingCost: Double,
+    val discount: Double = 0.0,
+    val total: Double,
+    @SerializedName("payment_method")
+    val paymentMethod: String = "",
+    @SerializedName("shipping_address")
+    val shippingAddress: String = "",
+    @SerializedName("shipping_phone")
+    val shippingPhone: String = "",
+    val notes: String = "",
+    @SerializedName("created_at")
+    val createdAt: String = "",
+    val items: List<OrderItem> = emptyList()
+)
+
+/**
+ * Order item — matches OrderItemResource output.
+ * product_name, product_image, price, quantity, subtotal.
+ */
+data class OrderItem(
+    val id: String = "",
+    @SerializedName("product_id")
+    val productId: String,
+    @SerializedName("product_name")
+    val name: String,
+    @SerializedName("product_image")
+    val productImage: String? = null,
+    val price: Double,
+    val quantity: Int,
+    @SerializedName("subtotal")
+    val subtotalVal: Double = 0.0,
+    val category: String = ""
+)
 
 data class OrderResponse(
     val id: String,
@@ -117,37 +165,6 @@ sealed class CheckoutState {
     data class Success(val order: OrderResponse) : CheckoutState()
     data class Error(val message: String) : CheckoutState()
 }
-
-data class Order(
-    val id: String,
-    @SerializedName("order_number")
-    val orderNumber: String,
-    @SerializedName("customer_name")
-    val customerName: String,
-    val phone: String,
-    @SerializedName("delivery_address")
-    val deliveryAddress: DeliveryAddress,
-    val notes: String,
-    @SerializedName("payment_method")
-    val paymentMethod: String,
-    val items: List<OrderItem>,
-    val subtotal: Double,
-    @SerializedName("delivery_fee")
-    val deliveryFee: Double,
-    val total: Double,
-    val status: String,
-    @SerializedName("created_at")
-    val createdAt: String,
-)
-
-data class OrderItem(
-    @SerializedName("product_id")
-    val productId: String,
-    val name: String,
-    val price: Double,
-    val quantity: Int,
-    val category: String,
-)
 
 sealed class OrderListState {
     data object Idle : OrderListState()
@@ -180,7 +197,6 @@ fun Order.statusLabel(): String {
     }
 }
 
-/** Localized version of statusLabel that accepts pre-resolved string resources. */
 fun Order.localizedStatus(
     pending: String,
     confirmed: String,
@@ -202,12 +218,12 @@ fun Order.localizedStatus(
 
 fun Order.statusEmoji(): String {
     return when (status) {
-        "pending" -> "\u23F3"
-        "confirmed" -> "\u2705"
-        "preparing" -> "\uD83D\uDCE6"
-        "out_for_delivery" -> "\uD83D\uDE9A"
-        "delivered" -> "\uD83C\uDF89"
-        "cancelled" -> "\u274C"
-        else -> "\uD83D\uDCCB"
+        "pending" -> "⏳"
+        "confirmed" -> "✅"
+        "preparing" -> "📦"
+        "out_for_delivery" -> "🚚"
+        "delivered" -> "🎉"
+        "cancelled" -> "❌"
+        else -> "📋"
     }
 }

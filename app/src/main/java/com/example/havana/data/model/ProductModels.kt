@@ -3,9 +3,9 @@ import com.google.gson.annotations.SerializedName
 
 data class Product(
     val id: String,
-    val name: String,
+    val name: String = "",
     val description: String = "",
-    val price: Double,
+    val price: Double = 0.0,
     @SerializedName("sale_price")
     val salePrice: Double? = null,
     @SerializedName("effective_price")
@@ -28,7 +28,7 @@ data class Product(
     @SerializedName("in_stock")
     val inStock: Boolean = true,
     val stock: Int = 0,
-    val images: List<String>? = emptyList(),
+    val images: List<String> = emptyList(),
     val reviews: List<Review> = emptyList(),
 ) {
     val displayPrice: Double get() = if (isOnSale && salePrice != null) salePrice else price
@@ -38,7 +38,7 @@ data class Product(
 
 data class Category(
     val id: String,
-    val name: String,
+    val name: String = "",
     val emoji: String = "",
     @SerializedName("name_en")
     val nameEn: String = "",
@@ -48,6 +48,14 @@ data class Category(
     val image: String? = null,
     @SerializedName("products_count")
     val productsCount: Int = 0,
+    @SerializedName("is_active")
+    val isActive: Boolean? = null,
+    @SerializedName("sort_order")
+    val sortOrder: Int? = null,
+    @SerializedName("created_at")
+    val createdAt: String? = null,
+    @SerializedName("updated_at")
+    val updatedAt: String? = null,
 )
 
 sealed class ProductListState {
@@ -65,25 +73,28 @@ sealed class CategoryState {
 }
 
 data class Review(
-    val id: String = "",
-    @SerializedName("product_id")
-    val productId: String = "",
+    val id: String,
     @SerializedName("user_id")
     val userId: String = "",
+    val userName: String = "",
     val rating: Float = 0f,
-    val title: String? = null,
     val comment: String = "",
-    val visibility: String? = null,
-    val user: ReviewUser? = null,
     @SerializedName("created_at")
-    val createdAt: String = "",
+    val date: String = "",
+    val avatar: String? = null,
+    @SerializedName("user")
+    private val _user: ReviewUser? = null,
 ) {
-    val userName: String get() = user?.name ?: "Customer"
-    val date: String get() = if (createdAt.contains("T")) createdAt.substringBefore("T") else createdAt
+    val displayName: String get() = _user?.fullName ?: userName
 }
 
 data class ReviewUser(
-    val name: String? = null,
+    @SerializedName("full_name")
+    val fullName: String = "",
+    @SerializedName("first_name")
+    val firstName: String = "",
+    @SerializedName("last_name")
+    val lastName: String = "",
 )
 
 data class ReviewRequest(
@@ -130,29 +141,6 @@ data class CartItem(
     val name: String,
     val price: Double,
     val quantity: Int,
-    val image: String? = null,
-    val category: String = "",
-)
-
-data class AddToCartRequest(
-    @SerializedName("product_id")
-    val productId: String,
-    val quantity: Int = 1,
-)
-
-data class CartResponse(
-    val items: List<CartItem> = emptyList(),
-    @SerializedName("cart_total")
-    val cartTotal: Double = 0.0,
-)
-
-data class WrappedServerCartItem(
-    val id: String = "",
-    @SerializedName("product_id")
-    val productId: String = "",
-    val name: String = "",
-    val price: Double = 0.0,
-    val quantity: Int = 1,
     val image: String? = null,
     val category: String = "",
 )

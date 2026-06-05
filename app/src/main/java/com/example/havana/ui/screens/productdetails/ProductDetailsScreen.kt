@@ -257,9 +257,8 @@ fun ProductDetailsScreen(
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
-                // ===== IMAGE CAROUSEL =====
                 item {
-                    val imageList = (p.images ?: emptyList()).ifEmpty {
+                    val imageList = p.images.ifEmpty {
                         if (p.image != null) listOf(p.image) else emptyList()
                     }
                     val imageCount = if (imageList.isNotEmpty()) imageList.size else 1
@@ -333,7 +332,6 @@ fun ProductDetailsScreen(
                     }
                 }
 
-                // ===== PRODUCT INFO =====
                 item {
                     Column(
                         modifier = Modifier
@@ -370,7 +368,7 @@ fun ProductDetailsScreen(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                "KD ${String.format("%.3f", p.price)}",
+                                "KWD ${String.format("%.3f", p.price)}",
                                 fontSize = 22.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = colorScheme.primary
@@ -423,7 +421,6 @@ fun ProductDetailsScreen(
                     }
                 }
 
-                // ===== DIVIDER =====
                 item {
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 16.dp),
@@ -431,7 +428,6 @@ fun ProductDetailsScreen(
                     )
                 }
 
-                // ===== REVIEWS SECTION HEADER =====
                 item {
                     Row(
                         modifier = Modifier
@@ -472,7 +468,6 @@ fun ProductDetailsScreen(
                     }
                 }
 
-                // ===== REVIEW LIST =====
                 when (reviewState) {
                     is ReviewState.Loading -> {
                         item {
@@ -512,9 +507,9 @@ fun ProductDetailsScreen(
 
 private fun formatKdPrice(amount: Double): String {
     return when {
-        amount >= 100.0 -> "KD ${String.format("%.0f", amount)}"
-        amount >= 10.0 -> "KD ${String.format("%.1f", amount)}"
-        else -> "KD ${String.format("%.3f", amount)}"
+        amount >= 100.0 -> "KWD ${String.format("%.0f", amount)}"
+        amount >= 10.0 -> "KWD ${String.format("%.1f", amount)}"
+        else -> "KWD ${String.format("%.3f", amount)}"
     }
 }
 
@@ -548,7 +543,7 @@ fun ReviewCard(review: Review) {
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Text(
-                            review.userName.firstOrNull()?.uppercase() ?: "?",
+                            review.displayName.firstOrNull()?.uppercase() ?: "?",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             color = colorScheme.primary
@@ -560,7 +555,7 @@ fun ReviewCard(review: Review) {
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        review.userName,
+                        review.displayName,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = colorScheme.onBackground

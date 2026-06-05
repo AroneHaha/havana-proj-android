@@ -8,7 +8,6 @@ import com.example.havana.data.remote.ApiResult
 import com.example.havana.data.remote.ReviewApiService
 import com.example.havana.data.remote.safeApiCall
 import com.example.havana.data.repository.OrderRepository
-import com.example.havana.data.session.SessionManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -52,23 +51,6 @@ class OrderDetailsViewModel(application: Application) : AndroidViewModel(applica
                 }
             }
             _isSubmittingReview.value = false
-        }
-    }
-
-    fun loadExistingReviews(productIds: List<String>) {
-        viewModelScope.launch {
-            when (val result = safeApiCall { reviewApi.getMyReviews(perPage = 100) }) {
-                is ApiResult.Success -> {
-                    val map = mutableMapOf<String, Review>()
-                    for (review in result.data.data) {
-                        if (review.productId in productIds) {
-                            map[review.productId] = review
-                        }
-                    }
-                    _itemReviews.value = map
-                }
-                else -> {}
-            }
         }
     }
 

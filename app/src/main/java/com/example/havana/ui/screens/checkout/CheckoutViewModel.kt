@@ -9,7 +9,6 @@ import com.example.havana.data.remote.ApiClient
 import com.example.havana.data.remote.ApiResult
 import com.example.havana.data.remote.safeApiCall
 import com.example.havana.R
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -76,16 +75,15 @@ class CheckoutViewModel(application: Application) : AndroidViewModel(application
         val fullOrder = Order(
             id = "order-${System.currentTimeMillis()}",
             orderNumber = "",
-            customerName = customerName,
-            phone = phone,
-            deliveryAddress = address,
-            notes = notes,
-            paymentMethod = "cash_on_delivery",
-            items = items.map { OrderItem(it.productId, it.name, it.price, it.quantity, it.category) },
-            subtotal = subtotal,
-            deliveryFee = deliveryFee,
-            total = total,
             status = "pending",
+            subtotal = subtotal,
+            shippingCost = deliveryFee,
+            total = total,
+            paymentMethod = "cash_on_delivery",
+            shippingAddress = fullAddress,
+            shippingPhone = phone,
+            notes = notes,
+            items = items.map { OrderItem(productId = it.productId, name = it.name, price = it.price, quantity = it.quantity, category = it.category) },
             createdAt = ""
         )
 
@@ -100,7 +98,7 @@ class CheckoutViewModel(application: Application) : AndroidViewModel(application
                         orderNumber = serverData.orderNumber,
                         status = serverData.status,
                         subtotal = serverData.subtotal,
-                        deliveryFee = serverData.shippingCost,
+                        shippingCost = serverData.shippingCost,
                         total = serverData.total,
                         createdAt = serverData.createdAt ?: ""
                     )
@@ -119,13 +117,8 @@ class CheckoutViewModel(application: Application) : AndroidViewModel(application
                     _checkoutState.value = CheckoutState.Error(result.message)
                 }
                 is ApiResult.NetworkError -> {
-                    // Server unreachable — fall back to mock order during development
-                    delay(1000)
-                    val mockOrderNumber = "HAV-${(1000..9999).random()}"
-                    val mockOrderResponse = OrderResponse(id = fullOrder.id, orderNumber = mockOrderNumber, status = "pending", total = total, createdAt = "2026-05-23")
-                    _lastPlacedOrder.value = fullOrder.copy(orderNumber = mockOrderNumber, createdAt = mockOrderResponse.createdAt)
-                    _checkoutState.value = CheckoutState.Success(mockOrderResponse)
-                    CartManager.clearCart()
+                    // Server unreachable — cannot place order without server confirmation
+                    _checkoutState.value = CheckoutState.Error("Unable to connect to server. Please check your connection and try again.")
                 }
             }
         }

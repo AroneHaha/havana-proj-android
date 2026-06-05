@@ -38,7 +38,6 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // ── Anti-flicker: apply saved theme BEFORE super.onCreate ──
         SessionManager.initialize(applicationContext)
         CartManager.initialize(applicationContext)
         ThemeManager.applySavedTheme()
@@ -60,18 +59,13 @@ class MainActivity : ComponentActivity() {
 fun HavanaApp() {
     var currentScreen by remember { mutableStateOf(if (SessionManager.isLoggedIn) "home" else "login") }
     var selectedProductId by remember { mutableStateOf<String?>(null) }
+    var productDetailKey by remember { mutableStateOf(0) }
     var selectedAddress by remember { mutableStateOf<DeliveryAddress?>(null) }
     var selectedOrderId by remember { mutableStateOf<String?>(null) }
     var lastPlacedOrder by remember { mutableStateOf<Order?>(null) }
 
-    // Track login state to detect logout and force a fresh LoginViewModel
     var loginKey by remember { mutableStateOf(0) }
 
-    // ── Global auth observer ──────────────────────────────────────────
-    // When SessionManager clears the session (e.g. TokenAuthenticator on
-    // refresh failure), this LaunchedEffect forces navigation to login.
-    // Without this, the user stays on whatever screen they were on with
-    // no way to recover — a "stuck" state.
     val isLoggedIn by SessionManager.authStateFlow.collectAsState()
     LaunchedEffect(isLoggedIn) {
         if (!isLoggedIn && currentScreen != "login" && currentScreen != "signup") {
@@ -88,13 +82,10 @@ fun HavanaApp() {
         )
         "signup" -> SignupScreen(
             onNavigateToLogin = { currentScreen = "login" },
-            onSignupSuccess = {
-                loginKey++
-                currentScreen = "login"
-            },
+            onSignupSuccess = { currentScreen = "home" },
         )
-        "home" -> HomeScreen(onProductClick = { productId -> selectedProductId = productId; currentScreen = "productDetails" }, onCartClick = { currentScreen = "cart" }, onOrdersClick = { currentScreen = "orders" }, onProfileClick = { currentScreen = "profile" })
-        "productDetails" -> ProductDetailsScreen(productId = selectedProductId ?: "", onBackClick = { currentScreen = "home" }, onCartClick = { currentScreen = "cart" }, onCheckoutClick = { currentScreen = "checkout" })
+        "home" -> HomeScreen(onProductClick = { productId -> selectedProductId = productId; productDetailKey++; currentScreen = "productDetails" }, onCartClick = { currentScreen = "cart" }, onOrdersClick = { currentScreen = "orders" }, onProfileClick = { currentScreen = "profile" })
+        "productDetails" -> key(productDetailKey) { ProductDetailsScreen(productId = selectedProductId ?: "", onBackClick = { currentScreen = "home" }, onCartClick = { currentScreen = "cart" }, onCheckoutClick = { currentScreen = "checkout" }) }
         "cart" -> CartScreen(onBackClick = { currentScreen = "home" }, onCheckoutClick = { currentScreen = "checkout" }, onHomeClick = { currentScreen = "home" }, onProfileClick = { currentScreen = "profile" })
         "checkout" -> CheckoutScreen(onBackClick = { currentScreen = "cart" }, onOrderSuccess = { orderNumber, order -> lastPlacedOrder = order; currentScreen = "orderConfirmation" }, onPickOnMap = { currentScreen = "mapPicker" }, savedAddress = selectedAddress)
         "orderConfirmation" -> OrderConfirmationScreen(order = lastPlacedOrder, onViewOrders = { if (lastPlacedOrder != null) OrderRepository.addOrder(lastPlacedOrder!!); currentScreen = "orders" }, onContinueShopping = { if (lastPlacedOrder != null) OrderRepository.addOrder(lastPlacedOrder!!); currentScreen = "home" })
@@ -107,8 +98,7 @@ fun HavanaApp() {
             onCartClick = { currentScreen = "cart" },
             onOrdersClick = { currentScreen = "orders" },
             onLogoutClick = {
-                SessionManager.clearSession()
-                loginKey++  // Force a fresh LoginViewModel on next login screen
+                loginKey++
                 currentScreen = "login"
             },
         )

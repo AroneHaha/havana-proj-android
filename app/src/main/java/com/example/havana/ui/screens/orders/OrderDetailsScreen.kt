@@ -57,11 +57,7 @@ fun OrderDetailsScreen(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                CircularProgressIndicator(color = colorScheme.primary)
-                Spacer(modifier = Modifier.height(16.dp))
-                Text("Loading orders...", color = colorScheme.onSurfaceVariant, fontSize = 14.sp)
-            }
+            Text(stringResource(R.string.order_not_found), color = colorScheme.onSurfaceVariant)
         }
         return
     }
@@ -69,10 +65,6 @@ fun OrderDetailsScreen(
     var currentStatus by remember { mutableStateOf(resolvedOrder.status) }
     val displayOrder = remember(resolvedOrder, currentStatus) {
         resolvedOrder.copy(status = currentStatus)
-    }
-
-    LaunchedEffect(displayOrder) {
-        viewModel.loadExistingReviews(displayOrder.items.map { it.productId })
     }
 
     var showReviewSheet by remember { mutableStateOf(false) }
@@ -328,7 +320,7 @@ fun OrderDetailsScreen(
                         Spacer(modifier = Modifier.height(4.dp))
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                             Text(stringResource(R.string.delivery_fee), fontSize = 13.sp, color = colorScheme.onSurfaceVariant)
-                            Text("KWD ${String.format("%.3f", displayOrder.deliveryFee)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground)
+                            Text("KWD ${String.format("%.3f", displayOrder.shippingCost)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground)
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                         HorizontalDivider(color = dividerColor)
@@ -366,54 +358,13 @@ fun OrderDetailsScreen(
                             Spacer(modifier = Modifier.width(10.dp))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    displayOrder.deliveryAddress.fullAddress,
+                                    displayOrder.shippingAddress,
                                     fontSize = 13.sp,
                                     color = colorScheme.onBackground,
                                     lineHeight = 19.sp
                                 )
                             }
                         }
-
-                        val addr = displayOrder.deliveryAddress
-                        val hasDetails = addr.block.isNotBlank() ||
-                                addr.street.isNotBlank() ||
-                                addr.building.isNotBlank() ||
-                                addr.floor.isNotBlank() ||
-                                addr.apartment.isNotBlank()
-
-                        if (hasDetails) {
-                            Spacer(modifier = Modifier.height(10.dp))
-                            HorizontalDivider(color = dividerColor)
-                            Spacer(modifier = Modifier.height(10.dp))
-                        }
-
-                        if (addr.block.isNotBlank()) {
-                            InfoRow(stringResource(R.string.order_block), addr.block)
-                            Spacer(modifier = Modifier.height(4.dp))
-                        }
-                        if (addr.street.isNotBlank()) {
-                            InfoRow(stringResource(R.string.order_street), addr.street)
-                            Spacer(modifier = Modifier.height(4.dp))
-                        }
-                        if (addr.building.isNotBlank()) {
-                            InfoRow(stringResource(R.string.order_building), addr.building)
-                            Spacer(modifier = Modifier.height(4.dp))
-                        }
-                        if (addr.floor.isNotBlank()) {
-                            InfoRow(stringResource(R.string.order_floor), addr.floor)
-                            Spacer(modifier = Modifier.height(4.dp))
-                        }
-                        if (addr.apartment.isNotBlank()) {
-                            InfoRow(stringResource(R.string.order_apartment), addr.apartment)
-                            Spacer(modifier = Modifier.height(4.dp))
-                        }
-
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            stringResource(R.string.lat_lon, String.format("%.6f", displayOrder.deliveryAddress.latitude), String.format("%.6f", displayOrder.deliveryAddress.longitude)),
-                            fontSize = 10.sp,
-                            color = colorScheme.onSurfaceVariant
-                        )
                     }
                 }
             }
@@ -429,9 +380,7 @@ fun OrderDetailsScreen(
                     elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
                 ) {
                     Column(modifier = Modifier.padding(14.dp)) {
-                        InfoRow(stringResource(R.string.order_name), displayOrder.customerName)
-                        Spacer(modifier = Modifier.height(6.dp))
-                        InfoRow(stringResource(R.string.order_phone), displayOrder.phone)
+                        InfoRow(stringResource(R.string.order_phone), displayOrder.shippingPhone)
                         if (displayOrder.notes.isNotBlank()) {
                             Spacer(modifier = Modifier.height(6.dp))
                             InfoRow(stringResource(R.string.order_notes), displayOrder.notes)
@@ -639,19 +588,7 @@ fun OrderDetailItemCard(
                         .background(colorScheme.surfaceVariant, RoundedCornerShape(8.dp)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        item.category.lowercase().let { cat ->
-                            when {
-                                cat.contains("rose") -> "\uD83C\uDF39"
-                                cat.contains("bouquet") -> "\uD83D\uDC90"
-                                cat.contains("arrangement") -> "\uD83C\uDF3A"
-                                cat.contains("gift") -> "\uD83C\uDF81"
-                                cat.contains("plant") -> "\uD83E\uDEB4"
-                                else -> "\uD83C\uDF38"
-                            }
-                        },
-                        fontSize = 20.sp
-                    )
+                    Text(categoryEmoji(item.category), fontSize = 20.sp)
                 }
                 Spacer(modifier = Modifier.width(10.dp))
                 Column(modifier = Modifier.weight(1f)) {
@@ -723,4 +660,13 @@ fun InfoRow(label: String, value: String) {
         Text("$label: ", fontSize = 13.sp, color = colorScheme.onSurfaceVariant)
         Text(value, fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground)
     }
+}
+
+private fun categoryEmoji(category: String): String = when {
+    category.lowercase().contains("rose") -> "\uD83C\uDF39"
+    category.lowercase().contains("bouquet") -> "\uD83D\uDC90"
+    category.lowercase().contains("arrangement") -> "\uD83C\uDF3A"
+    category.lowercase().contains("gift") -> "\uD83C\uDF81"
+    category.lowercase().contains("plant") -> "\uD83E\uDEB4"
+    else -> "\uD83C\uDF38"
 }

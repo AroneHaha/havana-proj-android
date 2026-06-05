@@ -8,9 +8,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.ReceiptLong
+import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
 import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -40,6 +41,7 @@ fun OrdersScreen(
     val viewModel: OrdersViewModel = viewModel()
     val orderListState by viewModel.orderListState.collectAsState()
     val selectedFilter by viewModel.selectedFilter.collectAsState()
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
 
     val isDark = ThemeManager.isDarkMode
     val colorScheme = MaterialTheme.colorScheme
@@ -66,6 +68,18 @@ fun OrdersScreen(
                         fontWeight = FontWeight.Bold,
                         color = colorScheme.onBackground
                     )
+                },
+                actions = {
+                    IconButton(
+                        onClick = { viewModel.refreshOrders() },
+                        enabled = !isRefreshing
+                    ) {
+                        Icon(
+                            Icons.Outlined.Refresh,
+                            contentDescription = stringResource(R.string.orders_title),
+                            tint = colorScheme.primary
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = colorScheme.background
@@ -100,7 +114,7 @@ fun OrdersScreen(
                 NavigationBarItem(
                     selected = true,
                     onClick = { },
-                    icon = { Icon(Icons.Outlined.ReceiptLong, contentDescription = stringResource(R.string.nav_orders)) },
+                    icon = { Icon(Icons.AutoMirrored.Outlined.ReceiptLong, contentDescription = stringResource(R.string.nav_orders)) },
                     label = { Text(stringResource(R.string.nav_orders), fontSize = 11.sp) },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = colorScheme.primary,
@@ -285,7 +299,7 @@ fun OrderCard(
                     color = colorScheme.onSurfaceVariant
                 )
                 Text(
-                    "KD ${String.format("%.3f", order.total)}",
+                    "KWD ${String.format("%.3f", order.total)}",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = colorScheme.primary

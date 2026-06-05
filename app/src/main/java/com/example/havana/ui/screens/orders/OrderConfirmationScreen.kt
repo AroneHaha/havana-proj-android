@@ -77,11 +77,11 @@ fun OrderConfirmationScreen(
             item {
                 Card(shape = RoundedCornerShape(14.dp), colors = CardDefaults.cardColors(containerColor = cardColor), elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)) {
                     Column(modifier = Modifier.padding(14.dp)) {
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Text(stringResource(R.string.subtotal), fontSize = 13.sp, color = colorScheme.onSurfaceVariant); Text("KD ${String.format("%.3f", order.subtotal)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground) }
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Text(stringResource(R.string.subtotal), fontSize = 13.sp, color = colorScheme.onSurfaceVariant); Text("KWD ${String.format("%.3f", order.subtotal)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground) }
                         Spacer(modifier = Modifier.height(4.dp))
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Text(stringResource(R.string.delivery_fee), fontSize = 13.sp, color = colorScheme.onSurfaceVariant); Text("KD ${String.format("%.3f", order.deliveryFee)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground) }
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Text(stringResource(R.string.delivery_fee), fontSize = 13.sp, color = colorScheme.onSurfaceVariant); Text("KWD ${String.format("%.3f", order.shippingCost)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground) }
                         Spacer(modifier = Modifier.height(8.dp)); HorizontalDivider(color = dividerColor); Spacer(modifier = Modifier.height(8.dp))
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Text(stringResource(R.string.total), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground); Text("KD ${String.format("%.3f", order.total)}", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary) }
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Text(stringResource(R.string.total), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground); Text("KWD ${String.format("%.3f", order.total)}", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary) }
                     }
                 }
             }
@@ -100,16 +100,8 @@ fun OrderConfirmationScreen(
                     Column(modifier = Modifier.fillMaxWidth().padding(14.dp)) {
                         Row(verticalAlignment = Alignment.Top) {
                             Icon(Icons.Default.LocationOn, contentDescription = null, tint = colorScheme.primary, modifier = Modifier.size(20.dp)); Spacer(modifier = Modifier.width(10.dp))
-                            Column(modifier = Modifier.weight(1f)) { Text(order.deliveryAddress.fullAddress, fontSize = 13.sp, color = colorScheme.onBackground, lineHeight = 19.sp) }
+                            Column(modifier = Modifier.weight(1f)) { Text(order.shippingAddress, fontSize = 13.sp, color = colorScheme.onBackground, lineHeight = 19.sp) }
                         }
-                        val addr = order.deliveryAddress
-                        val hasDetails = addr.block.isNotBlank() || addr.street.isNotBlank() || addr.building.isNotBlank() || addr.floor.isNotBlank() || addr.apartment.isNotBlank()
-                        if (hasDetails) { Spacer(modifier = Modifier.height(10.dp)); HorizontalDivider(color = dividerColor); Spacer(modifier = Modifier.height(10.dp)) }
-                        if (addr.block.isNotBlank()) { ReceiptInfoRow(stringResource(R.string.order_block), addr.block); Spacer(modifier = Modifier.height(4.dp)) }
-                        if (addr.street.isNotBlank()) { ReceiptInfoRow(stringResource(R.string.order_street), addr.street); Spacer(modifier = Modifier.height(4.dp)) }
-                        if (addr.building.isNotBlank()) { ReceiptInfoRow(stringResource(R.string.order_building), addr.building); Spacer(modifier = Modifier.height(4.dp)) }
-                        if (addr.floor.isNotBlank()) { ReceiptInfoRow(stringResource(R.string.order_floor), addr.floor); Spacer(modifier = Modifier.height(4.dp)) }
-                        if (addr.apartment.isNotBlank()) { ReceiptInfoRow(stringResource(R.string.order_apartment), addr.apartment); Spacer(modifier = Modifier.height(4.dp)) }
                     }
                 }
             }
@@ -118,8 +110,7 @@ fun OrderConfirmationScreen(
             item {
                 Card(shape = RoundedCornerShape(14.dp), colors = CardDefaults.cardColors(containerColor = cardColor), elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)) {
                     Column(modifier = Modifier.padding(14.dp)) {
-                        ReceiptInfoRow(stringResource(R.string.order_name), order.customerName); Spacer(modifier = Modifier.height(6.dp))
-                        ReceiptInfoRow(stringResource(R.string.order_phone), order.phone)
+                        ReceiptInfoRow(stringResource(R.string.order_phone), order.shippingPhone)
                         if (order.notes.isNotBlank()) { Spacer(modifier = Modifier.height(6.dp)); ReceiptInfoRow(stringResource(R.string.order_notes), order.notes) }
                         Spacer(modifier = Modifier.height(6.dp)); ReceiptInfoRow(stringResource(R.string.order_payment), stringResource(R.string.order_cash_on_delivery))
                     }
@@ -147,8 +138,8 @@ private fun ConfirmationItemCard(item: OrderItem) {
         Row(modifier = Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(modifier = Modifier.size(44.dp).background(colorScheme.surfaceVariant, RoundedCornerShape(8.dp)), contentAlignment = Alignment.Center) { Text(item.categoryEmoji(), fontSize = 18.sp) }
             Spacer(modifier = Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) { Text(item.name, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onBackground, maxLines = 1, overflow = TextOverflow.Ellipsis); Text("${stringResource(R.string.qty)}: ${item.quantity} x KD ${String.format("%.3f", item.price)}", fontSize = 12.sp, color = colorScheme.onSurfaceVariant) }
-            Text("KD ${String.format("%.3f", item.price * item.quantity)}", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
+            Column(modifier = Modifier.weight(1f)) { Text(item.name, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onBackground, maxLines = 1, overflow = TextOverflow.Ellipsis); Text("${stringResource(R.string.qty)}: ${item.quantity} x KWD ${String.format("%.3f", item.price)}", fontSize = 12.sp, color = colorScheme.onSurfaceVariant) }
+            Text("KWD ${String.format("%.3f", item.price * item.quantity)}", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
         }
     }
 }
