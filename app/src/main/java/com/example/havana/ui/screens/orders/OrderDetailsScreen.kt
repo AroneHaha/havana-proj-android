@@ -35,7 +35,6 @@ import com.example.havana.data.repository.OrderRepository
 import com.example.havana.data.session.SessionManager
 import com.example.havana.ui.theme.*
 import com.example.havana.data.model.Review
-import androidx.compose.runtime.LaunchedEffect
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,18 +44,9 @@ fun OrderDetailsScreen(
     onConfirmDelivery: (String) -> Unit = {},
     viewModel: OrderDetailsViewModel = viewModel(),
 ) {
-    val order by viewModel.orderState.collectAsState()
-    val orderLoading by viewModel.orderLoading.collectAsState()
-    val orderError by viewModel.orderError.collectAsState()
+    val order by OrderRepository.orders.collectAsState()
+    val resolvedOrder = remember(orderId, order) { order.find { it.id == orderId } }
 
-    // Fetch order from API on screen open
-    LaunchedEffect(orderId) {
-        if (orderId != null) {
-            viewModel.loadOrder(orderId)
-        }
-    }
-
-    val resolvedOrder = order
     val isDark = ThemeManager.isDarkMode
     val colorScheme = MaterialTheme.colorScheme
     val cardColor = if (isDark) CardDark else CardLight
@@ -70,7 +60,7 @@ fun OrderDetailsScreen(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 CircularProgressIndicator(color = colorScheme.primary)
                 Spacer(modifier = Modifier.height(16.dp))
-                Text("Loading orders…", color = colorScheme.onSurfaceVariant, fontSize = 14.sp)
+                Text("Loading orders...", color = colorScheme.onSurfaceVariant, fontSize = 14.sp)
             }
         }
         return
@@ -79,6 +69,10 @@ fun OrderDetailsScreen(
     var currentStatus by remember { mutableStateOf(resolvedOrder.status) }
     val displayOrder = remember(resolvedOrder, currentStatus) {
         resolvedOrder.copy(status = currentStatus)
+    }
+
+    LaunchedEffect(displayOrder) {
+        viewModel.loadExistingReviews(displayOrder.items.map { it.productId })
     }
 
     var showReviewSheet by remember { mutableStateOf(false) }
@@ -329,18 +323,20 @@ fun OrderDetailsScreen(
                     Column(modifier = Modifier.padding(14.dp)) {
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                             Text(stringResource(R.string.subtotal), fontSize = 13.sp, color = colorScheme.onSurfaceVariant)
-                            Text("KWD ${String.format("%.3f", displayOrder.subtotal)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground)                        }
+                            Text("KWD ${String.format("%.3f", displayOrder.subtotal)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground)
+                        }
                         Spacer(modifier = Modifier.height(4.dp))
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                             Text(stringResource(R.string.delivery_fee), fontSize = 13.sp, color = colorScheme.onSurfaceVariant)
-                            Text("KWD ${String.format("%.3f", displayOrder.shippingCost)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground)
+                            Text("KWD ${String.format("%.3f", displayOrder.deliveryFee)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground)
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                         HorizontalDivider(color = dividerColor)
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                             Text(stringResource(R.string.total), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground)
-                            Text("KWD ${String.format("%.3f", displayOrder.total)}", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)                        }
+                            Text("KWD ${String.format("%.3f", displayOrder.total)}", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
+                        }
                     }
                 }
             }
@@ -643,14 +639,26 @@ fun OrderDetailItemCard(
                         .background(colorScheme.surfaceVariant, RoundedCornerShape(8.dp)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("\uD83C\uDF38", fontSize = 20.sp)
+                    Text(
+                        item.category.lowercase().let { cat ->
+                            when {
+                                cat.contains("rose") -> "\uD83C\uDF39"
+                                cat.contains("bouquet") -> "\uD83D\uDC90"
+                                cat.contains("arrangement") -> "\uD83C\uDF3A"
+                                cat.contains("gift") -> "\uD83C\uDF81"
+                                cat.contains("plant") -> "\uD83E\uDEB4"
+                                else -> "\uD83C\uDF38"
+                            }
+                        },
+                        fontSize = 20.sp
+                    )
                 }
                 Spacer(modifier = Modifier.width(10.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(item.name, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onBackground, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Text("${stringResource(R.string.qty)}: ${item.quantity} x KD ${String.format("%.3f", item.price)}", fontSize = 12.sp, color = colorScheme.onSurfaceVariant)
+                    Text("${stringResource(R.string.qty)}: ${item.quantity} x KWD ${String.format("%.3f", item.price)}", fontSize = 12.sp, color = colorScheme.onSurfaceVariant)
                 }
-                Text("KD ${String.format("%.3f", item.price * item.quantity)}", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
+                Text("KWD ${String.format("%.3f", item.price * item.quantity)}", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
             }
 
             if (existingReview != null) {
@@ -715,13 +723,4 @@ fun InfoRow(label: String, value: String) {
         Text("$label: ", fontSize = 13.sp, color = colorScheme.onSurfaceVariant)
         Text(value, fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground)
     }
-}
-
-private fun categoryEmoji(category: String): String = when {
-    category.lowercase().contains("rose") -> "\uD83C\uDF39"
-    category.lowercase().contains("bouquet") -> "\uD83D\uDC90"
-    category.lowercase().contains("arrangement") -> "\uD83C\uDF3A"
-    category.lowercase().contains("gift") -> "\uD83C\uDF81"
-    category.lowercase().contains("plant") -> "\uD83E\uDEB4"
-    else -> "\uD83C\uDF38"
 }

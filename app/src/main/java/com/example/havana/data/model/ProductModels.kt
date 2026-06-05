@@ -64,12 +64,14 @@ sealed class CategoryState {
 }
 
 data class Review(
-    val id: String = "",
-    val userId: String = "",
-    val userName: String = "",
-    val rating: Float = 0f,
-    val comment: String = "",
-    val date: String = "",
+    val id: String,
+    @SerializedName("product_id")
+    val productId: String,
+    val userId: String,
+    val userName: String,
+    val rating: Float,
+    val comment: String,
+    val date: String,
     val avatar: String? = null,
 )
 
