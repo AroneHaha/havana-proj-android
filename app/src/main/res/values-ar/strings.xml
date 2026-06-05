@@ -150,6 +150,7 @@
     <string name="orders_appear_here">ستظهر طلباتك هنا</string>
     <string name="orders_more">+%d أخرى</string>
 
+
     <!-- ===================== ORDER DETAILS ===================== -->
     <string name="order_not_found">الطلب غير موجود</string>
     <string name="order_progress">تقدّم الطلب</string>

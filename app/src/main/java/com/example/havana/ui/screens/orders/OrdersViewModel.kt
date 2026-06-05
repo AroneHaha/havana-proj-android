@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.havana.data.model.Order
 import com.example.havana.data.model.OrderListState
+import com.example.havana.data.repository.OrderRepository
 import com.example.havana.data.remote.ApiClient
 import com.example.havana.data.remote.ApiResult
 import com.example.havana.data.remote.safeApiCall
@@ -40,13 +41,15 @@ class OrdersViewModel(application: Application) : AndroidViewModel(application) 
             when (val result = safeApiCall { orderApi.getOrders() }) {
                 is ApiResult.Success -> {
                     allOrders = result.data.data
+                    OrderRepository.setOrders(allOrders)
                     _orderListState.value = OrderListState.Success(allOrders)
                 }
                 is ApiResult.ServerError -> {
                     _orderListState.value = OrderListState.Error(result.message)
                 }
                 is ApiResult.NetworkError -> {
-                    _orderListState.value = OrderListState.Error(result.error)
+                    allOrders = OrderRepository.orders.value
+                    _orderListState.value = OrderListState.Success(allOrders)
                 }
             }
         }
@@ -58,8 +61,8 @@ class OrdersViewModel(application: Application) : AndroidViewModel(application) 
             when (val result = safeApiCall { orderApi.getOrders() }) {
                 is ApiResult.Success -> {
                     allOrders = result.data.data
-                    val filtered = if (_selectedFilter.value == "all") allOrders else allOrders.filter { it.status == _selectedFilter.value }
-                    _orderListState.value = OrderListState.Success(filtered)
+                    OrderRepository.setOrders(allOrders)
+                    filterOrders()
                 }
                 else -> {}
             }
@@ -74,6 +77,7 @@ class OrdersViewModel(application: Application) : AndroidViewModel(application) 
 
     private fun filterOrders() {
         val filter = _selectedFilter.value
+        allOrders = OrderRepository.orders.value
         val filtered = if (filter == "all") {
             allOrders
         } else {

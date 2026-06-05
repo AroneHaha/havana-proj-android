@@ -16,19 +16,47 @@ data class DeliveryAddress(
     val longitude: Double = 0.0,
 )
 
+// ─── Checkout request (backend expects only 4 fields) ─────────────
+
 data class OrderRequest(
     @SerializedName("shipping_address")
     val shippingAddress: String,
     @SerializedName("shipping_phone")
     val shippingPhone: String,
-    val notes: String? = null,
+    val notes: String,
     @SerializedName("payment_method")
-    val paymentMethod: String = "cash_on_delivery",
+    val paymentMethod: String = "cod",
 )
 
+data class OrderItemRequest(
+    @SerializedName("product_id")
+    val productId: String,
+    val name: String,
+    val price: Double,
+    val quantity: Int,
+)
+
+// ─── Backend response wrappers ────────────────────────────────────
+
 data class CheckoutApiResponse(
-    val data: OrderResponse,
-    val message: String,
+    val data: Order,
+    val message: String? = null,
+)
+
+data class OrdersListResponse(
+    val data: List<Order>,
+    val meta: ResponseMeta? = null,
+)
+
+data class ResponseMeta(
+    @SerializedName("current_page") val currentPage: Int = 1,
+    @SerializedName("last_page") val lastPage: Int = 1,
+    @SerializedName("per_page") val perPage: Int = 15,
+    val total: Int = 0,
+)
+
+data class OrderDetailResponse(
+    val data: Order,
 )
 
 data class OrderResponse(
@@ -36,17 +64,51 @@ data class OrderResponse(
     @SerializedName("order_number")
     val orderNumber: String,
     val status: String,
-    val subtotal: Double = 0.0,
-    @SerializedName("shipping_cost")
-    val shippingCost: Double = 0.0,
     val total: Double,
-    @SerializedName("shipping_address")
-    val shippingAddress: String = "",
-    @SerializedName("shipping_phone")
-    val shippingPhone: String = "",
     @SerializedName("created_at")
     val createdAt: String,
 )
+
+// ─── Order model (matches backend OrderResource) ───────────────────
+
+data class Order(
+    val id: String,
+    @SerializedName("order_number")
+    val orderNumber: String,
+    @SerializedName("shipping_phone")
+    val phone: String,
+    @SerializedName("shipping_address")
+    val shippingAddress: String,
+    val notes: String = "",
+    @SerializedName("payment_method")
+    val paymentMethod: String = "cod",
+    val items: List<OrderItem> = emptyList(),
+    val subtotal: Double = 0.0,
+    @SerializedName("shipping_cost")
+    val shippingCost: Double = 0.0,
+    val total: Double = 0.0,
+    val status: String = "pending",
+    @SerializedName("created_at")
+    val createdAt: String = "",
+) {
+    val customerName: String get() = ""
+    val deliveryAddress: DeliveryAddress get() = DeliveryAddress(fullAddress = shippingAddress)
+    val deliveryFee: Double get() = shippingCost
+}
+
+// ─── OrderItem (matches backend OrderItemResource) ────────────────
+
+data class OrderItem(
+    val id: String = "",
+    @SerializedName("product_id")
+    val productId: String,
+    @SerializedName("product_name")
+    val name: String,
+    val price: Double,
+    val quantity: Int,
+) {
+    val category: String get() = "flowers"
+}
 
 sealed class CheckoutState {
     data object Idle : CheckoutState()
@@ -54,68 +116,6 @@ sealed class CheckoutState {
     data class Success(val order: OrderResponse) : CheckoutState()
     data class Error(val message: String) : CheckoutState()
 }
-
-/**
- * Order model — matches backend OrderResource exactly.
- * Fields use @SerializedName to map backend snake_case to Kotlin camelCase.
- */
-data class Order(
-    val id: String,
-    @SerializedName("order_number")
-    val orderNumber: String,
-    @SerializedName("customer_name")
-    val customerName: String = "",
-    @SerializedName("shipping_phone")
-    val phone: String = "",
-    @SerializedName("shipping_address")
-    val shippingAddress: String = "",
-    val notes: String = "",
-    @SerializedName("payment_method")
-    val paymentMethod: String = "",
-    val items: List<OrderItem> = emptyList(),
-    val subtotal: Double = 0.0,
-    @SerializedName("shipping_cost")
-    val shippingCost: Double = 0.0,
-    val discount: Double = 0.0,
-    val total: Double,
-    @SerializedName("payment_status")
-    val paymentStatus: String = "",
-    val status: String,
-    @SerializedName("created_at")
-    val createdAt: String,
-    @SerializedName("updated_at")
-    val updatedAt: String = "",
-) {
-    /** Backward-compatible: address as DeliveryAddress object */
-    val deliveryAddress: DeliveryAddress get() = DeliveryAddress(fullAddress = shippingAddress)
-
-    /** Backward-compatible: use shipping_cost */
-    val deliveryFee: Double get() = shippingCost
-}
-
-/**
- * Order item — matches backend OrderItemResource exactly.
- */
-data class OrderItem(
-    val id: String = "",
-    @SerializedName("product_id")
-    val productId: String,
-    @SerializedName("product_name")
-    val name: String = "",
-    @SerializedName("product_image")
-    val image: String? = null,
-    val price: Double = 0.0,
-    val quantity: Int = 0,
-)
-
-data class OrdersListResponse(
-    val data: List<Order>,
-    val meta: PaginatedMeta? = null,
-)
-
-data class OrderDetailResponse(
-    val data: Order,
-)
 
 sealed class OrderListState {
     data object Idle : OrderListState()

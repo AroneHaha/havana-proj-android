@@ -67,7 +67,11 @@ fun OrderDetailsScreen(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Text(stringResource(R.string.order_not_found), color = colorScheme.onSurfaceVariant)
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                CircularProgressIndicator(color = colorScheme.primary)
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Loading orders…", color = colorScheme.onSurfaceVariant, fontSize = 14.sp)
+            }
         }
         return
     }
