@@ -16,48 +16,80 @@ data class DeliveryAddress(
     val longitude: Double = 0.0,
 )
 
-// ─── Checkout request (backend expects only 4 fields) ─────────────
+// ═══════════════════════════════════════════════════════════════════
+// Checkout request/response — matches Laravel CheckoutController@store
+// ═══════════════════════════════════════════════════════════════════
 
-data class OrderRequest(
+/**
+ * Request body sent to POST /api/checkout.
+ * Backend validates stock and prices server-side.
+ */
+data class CheckoutRequest(
     @SerializedName("shipping_address")
     val shippingAddress: String,
     @SerializedName("shipping_phone")
     val shippingPhone: String,
-    val notes: String,
+    val notes: String = "",
     @SerializedName("payment_method")
-    val paymentMethod: String = "cod",
+    val paymentMethod: String = "cash_on_delivery",
+    val items: List<CheckoutItemRequest>
 )
 
-data class OrderItemRequest(
+data class CheckoutItemRequest(
     @SerializedName("product_id")
     val productId: String,
-    val name: String,
+    val quantity: Int
+)
+
+/**
+ * Wrapper for backend response: { data: OrderResource, message: "..." }
+ * respondCreated() wraps in { data: {...}, message: "..." }
+ */
+data class CheckoutApiResponse(
+    val data: CheckoutOrderData,
+    val message: String? = null
+)
+
+/**
+ * Matches Laravel OrderResource::toArray() output.
+ */
+data class CheckoutOrderData(
+    val id: String,
+    @SerializedName("order_number")
+    val orderNumber: String,
+    val status: String,
+    val subtotal: Double,
+    @SerializedName("shipping_cost")
+    val shippingCost: Double,
+    val discount: Double = 0.0,
+    val total: Double,
+    @SerializedName("payment_method")
+    val paymentMethod: String = "",
+    @SerializedName("shipping_address")
+    val shippingAddress: String = "",
+    @SerializedName("shipping_phone")
+    val shippingPhone: String = "",
+    val notes: String? = null,
+    @SerializedName("created_at")
+    val createdAt: String? = null,
+    val items: List<CheckoutOrderItemData>? = null
+)
+
+data class CheckoutOrderItemData(
+    val id: String? = null,
+    @SerializedName("product_id")
+    val productId: String,
+    @SerializedName("product_name")
+    val productName: String,
     val price: Double,
     val quantity: Int,
+    @SerializedName("subtotal")
+    val subtotalVal: Double = 0.0,
 )
 
-// ─── Backend response wrappers ────────────────────────────────────
-
-data class CheckoutApiResponse(
-    val data: Order,
-    val message: String? = null,
-)
-
-data class OrdersListResponse(
-    val data: List<Order>,
-    val meta: ResponseMeta? = null,
-)
-
-data class ResponseMeta(
-    @SerializedName("current_page") val currentPage: Int = 1,
-    @SerializedName("last_page") val lastPage: Int = 1,
-    @SerializedName("per_page") val perPage: Int = 15,
-    val total: Int = 0,
-)
-
-data class OrderDetailResponse(
-    val data: Order,
-)
+// ═══════════════════════════════════════════════════════════════════
+// Local Order model — used for UI display (OrderConfirmationScreen etc.)
+// ═══════════════════════════════════════════════════════════════════
 
 data class OrderResponse(
     val id: String,
@@ -69,53 +101,43 @@ data class OrderResponse(
     val createdAt: String,
 )
 
-// ─── Order model (matches backend OrderResource) ───────────────────
-
-data class Order(
-    val id: String,
-    @SerializedName("order_number")
-    val orderNumber: String,
-    @SerializedName("shipping_phone")
-    val phone: String,
-    @SerializedName("shipping_address")
-    val shippingAddress: String,
-    val notes: String = "",
-    @SerializedName("payment_method")
-    val paymentMethod: String = "cod",
-    val items: List<OrderItem> = emptyList(),
-    val subtotal: Double = 0.0,
-    @SerializedName("shipping_cost")
-    val shippingCost: Double = 0.0,
-    val total: Double = 0.0,
-    val status: String = "pending",
-    @SerializedName("created_at")
-    val createdAt: String = "",
-) {
-    val customerName: String get() = ""
-    val deliveryAddress: DeliveryAddress get() = DeliveryAddress(fullAddress = shippingAddress)
-    val deliveryFee: Double get() = shippingCost
-}
-
-// ─── OrderItem (matches backend OrderItemResource) ────────────────
-
-data class OrderItem(
-    val id: String = "",
-    @SerializedName("product_id")
-    val productId: String,
-    @SerializedName("product_name")
-    val name: String,
-    val price: Double,
-    val quantity: Int,
-) {
-    val category: String get() = "flowers"
-}
-
 sealed class CheckoutState {
     data object Idle : CheckoutState()
     data object Loading : CheckoutState()
     data class Success(val order: OrderResponse) : CheckoutState()
     data class Error(val message: String) : CheckoutState()
 }
+
+data class Order(
+    val id: String,
+    @SerializedName("order_number")
+    val orderNumber: String,
+    @SerializedName("customer_name")
+    val customerName: String,
+    val phone: String,
+    @SerializedName("delivery_address")
+    val deliveryAddress: DeliveryAddress,
+    val notes: String,
+    @SerializedName("payment_method")
+    val paymentMethod: String,
+    val items: List<OrderItem>,
+    val subtotal: Double,
+    @SerializedName("delivery_fee")
+    val deliveryFee: Double,
+    val total: Double,
+    val status: String,
+    @SerializedName("created_at")
+    val createdAt: String,
+)
+
+data class OrderItem(
+    @SerializedName("product_id")
+    val productId: String,
+    val name: String,
+    val price: Double,
+    val quantity: Int,
+    val category: String,
+)
 
 sealed class OrderListState {
     data object Idle : OrderListState()
@@ -148,6 +170,7 @@ fun Order.statusLabel(): String {
     }
 }
 
+/** Localized version of statusLabel that accepts pre-resolved string resources. */
 fun Order.localizedStatus(
     pending: String,
     confirmed: String,
@@ -169,12 +192,12 @@ fun Order.localizedStatus(
 
 fun Order.statusEmoji(): String {
     return when (status) {
-        "pending" -> "\u23F3"
-        "confirmed" -> "\u2705"
-        "preparing" -> "\uD83D\uDCE6"
-        "out_for_delivery" -> "\uD83D\uDE9A"
-        "delivered" -> "\uD83C\uDF89"
-        "cancelled" -> "\u274C"
-        else -> "\uD83D\uDCCB"
+        "pending" -> "⏳"
+        "confirmed" -> "✅"
+        "preparing" -> "📦"
+        "out_for_delivery" -> "🚚"
+        "delivered" -> "🎉"
+        "cancelled" -> "❌"
+        else -> "📋"
     }
 }

@@ -13,6 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -48,6 +49,7 @@ fun OrderConfirmationScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            // SUCCESS HEADER
             item {
                 Column(modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Surface(modifier = Modifier.size(80.dp), shape = CircleShape, color = Success.copy(alpha = 0.1f)) {
@@ -68,19 +70,22 @@ fun OrderConfirmationScreen(
                     }
                 }
             }
+            // ORDER ITEMS
             item { Text(stringResource(R.string.confirmation_order_items), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground) }
             items(order.items) { item -> ConfirmationItemCard(item) }
+            // TOTALS
             item {
                 Card(shape = RoundedCornerShape(14.dp), colors = CardDefaults.cardColors(containerColor = cardColor), elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)) {
                     Column(modifier = Modifier.padding(14.dp)) {
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Text(stringResource(R.string.subtotal), fontSize = 13.sp, color = colorScheme.onSurfaceVariant); Text("KWD ${String.format("%.3f", order.subtotal)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground) }
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Text(stringResource(R.string.subtotal), fontSize = 13.sp, color = colorScheme.onSurfaceVariant); Text("KD ${String.format("%.3f", order.subtotal)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground) }
                         Spacer(modifier = Modifier.height(4.dp))
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Text(stringResource(R.string.delivery_fee), fontSize = 13.sp, color = colorScheme.onSurfaceVariant); Text("KWD ${String.format("%.3f", order.shippingCost)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground) }
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Text(stringResource(R.string.delivery_fee), fontSize = 13.sp, color = colorScheme.onSurfaceVariant); Text("KD ${String.format("%.3f", order.deliveryFee)}", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground) }
                         Spacer(modifier = Modifier.height(8.dp)); HorizontalDivider(color = dividerColor); Spacer(modifier = Modifier.height(8.dp))
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Text(stringResource(R.string.total), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground); Text("KWD ${String.format("%.3f", order.total)}", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary) }
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Text(stringResource(R.string.total), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground); Text("KD ${String.format("%.3f", order.total)}", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary) }
                     }
                 }
             }
+            // RECEIPT DIVIDER
             item {
                 Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                     Spacer(modifier = Modifier.height(4.dp)); HorizontalDivider(color = dividerColor); Spacer(modifier = Modifier.height(4.dp))
@@ -88,6 +93,7 @@ fun OrderConfirmationScreen(
                     Spacer(modifier = Modifier.height(4.dp)); HorizontalDivider(color = dividerColor)
                 }
             }
+            // DELIVERY ADDRESS
             item { Text(stringResource(R.string.confirmation_delivery_address), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground) }
             item {
                 Card(shape = RoundedCornerShape(14.dp), colors = CardDefaults.cardColors(containerColor = cardColor), elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)) {
@@ -96,9 +102,18 @@ fun OrderConfirmationScreen(
                             Icon(Icons.Default.LocationOn, contentDescription = null, tint = colorScheme.primary, modifier = Modifier.size(20.dp)); Spacer(modifier = Modifier.width(10.dp))
                             Column(modifier = Modifier.weight(1f)) { Text(order.deliveryAddress.fullAddress, fontSize = 13.sp, color = colorScheme.onBackground, lineHeight = 19.sp) }
                         }
+                        val addr = order.deliveryAddress
+                        val hasDetails = addr.block.isNotBlank() || addr.street.isNotBlank() || addr.building.isNotBlank() || addr.floor.isNotBlank() || addr.apartment.isNotBlank()
+                        if (hasDetails) { Spacer(modifier = Modifier.height(10.dp)); HorizontalDivider(color = dividerColor); Spacer(modifier = Modifier.height(10.dp)) }
+                        if (addr.block.isNotBlank()) { ReceiptInfoRow(stringResource(R.string.order_block), addr.block); Spacer(modifier = Modifier.height(4.dp)) }
+                        if (addr.street.isNotBlank()) { ReceiptInfoRow(stringResource(R.string.order_street), addr.street); Spacer(modifier = Modifier.height(4.dp)) }
+                        if (addr.building.isNotBlank()) { ReceiptInfoRow(stringResource(R.string.order_building), addr.building); Spacer(modifier = Modifier.height(4.dp)) }
+                        if (addr.floor.isNotBlank()) { ReceiptInfoRow(stringResource(R.string.order_floor), addr.floor); Spacer(modifier = Modifier.height(4.dp)) }
+                        if (addr.apartment.isNotBlank()) { ReceiptInfoRow(stringResource(R.string.order_apartment), addr.apartment); Spacer(modifier = Modifier.height(4.dp)) }
                     }
                 }
             }
+            // CUSTOMER INFO
             item { Text(stringResource(R.string.confirmation_customer_info), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colorScheme.onBackground) }
             item {
                 Card(shape = RoundedCornerShape(14.dp), colors = CardDefaults.cardColors(containerColor = cardColor), elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)) {
@@ -110,6 +125,7 @@ fun OrderConfirmationScreen(
                     }
                 }
             }
+            // ACTION BUTTONS
             item {
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(onClick = onViewOrders, shape = RoundedCornerShape(12.dp), colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary), modifier = Modifier.fillMaxWidth().height(50.dp)) { Text(stringResource(R.string.confirmation_view_orders), fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onPrimary) }
@@ -129,10 +145,10 @@ private fun ConfirmationItemCard(item: OrderItem) {
 
     Card(shape = RoundedCornerShape(12.dp), colors = CardDefaults.cardColors(containerColor = cardColor), elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)) {
         Row(modifier = Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.size(44.dp).background(colorScheme.surfaceVariant, RoundedCornerShape(8.dp)), contentAlignment = Alignment.Center) { Text("\uD83C\uDF38", fontSize = 18.sp) }
+            Box(modifier = Modifier.size(44.dp).background(colorScheme.surfaceVariant, RoundedCornerShape(8.dp)), contentAlignment = Alignment.Center) { Text(item.categoryEmoji(), fontSize = 18.sp) }
             Spacer(modifier = Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) { Text(item.name, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onBackground, maxLines = 1, overflow = TextOverflow.Ellipsis); Text("${stringResource(R.string.qty)}: ${item.quantity} x KWD ${String.format("%.3f", item.price)}", fontSize = 12.sp, color = colorScheme.onSurfaceVariant) }
-            Text("KWD ${String.format("%.3f", item.price * item.quantity)}", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
+            Column(modifier = Modifier.weight(1f)) { Text(item.name, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onBackground, maxLines = 1, overflow = TextOverflow.Ellipsis); Text("${stringResource(R.string.qty)}: ${item.quantity} x KD ${String.format("%.3f", item.price)}", fontSize = 12.sp, color = colorScheme.onSurfaceVariant) }
+            Text("KD ${String.format("%.3f", item.price * item.quantity)}", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
         }
     }
 }
@@ -141,4 +157,8 @@ private fun ConfirmationItemCard(item: OrderItem) {
 private fun ReceiptInfoRow(label: String, value: String) {
     val colorScheme = MaterialTheme.colorScheme
     Row(modifier = Modifier.fillMaxWidth()) { Text("$label: ", fontSize = 13.sp, color = colorScheme.onSurfaceVariant); Text(value, fontSize = 13.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground) }
+}
+
+private fun OrderItem.categoryEmoji(): String {
+    return when (category.lowercase()) { "roses" -> "\uD83C\uDF39"; "bouquets" -> "\uD83D\uDC90"; "arrangements" -> "\uD83C\uDF3A"; "gifts" -> "\uD83C\uDF81"; "plants" -> "\uD83E\uDEB4"; else -> "\uD83C\uDF38" }
 }

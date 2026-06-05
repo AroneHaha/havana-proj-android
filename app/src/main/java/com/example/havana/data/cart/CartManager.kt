@@ -9,13 +9,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-/**
- * Singleton that manages the shopping cart state.
- * Persists cart items to SharedPreferences so they survive process death.
- */
+
 object CartManager {
 
-    private const val PREFS_NAME = "havana_cart"
+    private const val PREFS_BASE = "havana_cart_"
     private const val KEY_CART_ITEMS = "cart_items"
 
     private var prefs: android.content.SharedPreferences? = null
@@ -25,7 +22,8 @@ object CartManager {
     val cartItems: StateFlow<List<CartItem>> = _cartItems.asStateFlow()
 
     fun initialize(context: Context) {
-        prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val userId = com.example.havana.data.session.SessionManager.currentUser?.id ?: "guest"
+        prefs = context.getSharedPreferences(PREFS_BASE + userId, Context.MODE_PRIVATE)
         // Restore cart from SharedPreferences
         val json = prefs?.getString(KEY_CART_ITEMS, null)
         if (json != null) {
@@ -36,6 +34,40 @@ object CartManager {
                 _cartItems.value = emptyList()
             }
         }
+    }
+
+    /**
+     * Switch to a different user's cart. Call this after login/logout.
+     */
+    fun switchUser(context: Context) {
+        val userId = com.example.havana.data.session.SessionManager.currentUser?.id ?: "guest"
+        prefs = context.getSharedPreferences(PREFS_BASE + userId, Context.MODE_PRIVATE)
+        val json = prefs?.getString(KEY_CART_ITEMS, null)
+        if (json != null) {
+            try {
+                val type = object : TypeToken<List<CartItem>>() {}.type
+                _cartItems.value = gson.fromJson(json, type)
+            } catch (_: Exception) {
+                _cartItems.value = emptyList()
+            }
+        } else {
+            _cartItems.value = emptyList()
+        }
+    }
+
+    /**
+     * Clear the current user's cart. Call on logout.
+     */
+    fun clearCartOnLogout(context: Context) {
+        _cartItems.value = emptyList()
+        // Remove SharedPreferences file for the old user
+        try {
+            val oldPrefs = prefs
+            if (oldPrefs != null) {
+                oldPrefs.edit().clear().apply()
+            }
+        } catch (_: Exception) { }
+        prefs = null
     }
 
     fun addToCart(item: CartItem) {

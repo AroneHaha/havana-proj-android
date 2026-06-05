@@ -9,7 +9,6 @@ import com.example.havana.data.remote.ApiClient
 import com.example.havana.data.remote.ApiResult
 import com.example.havana.data.remote.safeApiCall
 import com.example.havana.R
-import com.example.havana.data.AppConstants
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,9 +19,6 @@ class CheckoutViewModel(application: Application) : AndroidViewModel(application
 
     private val checkoutApi = ApiClient.retrofit.create(
         com.example.havana.data.remote.CheckoutApiService::class.java
-    )
-    private val cartApi = ApiClient.retrofit.create(
-        com.example.havana.data.remote.CartApiService::class.java
     )
 
     private val _checkoutState = MutableStateFlow<CheckoutState>(CheckoutState.Idle)
@@ -40,28 +36,6 @@ class CheckoutViewModel(application: Application) : AndroidViewModel(application
         _deliveryAddress.value = address
     }
 
-    private suspend fun syncCartToServer(): String? {
-        val items = cartItems.value
-        if (items.isEmpty()) return null
-        val errors = mutableListOf<String>()
-        for (item in items) {
-            val request = com.example.havana.data.model.AddToCartRequest(
-                productId = item.productId,
-                quantity = item.quantity
-            )
-            when (val result = safeApiCall { cartApi.addToCart(request) }) {
-                is ApiResult.Success -> { /* ok */ }
-                is ApiResult.ServerError -> {
-                    errors.add("ADD ${item.name} FAILED HTTP ${result.code}")
-                }
-                is ApiResult.NetworkError -> {
-                    errors.add("ADD ${item.name} FAILED: ${result.error}")
-                }
-            }
-        }
-        return if (errors.isEmpty()) null else errors.joinToString("\n")
-    }
-
     fun placeOrder(customerName: String, phone: String, notes: String) {
         if (customerName.isBlank()) { _checkoutState.value = CheckoutState.Error(getApplication<Application>().getString(R.string.checkout_error_name)); return }
         if (phone.isBlank()) { _checkoutState.value = CheckoutState.Error(getApplication<Application>().getString(R.string.checkout_error_phone)); return }
@@ -73,75 +47,80 @@ class CheckoutViewModel(application: Application) : AndroidViewModel(application
         if (items.isEmpty()) { _checkoutState.value = CheckoutState.Error(getApplication<Application>().getString(R.string.checkout_error_cart_empty)); return }
         _checkoutState.value = CheckoutState.Loading
         val subtotal = items.sumOf { it.price * it.quantity }
-        val deliveryFee = AppConstants.DELIVERY_FEE
+        val deliveryFee = 1.500
         val total = subtotal + deliveryFee
 
-        // Create a local Order for display (OrderConfirmationScreen)
+        // Build full address string for backend (concatenate fullAddress + details)
+        val addressParts = mutableListOf(address.fullAddress)
+        if (address.block.isNotBlank()) addressParts.add("Block ${address.block}")
+        if (address.street.isNotBlank()) addressParts.add("Street ${address.street}")
+        if (address.building.isNotBlank()) addressParts.add("Building ${address.building}")
+        if (address.floor.isNotBlank()) addressParts.add("Floor ${address.floor}")
+        if (address.apartment.isNotBlank()) addressParts.add("Apt ${address.apartment}")
+        val fullShippingAddress = addressParts.joinToString(", ")
+
+        // Build the request matching Laravel CheckoutController@store validation
+        val checkoutRequest = CheckoutRequest(
+            shippingAddress = fullShippingAddress,
+            shippingPhone = phone,
+            notes = notes.ifBlank { "" },
+            paymentMethod = "cash_on_delivery",
+            items = items.map { CheckoutItemRequest(it.productId, it.quantity) }
+        )
+
+        // Build local Order for UI (used by OrderConfirmationScreen)
         val fullOrder = Order(
             id = "order-${System.currentTimeMillis()}",
             orderNumber = "",
+            customerName = customerName,
             phone = phone,
-            shippingAddress = address.fullAddress,
+            deliveryAddress = address,
             notes = notes,
-            paymentMethod = "cod",
-            items = items.map { OrderItem(productId = it.productId, name = it.name, price = it.price, quantity = it.quantity) },
+            paymentMethod = "cash_on_delivery",
+            items = items.map { OrderItem(it.productId, it.name, it.price, it.quantity, it.category) },
             subtotal = subtotal,
-            shippingCost = deliveryFee,
+            deliveryFee = deliveryFee,
             total = total,
             status = "pending",
             createdAt = ""
         )
 
-        // Build the simple request the backend expects (only 4 fields)
-        val orderRequest = OrderRequest(
-            shippingAddress = address.fullAddress,
-            shippingPhone = phone,
-            notes = notes,
-            paymentMethod = "cod"
-        )
-
         viewModelScope.launch {
-            // Step 1: Sync cart items to server (backend reads from user's cart)
-            val syncError = syncCartToServer()
-            if (syncError != null) {
-                _checkoutState.value = CheckoutState.Error("Failed to sync cart: $syncError")
-                return@launch
-            }
-
-            // Step 2: Place the order
-            when (val result = safeApiCall { checkoutApi.placeOrder(orderRequest) }) {
+            when (val result = safeApiCall { checkoutApi.placeOrder(checkoutRequest) }) {
                 is ApiResult.Success -> {
-                    val serverOrder = result.data.data
-                    val displayOrder = fullOrder.copy(
-                        id = serverOrder.id,
-                        orderNumber = serverOrder.orderNumber,
-                        status = serverOrder.status,
-                        createdAt = serverOrder.createdAt
+                    val apiResponse = result.data
+                    val serverData = apiResponse.data
+                    // Merge server response into local Order for UI
+                    val mergedOrder = fullOrder.copy(
+                        id = serverData.id,
+                        orderNumber = serverData.orderNumber,
+                        status = serverData.status,
+                        subtotal = serverData.subtotal,
+                        deliveryFee = serverData.shippingCost,
+                        total = serverData.total,
+                        createdAt = serverData.createdAt ?: ""
                     )
-                    _lastPlacedOrder.value = displayOrder
-                    _checkoutState.value = CheckoutState.Success(OrderResponse(
-                        id = serverOrder.id,
-                        orderNumber = serverOrder.orderNumber,
-                        status = serverOrder.status,
-                        total = serverOrder.total,
-                        createdAt = serverOrder.createdAt
-                    ))
+                    val orderResponse = OrderResponse(
+                        id = serverData.id,
+                        orderNumber = serverData.orderNumber,
+                        status = serverData.status,
+                        total = serverData.total,
+                        createdAt = serverData.createdAt ?: ""
+                    )
+                    _lastPlacedOrder.value = mergedOrder
+                    _checkoutState.value = CheckoutState.Success(orderResponse)
                     CartManager.clearCart()
                 }
                 is ApiResult.ServerError -> {
-                    _checkoutState.value = CheckoutState.Error(
-                        "Server error (HTTP ${result.code}): ${result.message}"
-                    )
+                    _checkoutState.value = CheckoutState.Error(result.message)
                 }
                 is ApiResult.NetworkError -> {
+                    // Server unreachable — fall back to mock order during development
                     delay(1000)
-                    val mockNumber = "HAV-${(1000..9999).random()}"
-                    _lastPlacedOrder.value = fullOrder.copy(orderNumber = mockNumber)
-                    _checkoutState.value = CheckoutState.Success(OrderResponse(
-                        id = fullOrder.id, orderNumber = mockNumber,
-                        status = "pending", total = total,
-                        createdAt = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(java.util.Date())
-                    ))
+                    val mockOrderNumber = "HAV-${(1000..9999).random()}"
+                    val mockOrderResponse = OrderResponse(id = fullOrder.id, orderNumber = mockOrderNumber, status = "pending", total = total, createdAt = "2026-05-23")
+                    _lastPlacedOrder.value = fullOrder.copy(orderNumber = mockOrderNumber, createdAt = mockOrderResponse.createdAt)
+                    _checkoutState.value = CheckoutState.Success(mockOrderResponse)
                     CartManager.clearCart()
                 }
             }

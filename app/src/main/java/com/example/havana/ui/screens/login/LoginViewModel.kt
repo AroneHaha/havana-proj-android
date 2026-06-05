@@ -45,6 +45,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                     )
                     SessionManager.saveSession(apiUser, result.data.token)
                     SessionManager.saveRefreshToken(result.data.refreshToken)
+                    com.example.havana.data.cart.CartManager.switchUser(getApplication())
                     _authState.value = AuthState.Success(user = apiUser, token = result.data.token)
                 }
                 is ApiResult.ServerError -> {

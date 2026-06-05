@@ -26,9 +26,6 @@ class OrdersViewModel(application: Application) : AndroidViewModel(application) 
     private val _selectedFilter = MutableStateFlow("all")
     val selectedFilter: StateFlow<String> = _selectedFilter.asStateFlow()
 
-    private val _isRefreshing = MutableStateFlow(false)
-    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
-
     private var allOrders: List<Order> = emptyList()
 
     init {
@@ -40,9 +37,9 @@ class OrdersViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch {
             when (val result = safeApiCall { orderApi.getOrders() }) {
                 is ApiResult.Success -> {
-                    allOrders = result.data.data
-                    OrderRepository.setOrders(allOrders)
-                    _orderListState.value = OrderListState.Success(allOrders)
+                    allOrders = result.data
+                    OrderRepository.setOrders(result.data)
+                    _orderListState.value = OrderListState.Success(result.data)
                 }
                 is ApiResult.ServerError -> {
                     _orderListState.value = OrderListState.Error(result.message)
@@ -52,21 +49,6 @@ class OrdersViewModel(application: Application) : AndroidViewModel(application) 
                     _orderListState.value = OrderListState.Success(allOrders)
                 }
             }
-        }
-    }
-
-    fun refreshOrders() {
-        viewModelScope.launch {
-            _isRefreshing.value = true
-            when (val result = safeApiCall { orderApi.getOrders() }) {
-                is ApiResult.Success -> {
-                    allOrders = result.data.data
-                    OrderRepository.setOrders(allOrders)
-                    filterOrders()
-                }
-                else -> {}
-            }
-            _isRefreshing.value = false
         }
     }
 

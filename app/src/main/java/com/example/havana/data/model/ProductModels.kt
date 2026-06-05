@@ -2,10 +2,10 @@ package com.example.havana.data.model
 import com.google.gson.annotations.SerializedName
 
 data class Product(
-    val id: String = "",
-    val name: String = "",
+    val id: String,
+    val name: String,
     val description: String = "",
-    val price: Double = 0.0,
+    val price: Double,
     @SerializedName("sale_price")
     val salePrice: Double? = null,
     @SerializedName("effective_price")
@@ -29,6 +29,7 @@ data class Product(
     val inStock: Boolean = true,
     val stock: Int = 0,
     val images: List<String>? = emptyList(),
+    val reviews: List<Review> = emptyList(),
 ) {
     val displayPrice: Double get() = if (isOnSale && salePrice != null) salePrice else price
     val isTopSelling: Boolean get() = isBestSeller
@@ -36,8 +37,8 @@ data class Product(
 }
 
 data class Category(
-    val id: String = "",
-    val name: String = "",
+    val id: String,
+    val name: String,
     val emoji: String = "",
     @SerializedName("name_en")
     val nameEn: String = "",
@@ -64,15 +65,25 @@ sealed class CategoryState {
 }
 
 data class Review(
-    val id: String,
+    val id: String = "",
     @SerializedName("product_id")
-    val productId: String,
-    val userId: String,
-    val userName: String,
-    val rating: Float,
-    val comment: String,
-    val date: String,
-    val avatar: String? = null,
+    val productId: String = "",
+    @SerializedName("user_id")
+    val userId: String = "",
+    val rating: Float = 0f,
+    val title: String? = null,
+    val comment: String = "",
+    val visibility: String? = null,
+    val user: ReviewUser? = null,
+    @SerializedName("created_at")
+    val createdAt: String = "",
+) {
+    val userName: String get() = user?.name ?: "Customer"
+    val date: String get() = if (createdAt.contains("T")) createdAt.substringBefore("T") else createdAt
+}
+
+data class ReviewUser(
+    val name: String? = null,
 )
 
 data class ReviewRequest(
@@ -126,26 +137,22 @@ data class CartItem(
 data class AddToCartRequest(
     @SerializedName("product_id")
     val productId: String,
-    val quantity: Int,
-)
-
-data class WrappedServerCartItem(
-    val data: ServerCartItem,
-    val message: String,
-)
-
-data class ServerCartItem(
-    val id: String,
-    @SerializedName("product_id")
-    val productId: String,
-    val quantity: Int,
-    val subtotal: Double,
-    val product: Product,
+    val quantity: Int = 1,
 )
 
 data class CartResponse(
-    val items: List<ServerCartItem>,
-    @SerializedName("items_count")
-    val itemsCount: Int,
-    val subtotal: Double,
+    val items: List<CartItem> = emptyList(),
+    @SerializedName("cart_total")
+    val cartTotal: Double = 0.0,
+)
+
+data class WrappedServerCartItem(
+    val id: String = "",
+    @SerializedName("product_id")
+    val productId: String = "",
+    val name: String = "",
+    val price: Double = 0.0,
+    val quantity: Int = 1,
+    val image: String? = null,
+    val category: String = "",
 )

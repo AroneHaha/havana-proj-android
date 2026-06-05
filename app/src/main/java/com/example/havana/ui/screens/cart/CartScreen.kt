@@ -18,12 +18,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.havana.R
 
 import com.example.havana.data.model.CartItem
@@ -170,6 +174,7 @@ fun CartItemCard(item: CartItem, onIncrease: () -> Unit, onDecrease: () -> Unit,
     val isDark = ThemeManager.isDarkMode
     val colorScheme = MaterialTheme.colorScheme
     val cardColor = if (isDark) CardDark else CardLight
+    val context = LocalContext.current
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -184,7 +189,21 @@ fun CartItemCard(item: CartItem, onIncrease: () -> Unit, onDecrease: () -> Unit,
             Box(
                 modifier = Modifier.size(80.dp).background(colorScheme.surfaceVariant, RoundedCornerShape(10.dp)),
                 contentAlignment = Alignment.Center
-            ) { Text(categoryEmoji(item.category), fontSize = 32.sp) }
+            ) {
+                if (item.image != null) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(context)
+                            .data(item.image)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = item.name,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    Text(categoryEmoji(item.category), fontSize = 32.sp)
+                }
+            }
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(item.name, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onBackground, maxLines = 2, overflow = TextOverflow.Ellipsis)

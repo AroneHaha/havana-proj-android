@@ -209,8 +209,8 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
                     authApi.logout("Bearer $token")
                 }
             } catch (_: Exception) {
-                // Server logout failed — still clear local session
             }
+            com.example.havana.data.cart.CartManager.clearCartOnLogout(getApplication())
             SessionManager.clearSession()
         }
     }

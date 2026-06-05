@@ -36,16 +36,23 @@ class ProductDetailsViewModel(application: Application) : AndroidViewModel(appli
     val addedToCart: StateFlow<Boolean> = _addedToCart.asStateFlow()
 
     fun loadProduct(productId: String) {
-        _productState.value = null
         _quantity.value = 1
         _addedToCart.value = false
         _errorState.value = ""
         _isLoading.value = true
+        _reviewState.value = ReviewState.Idle
         viewModelScope.launch {
             when (val result = safeApiCall { detailsApi.getProduct(productId) }) {
                 is ApiResult.Success -> {
-                    _productState.value = result.data.data
+                    val product = result.data.data
+                    _productState.value = product
                     _errorState.value = ""
+
+                    if (product.reviews.isNotEmpty()) {
+                        _reviewState.value = ReviewState.Success(product.reviews)
+                    } else {
+                        _reviewState.value = ReviewState.Success(emptyList())
+                    }
                 }
                 is ApiResult.ServerError -> {
                     _errorState.value = result.message
@@ -79,10 +86,11 @@ class ProductDetailsViewModel(application: Application) : AndroidViewModel(appli
         com.example.havana.data.cart.CartManager.addToCart(
             com.example.havana.data.model.CartItem(
                 productId = product.id,
-                name = product.name ?: "Product",
+                name = product.name,
                 price = product.price,
                 quantity = _quantity.value,
-                category = product.categoryName ?: "Flowers"
+                image = product.image,
+                category = product.categoryName
             )
         )
         _addedToCart.value = true
